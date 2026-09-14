@@ -1,0 +1,10 @@
+{
+  "name": "Ángeles & Agustín",
+  "short_name": "A & A",
+  "description": "Nuestra historia desde el 8 de octubre de 2025.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#121012",
+  "theme_color": "#121012",
+  "icons": []
+}
