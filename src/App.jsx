@@ -163,7 +163,7 @@ function MemoryReel({ onOpen }) {
   return (
     <section className="memory-reel" aria-label="Tira animada de recuerdos">
       <div className="memory-reel-heading" data-reveal>
-        <span>10 recuerdos · una historia</span>
+        <span>{memories.length} recuerdos · una historia</span>
         <strong>Un vistazo rápido a nosotros</strong>
       </div>
       <div className="memory-reel-mask">
@@ -195,7 +195,7 @@ function Gallery({ onOpen }) {
           <button className={`photo-card photo-${index + 2}`} key={memory.src} onClick={() => onOpen(index + 1)} data-reveal aria-label={`Abrir recuerdo ${index + 2}`}>
             <span className="photo-image-shell"><img src={memory.src} alt={memory.alt} loading="lazy" /></span>
             <span className="photo-index">{pad(index + 2)}</span>
-            <span className="photo-caption">{memory.note}</span>
+            <span className="photo-caption"><small>{memory.date}</small>{memory.note}</span>
           </button>
         ))}
       </div>
@@ -212,7 +212,7 @@ function FeatureMoment({ onOpen }) {
         <p>Hay recuerdos enormes y otros que parecen mínimos. Esta página está hecha para guardar los dos.</p>
       </div>
       <div className="feature-stack" data-reveal>
-        {[4, 9, 2].map((memoryIndex, index) => (
+        {[1, 6, 15].map((memoryIndex, index) => (
           <button key={memoryIndex} className={`stack-photo stack-photo-${index + 1}`} onClick={() => onOpen(memoryIndex)} aria-label={`Abrir recuerdo ${memoryIndex + 1}`}>
             <img src={memories[memoryIndex].src} alt={memories[memoryIndex].alt} loading="lazy" />
           </button>
@@ -241,6 +241,7 @@ function RandomMemory({ onOpen }) {
         <div className="random-copy">
           <span className="kicker">Memory machine</span>
           <h2>Traeme un recuerdo.</h2>
+          <p className="random-date">{memories[index].date}</p>
           <p>{memories[index].note}</p>
           <div className="random-actions">
             <button className="pill-button" onClick={pick}>Otro recuerdo <span>↻</span></button>
@@ -254,8 +255,10 @@ function RandomMemory({ onOpen }) {
 
 function Universe({ onOpen }) {
   const stars = [
-    [8, 22, 0], [16, 68, 3], [29, 40, 7], [38, 80, 5], [46, 18, 9],
-    [57, 56, 1], [65, 88, 8], [73, 31, 6], [84, 66, 2], [91, 14, 4],
+    [8, 22, 0], [14, 68, 1], [22, 42, 2], [29, 82, 3], [35, 18, 4],
+    [42, 57, 5], [48, 88, 6], [54, 31, 7], [60, 70, 8], [66, 14, 9],
+    [72, 48, 10], [78, 84, 11], [83, 27, 12], [88, 63, 13], [92, 12, 14],
+    [95, 43, 15], [96, 79, 16],
   ];
 
   return (
@@ -263,7 +266,7 @@ function Universe({ onOpen }) {
       <div className="universe-copy" data-reveal>
         <span className="kicker light">Capítulo 03 · nuestro universo</span>
         <h2>Cada punto<br />guarda <i>algo.</i></h2>
-        <p>Tocá una estrella. Cada una abre una escena distinta de nosotros.</p>
+        <p>Tocá una estrella. Ahora cada recuerdo tiene su lugar dentro de este pequeño universo.</p>
       </div>
       <div className="star-field" data-reveal aria-label="Mapa interactivo de recuerdos">
         <div className="orbit orbit-a" /><div className="orbit orbit-b" /><div className="orbit-glow" />
@@ -302,7 +305,7 @@ function Lightbox({ index, onClose, onStep }) {
         <button className="lightbox-arrow left" onClick={() => onStep(-1)} aria-label="Anterior">←</button>
         <img src={memory.src} alt={memory.alt} />
         <button className="lightbox-arrow right" onClick={() => onStep(1)} aria-label="Siguiente">→</button>
-        <div className="lightbox-caption"><span>{pad(index + 1)} / {pad(memories.length)}</span><p>{memory.note}</p></div>
+        <div className="lightbox-caption"><span>{pad(index + 1)} / {pad(memories.length)} · {memory.date}</span><p>{memory.note}</p></div>
       </div>
     </div>
   );
