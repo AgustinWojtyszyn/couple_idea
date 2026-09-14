@@ -1,0 +1,79 @@
+/* Expanded memory collection: layout for the newly uploaded photos */
+
+.photo-caption small {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 9px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: rgba(23,20,22,.42);
+}
+
+.photo-11 { grid-column: 1 / span 5; margin-top: 88px; }
+.photo-12 { grid-column: 7 / span 6; margin-top: 8px; }
+.photo-13 { grid-column: 2 / span 4; margin-top: -18px; }
+.photo-14 { grid-column: 7 / span 4; margin-top: 84px; }
+.photo-15 { grid-column: 1 / span 6; margin-top: 34px; }
+.photo-16 { grid-column: 8 / span 5; margin-top: -26px; }
+.photo-17 { grid-column: 4 / span 6; margin-top: 72px; }
+
+.photo-11 img,
+.photo-14 img,
+.photo-17 img { aspect-ratio: 3 / 4; }
+
+.photo-12 img,
+.photo-15 img,
+.photo-16 img { aspect-ratio: 4 / 3; }
+
+.photo-13 img { aspect-ratio: 4 / 5; }
+
+.random-date {
+  margin: 0 0 4px !important;
+  font-size: 10px !important;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: rgba(23,20,22,.4) !important;
+}
+
+.star:nth-of-type(n+11) span {
+  box-shadow: 0 0 14px 4px rgba(232,188,184,.3);
+}
+
+@media (max-width: 760px) {
+  .memory-reel-track .reel-card:nth-child(n+11):nth-child(-n+17) { display: block; }
+  .memory-reel-track .reel-card:nth-child(n+18) { display: none; }
+
+  .photo-11,
+  .photo-12,
+  .photo-13,
+  .photo-14,
+  .photo-15,
+  .photo-16,
+  .photo-17 {
+    grid-column: auto;
+    margin-top: 0;
+  }
+
+  .photo-card:nth-child(3n+1) {
+    grid-column: 1 / -1;
+  }
+
+  .photo-11 img,
+  .photo-12 img,
+  .photo-13 img,
+  .photo-14 img,
+  .photo-15 img,
+  .photo-16 img,
+  .photo-17 img {
+    aspect-ratio: 4 / 5;
+  }
+
+  .photo-card:nth-child(3n+1) img {
+    aspect-ratio: 16 / 10;
+  }
+
+  .photo-caption small {
+    margin-bottom: 4px;
+    font-size: 8px;
+  }
+}
