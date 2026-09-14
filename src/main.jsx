@@ -4,6 +4,7 @@ import App from './App';
 import './styles.css';
 import './polish.css';
 import './experience.css';
+import './memories.css';
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
