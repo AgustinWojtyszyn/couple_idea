@@ -2,9 +2,9 @@ export const START_DATE = '2025-10-08T00:00:00-03:00';
 
 export const memories = [
   { src: '/photos/Peachy_20260802_132844810.jpg', alt: 'Ángeles y Agustín juntos', note: 'Una de esas fotos que ya se sienten como hogar.' },
-  { src: '/photos/IMG_20260719_193017714_HDR.jpg', alt: 'Ángeles y Agustín con camisetas de Argentina', note: 'Mismo equipo. Siempre.' },
-  { src: '/photos/IMG-20260826-WA0166.jpg', alt: 'Ángeles y Agustín sonriendo al aire libre', note: 'La clase de día que vale la pena guardar.' },
-  { src: '/photos/IMG-20260621-WA0199.jpg', alt: 'Selfie de Ángeles y Agustín', note: 'Dos caras, una historia enorme.' },
+  { src: '/photos/IMG_20260801_221742102_HDR.jpg', alt: 'Ángeles y Agustín compartiendo otro momento juntos', note: 'Otra escena nuestra que merecía quedarse.' },
+  { src: '/photos/IMG-20260826-WA0156.jpg', alt: 'Ángeles y Agustín en uno de sus recuerdos', note: 'La clase de día que vale la pena guardar.' },
+  { src: '/photos/IMG-20260826-WA0168.jpg', alt: 'Ángeles y Agustín juntos', note: 'Dos caras, una historia enorme.' },
   { src: '/photos/IMG_20260722_191149120_HDR.jpg', alt: 'Ángeles y Agustín juntos de noche', note: 'También somos todas esas noches que terminan en foto.' },
   { src: '/photos/IMG-20260808-WA0108.jpg', alt: 'Ángeles y Agustín compartiendo una comida', note: 'Lo cotidiano también merece un lugar en la historia.' },
   { src: '/photos/IMG-20260808-WA0109.jpg', alt: 'Ángeles y Agustín en una salida', note: 'Plan simple. Recuerdo gigante.' },
