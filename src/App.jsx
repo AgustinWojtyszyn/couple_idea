@@ -43,11 +43,29 @@ function useReveal() {
           observer.unobserve(entry.target);
         }
       }),
-      { threshold: 0.16 },
+      { threshold: 0.14 },
     );
     nodes.forEach((node) => observer.observe(node));
     return () => observer.disconnect();
   }, []);
+}
+
+function ScrollProgress() {
+  const [progress, setProgress] = useState(0);
+  useEffect(() => {
+    const update = () => {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      setProgress(max > 0 ? Math.min(1, window.scrollY / max) : 0);
+    };
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+    return () => {
+      window.removeEventListener('scroll', update);
+      window.removeEventListener('resize', update);
+    };
+  }, []);
+  return <div className="scroll-progress" aria-hidden="true"><span style={{ transform: `scaleX(${progress})` }} /></div>;
 }
 
 function LiveCounter() {
@@ -94,6 +112,8 @@ function Hero({ onSecret }) {
       <img className="hero-image" src={memories[0].src} alt={memories[0].alt} fetchPriority="high" />
       <div className="hero-vignette" />
       <div className="hero-frame" aria-hidden="true" />
+      <div className="hero-aura hero-aura-a" aria-hidden="true" />
+      <div className="hero-aura hero-aura-b" aria-hidden="true" />
       <nav className="floating-nav" aria-label="Navegación principal">
         <a className="brand" href="#inicio">A<span>♡</span>A</a>
         <div className="nav-links">
@@ -138,6 +158,28 @@ function Story() {
   );
 }
 
+function MemoryReel({ onOpen }) {
+  const reel = [...memories, ...memories];
+  return (
+    <section className="memory-reel" aria-label="Tira animada de recuerdos">
+      <div className="memory-reel-heading" data-reveal>
+        <span>10 recuerdos · una historia</span>
+        <strong>Un vistazo rápido a nosotros</strong>
+      </div>
+      <div className="memory-reel-mask">
+        <div className="memory-reel-track">
+          {reel.map((memory, index) => (
+            <button key={`${memory.src}-${index}`} className="reel-card" onClick={() => onOpen(index % memories.length)} aria-label={`Abrir recuerdo ${(index % memories.length) + 1}`}>
+              <img src={memory.src} alt="" loading="lazy" />
+              <span>{pad((index % memories.length) + 1)}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function Gallery({ onOpen }) {
   return (
     <section className="gallery-section section-pad" id="recuerdos">
@@ -150,20 +192,32 @@ function Gallery({ onOpen }) {
       </div>
       <div className="editorial-grid">
         {memories.slice(1).map((memory, index) => (
-          <button
-            className={`photo-card photo-${index + 2}`}
-            key={memory.src}
-            onClick={() => onOpen(index + 1)}
-            data-reveal
-            aria-label={`Abrir recuerdo ${index + 2}`}
-          >
-            <span className="photo-image-shell">
-              <img src={memory.src} alt={memory.alt} loading="lazy" />
-            </span>
+          <button className={`photo-card photo-${index + 2}`} key={memory.src} onClick={() => onOpen(index + 1)} data-reveal aria-label={`Abrir recuerdo ${index + 2}`}>
+            <span className="photo-image-shell"><img src={memory.src} alt={memory.alt} loading="lazy" /></span>
             <span className="photo-index">{pad(index + 2)}</span>
             <span className="photo-caption">{memory.note}</span>
           </button>
         ))}
+      </div>
+    </section>
+  );
+}
+
+function FeatureMoment({ onOpen }) {
+  return (
+    <section className="feature-moment section-pad">
+      <div className="feature-copy" data-reveal>
+        <span className="kicker">Una pausa en el medio</span>
+        <blockquote>“Lo mejor no fue encontrar una historia perfecta. Fue encontrar una que se sintiera nuestra.”</blockquote>
+        <p>Hay recuerdos enormes y otros que parecen mínimos. Esta página está hecha para guardar los dos.</p>
+      </div>
+      <div className="feature-stack" data-reveal>
+        {[4, 9, 2].map((memoryIndex, index) => (
+          <button key={memoryIndex} className={`stack-photo stack-photo-${index + 1}`} onClick={() => onOpen(memoryIndex)} aria-label={`Abrir recuerdo ${memoryIndex + 1}`}>
+            <img src={memories[memoryIndex].src} alt={memories[memoryIndex].alt} loading="lazy" />
+          </button>
+        ))}
+        <div className="stack-seal">A <span>♡</span> A</div>
       </div>
     </section>
   );
@@ -188,7 +242,10 @@ function RandomMemory({ onOpen }) {
           <span className="kicker">Memory machine</span>
           <h2>Traeme un recuerdo.</h2>
           <p>{memories[index].note}</p>
-          <button className="pill-button" onClick={pick}>Otro recuerdo <span>↻</span></button>
+          <div className="random-actions">
+            <button className="pill-button" onClick={pick}>Otro recuerdo <span>↻</span></button>
+            <button className="ghost-button" onClick={() => onOpen(index)}>Ver grande <span>↗</span></button>
+          </div>
         </div>
       </div>
     </section>
@@ -209,20 +266,11 @@ function Universe({ onOpen }) {
         <p>Tocá una estrella. Cada una abre una escena distinta de nosotros.</p>
       </div>
       <div className="star-field" data-reveal aria-label="Mapa interactivo de recuerdos">
-        <div className="orbit orbit-a" />
-        <div className="orbit orbit-b" />
+        <div className="orbit orbit-a" /><div className="orbit orbit-b" /><div className="orbit-glow" />
         {stars.map(([x, y, memoryIndex], index) => (
-          <button
-            className={`star star-${index + 1}`}
-            key={`${x}-${y}`}
-            style={{ left: `${x}%`, top: `${y}%` }}
-            onClick={() => onOpen(memoryIndex)}
-            aria-label={`Abrir estrella ${index + 1}`}
-          >
-            <span />
-          </button>
+          <button className={`star star-${index + 1}`} key={`${x}-${y}`} style={{ left: `${x}%`, top: `${y}%` }} onClick={() => onOpen(memoryIndex)} aria-label={`Abrir estrella ${index + 1}`}><span /></button>
         ))}
-        <div className="universe-center">A <span>♡</span> A</div>
+        <div className="universe-center">A <span>♡</span> A<small>08·10·25</small></div>
       </div>
     </section>
   );
@@ -254,10 +302,7 @@ function Lightbox({ index, onClose, onStep }) {
         <button className="lightbox-arrow left" onClick={() => onStep(-1)} aria-label="Anterior">←</button>
         <img src={memory.src} alt={memory.alt} />
         <button className="lightbox-arrow right" onClick={() => onStep(1)} aria-label="Siguiente">→</button>
-        <div className="lightbox-caption">
-          <span>{pad(index + 1)} / {pad(memories.length)}</span>
-          <p>{memory.note}</p>
-        </div>
+        <div className="lightbox-caption"><span>{pad(index + 1)} / {pad(memories.length)}</span><p>{memory.note}</p></div>
       </div>
     </div>
   );
@@ -278,23 +323,17 @@ function SpecialDay() {
 
 function Footer() {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
-
   useEffect(() => {
-    const handler = (event) => {
-      event.preventDefault();
-      setDeferredPrompt(event);
-    };
+    const handler = (event) => { event.preventDefault(); setDeferredPrompt(event); };
     window.addEventListener('beforeinstallprompt', handler);
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
-
   const install = async () => {
     if (!deferredPrompt) return;
     deferredPrompt.prompt();
     await deferredPrompt.userChoice;
     setDeferredPrompt(null);
   };
-
   return (
     <footer className="footer section-pad">
       <p className="footer-mark">A <span>♡</span> A</p>
@@ -312,13 +351,7 @@ export default function App() {
   const [secretVisible, setSecretVisible] = useState(false);
   const [note, setNote] = useState(littleNotes[0]);
 
-  const stepLightbox = (delta) => {
-    setLightboxIndex((current) => {
-      if (current === null) return null;
-      return (current + delta + memories.length) % memories.length;
-    });
-  };
-
+  const stepLightbox = (delta) => setLightboxIndex((current) => current === null ? null : (current + delta + memories.length) % memories.length);
   const secretClick = () => {
     const next = secretClicks + 1;
     setSecretClicks(next);
@@ -331,12 +364,15 @@ export default function App() {
 
   return (
     <>
+      <ScrollProgress />
       <SpecialDay />
       <Hero onSecret={secretClick} />
       <main>
         <LiveCounter />
         <Story />
+        <MemoryReel onOpen={setLightboxIndex} />
         <Gallery onOpen={setLightboxIndex} />
+        <FeatureMoment onOpen={setLightboxIndex} />
         <RandomMemory onOpen={setLightboxIndex} />
         <Universe onOpen={setLightboxIndex} />
       </main>
