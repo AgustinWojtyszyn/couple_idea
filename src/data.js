@@ -1,3 +1,8 @@
+const december20 = new URL('../IMG_20251220_084825766_HDR.jpg', import.meta.url).href;
+const december22 = new URL('../IMG_20251222_185848525_HDR.jpg', import.meta.url).href;
+const december30 = new URL('../IMG_20251230_192530487_HDR.jpg', import.meta.url).href;
+const april11Extra = new URL('../IMG_20260411_181951405_HDR.jpg', import.meta.url).href;
+
 export const START_DATE = '2025-10-08T00:00:00-03:00';
 
 export const memories = [
@@ -5,10 +10,14 @@ export const memories = [
   { src: '/photos/IMG_20251008_221200447_HDR.jpg', date: '08 · 10 · 2025', alt: 'Ángeles y Agustín en el comienzo de su historia', note: 'El día que dejó de ser una fecha cualquiera.' },
   { src: '/photos/IMG_20251009_220806166.jpg', date: '09 · 10 · 2025', alt: 'Ángeles y Agustín juntos al comienzo de su relación', note: 'Un día después, y ya había muchísimo por guardar.' },
   { src: '/photos/IMG_20251011_223912711_HDR.jpg', date: '11 · 10 · 2025', alt: 'Ángeles y Agustín compartiendo uno de sus primeros recuerdos', note: 'De esos primeros días que hoy se sienten lejísimos y cerquísima a la vez.' },
+  { src: december20, date: '20 · 12 · 2025', alt: 'Ángeles y Agustín compartiendo un recuerdo de diciembre', note: 'Diciembre también quedó guardado en nuestra historia.' },
+  { src: december22, date: '22 · 12 · 2025', alt: 'Ángeles y Agustín juntos en diciembre', note: 'Dos días después, otra escena que valía la pena conservar.' },
+  { src: december30, date: '30 · 12 · 2025', alt: 'Ángeles y Agustín cerrando diciembre juntos', note: 'Casi cerrando el año, pero recién empezando nosotros.' },
   { src: '/photos/IMG-20260117-WA0077.jpg', date: '17 · 01 · 2026', alt: 'Ángeles y Agustín juntos en enero', note: 'La historia ya tenía meses, pero seguía sintiéndose nueva.' },
   { src: '/photos/IMG_20260402_212017843_HDR.jpg', date: '02 · 04 · 2026', alt: 'Ángeles y Agustín compartiendo un momento en abril', note: 'Otra noche que terminó convertida en recuerdo.' },
   { src: '/photos/IMG_20260407_230941000_HDR.jpg', date: '07 · 04 · 2026', alt: 'Ángeles y Agustín juntos en abril', note: 'Cinco minutos pueden ser una foto. Después se vuelven una época.' },
   { src: '/photos/IMG_20260411_181950106_HDR.jpg', date: '11 · 04 · 2026', alt: 'Ángeles y Agustín en otro recuerdo de abril', note: 'Una escena más de todas las que fueron armando lo nuestro.' },
+  { src: april11Extra, date: '11 · 04 · 2026', alt: 'Ángeles y Agustín en un segundo recuerdo de abril', note: 'Mismo día, otro instante. También cuenta.' },
   { src: '/photos/IMG_20260722_191149120_HDR.jpg', date: '22 · 07 · 2026', alt: 'Ángeles y Agustín juntos de noche', note: 'También somos todas esas noches que terminan en foto.' },
   { src: '/photos/IMG_20260801_221742102_HDR.jpg', date: '01 · 08 · 2026', alt: 'Ángeles y Agustín compartiendo otro momento juntos', note: 'Otra escena nuestra que merecía quedarse.' },
   { src: '/photos/IMG-20260808-WA0105.jpg', date: '08 · 08 · 2026', alt: 'Ángeles y Agustín cenando', note: 'Otra mesa, otra escena que queda con nosotros.' },
