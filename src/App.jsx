@@ -90,8 +90,10 @@ function LiveCounter() {
 function Hero({ onSecret }) {
   return (
     <header className="hero" id="inicio">
-      <img className="hero-image" src="/photos/memory-01.webp" alt="Ángeles y Agustín" fetchPriority="high" />
+      <img className="hero-backdrop-image" src={memories[0].src} alt="" aria-hidden="true" />
+      <img className="hero-image" src={memories[0].src} alt={memories[0].alt} fetchPriority="high" />
       <div className="hero-vignette" />
+      <div className="hero-frame" aria-hidden="true" />
       <nav className="floating-nav" aria-label="Navegación principal">
         <a className="brand" href="#inicio">A<span>♡</span>A</a>
         <div className="nav-links">
@@ -155,7 +157,9 @@ function Gallery({ onOpen }) {
             data-reveal
             aria-label={`Abrir recuerdo ${index + 2}`}
           >
-            <img src={memory.src} alt={memory.alt} loading="lazy" />
+            <span className="photo-image-shell">
+              <img src={memory.src} alt={memory.alt} loading="lazy" />
+            </span>
             <span className="photo-index">{pad(index + 2)}</span>
             <span className="photo-caption">{memory.note}</span>
           </button>
