@@ -53,6 +53,7 @@ export type CareerState = {
   season:number
   maxSeasons:number
   clubId:string
+  divisionTier?:number
   overall:number
   stats?:PlayerStats
   form:number
