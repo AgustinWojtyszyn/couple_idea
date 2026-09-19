@@ -19,7 +19,8 @@ export type Club = {
 
 export type SeasonRecord = {
   season:number; age:number; clubId:string; matches:number; goals:number; assists:number;
-  titles:number; rating:number; score:number; note:string; glory?:number
+  titles:number; rating:number; score:number; note:string; glory?:number;
+  competition?:string; outcomeKind?:CareerOutcomeKind; outcomeWon?:boolean
 }
 
 export type Effects = Partial<Record<
