@@ -1412,6 +1412,8 @@ function MarketPanel({
   const offers=state.transferOffers??[]
   const salary=state.currentSalary??club.salary
   const yearsLeft=state.contractYearsLeft??0
+  const [offerIndex,setOfferIndex]=useState(0)
+  const activeOffer=offers.length?offers[Math.min(offerIndex,offers.length-1)]:null
   const choose=(next:CareerState)=>{onState(next);onDone()}
 
   return <section className="market-core">
@@ -1431,18 +1433,25 @@ function MarketPanel({
       <button className="renew-button" onClick={()=>choose(renewCurrentClub(state,3))}><b>✎</b><span><strong>RENOVAR 3 AÑOS</strong><small>Nuevo sueldo y continuidad. Conservás toda tu huella en el club.</small></span></button>
     </div>
 
-    <div className="transfer-offers-head"><span>OFERTAS SOBRE LA MESA</span><strong>{offers.length}</strong></div>
+    <div className="transfer-offers-head">
+      <span>OFERTAS SOBRE LA MESA</span>
+      <div className="offer-counter"><b>{offers.length?offerIndex+1:0}/{offers.length}</b>{offers.length>1&&<><button onClick={()=>setOfferIndex(index=>(index-1+offers.length)%offers.length)}>‹</button><button onClick={()=>setOfferIndex(index=>(index+1)%offers.length)}>›</button></>}</div>
+    </div>
     {offers.length===0?<div className="empty-state"><b>↗</b><strong>No llegaron propuestas externas.</strong><span>Podés seguir o renovar con tu club.</span></div>:
-    <div className="transfer-offer-list">{offers.map((offer:TransferOffer)=>{
+    activeOffer&&(()=>{
+      const offer=activeOffer as TransferOffer
       const destination=clubById(offer.clubId)
       const prestigeDelta=destination.prestige-club.prestige
-      return <article key={offer.clubId} className="transfer-offer-card">
-        <div className="transfer-offer-card__top"><ClubCrest name={destination.name} size="lg"/><div><span>{leagueById(destination.leagueId).name}</span><strong>{destination.name}</strong><small>{offer.role} · prestigio {destination.prestige}</small></div><em>{prestigeDelta>0?'▲ '+prestigeDelta:prestigeDelta<0?'▼ '+Math.abs(prestigeDelta):'='}</em></div>
-        <div className="transfer-offer-card__terms"><div><span>SUELDO</span><b>$ {formatMoney(offer.salary)}</b></div><div><span>CONTRATO</span><b>{offer.years} AÑOS</b></div><div><span>PRIMA</span><b>$ {formatMoney(offer.signingBonus)}</b></div></div>
-        <div className="transfer-offer-card__warning">Al irte, la huella construida en {club.name} queda atrás. Tu reputación viaja con vos; la idolatría no.</div>
-        <button onClick={()=>choose(acceptTransferOffer(state,offer))}>FIRMAR CON {destination.short} →</button>
-      </article>
-    })}</div>}
+      return <div className="market-offer-carousel">
+        <article key={offer.clubId} className="transfer-offer-card transfer-offer-card--single">
+          <div className="transfer-offer-card__top"><ClubCrest name={destination.name} size="lg"/><div><span>{leagueById(destination.leagueId).name}</span><strong>{destination.name}</strong><small>{offer.role} · prestigio {destination.prestige}</small></div><em>{prestigeDelta>0?'▲ '+prestigeDelta:prestigeDelta<0?'▼ '+Math.abs(prestigeDelta):'='}</em></div>
+          <div className="transfer-offer-card__terms"><div><span>SUELDO</span><b>$ {formatMoney(offer.salary)}</b></div><div><span>CONTRATO</span><b>{offer.years} AÑOS</b></div><div><span>PRIMA</span><b>$ {formatMoney(offer.signingBonus)}</b></div></div>
+          <div className="transfer-offer-card__warning">Al irte, la huella construida en {club.name} queda atrás. Tu reputación viaja con vos; la idolatría no.</div>
+          <button onClick={()=>choose(acceptTransferOffer(state,offer))}>FIRMAR CON {destination.short} →</button>
+        </article>
+        <div className="offer-dots">{offers.map((_,index)=><button key={index} className={index===offerIndex?'active':''} onClick={()=>setOfferIndex(index)} aria-label={'Ver oferta '+(index+1)}/>)}</div>
+      </div>
+    })()}
   </section>
 }
 
