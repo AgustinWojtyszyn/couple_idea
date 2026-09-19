@@ -143,11 +143,10 @@ export function createCareer(name:string,position:Position,mode:PlayerMode,clubI
   const seed=mode==='daily'
     ? hash(new Date().toISOString().slice(0,10)+position+clubId)
     : Math.floor(Math.random()*2147483647)
-  const pos=positions.find(p=>p.id===position)!
   const maxSeasons=11+(seed%7)
   const s:CareerState={
     version:2,gameMode:'player',mode,seed,playerName:name.trim()||'El Pibe',nationality,position,
-    age:17,season:1,maxSeasons,clubId,overall:58+pos.boost,stats:{...baseStatsByPosition[position]},form:68,energy:92,reputation:8,fans:12,
+    age:17,season:1,maxSeasons,clubId,overall:Math.round(roleOverall(baseStatsByPosition[position],position)),stats:{...baseStatsByPosition[position]},form:68,energy:92,reputation:8,fans:12,
     coachTrust:55,discipline:62,leadership:42,morale:72,injuryRisk:8,money:12000,matches:0,goals:0,
     assists:0,titles:0,caps:0,nationalGoals:0,trainingCredits:2,seenEvents:[],history:[],achievements:[],offers:[],
     activeEvent:null,retired:false
