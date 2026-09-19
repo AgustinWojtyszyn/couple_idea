@@ -691,6 +691,7 @@ function AdvancedSkillMiniGame({
   const [revealed,setRevealed]=useState(true)
   const [direction,setDirection]=useState<number|null>(null)
   const [done,setDone]=useState(false)
+  const livePhase=useGamePhase(!done,1650)
 
   useEffect(()=>{
     if(!['memory-board','ball-track','code-call','grid-gap','pressure-exit'].includes(game))return
@@ -716,10 +717,8 @@ function AdvancedSkillMiniGame({
   }
 
   const timingScore=(center=.52,width=.18)=>{
-    const phase=(Date.now()%1800)/1800
-    const distance=Math.abs(phase-center)
-    const normalized=Math.min(distance,1-distance)
-    return normalized<=width/2?100:normalized<=width?70:normalized<=width*1.6?42:18
+    const distance=Math.abs(livePhase-center)
+    return distance<=width/2?100:distance<=width?70:distance<=width*1.6?42:18
   }
 
   const chooseSafeLane=(lane:number)=>{
@@ -784,7 +783,7 @@ function AdvancedSkillMiniGame({
     </div>}
 
     {game==='timing-run'&&<div className="visual-game visual-game--timing">
-      <div className="sprint-track"><span/><span/><span/><i/><b/></div>
+      <div className="sprint-track"><span/><span/><span/><i/><b style={{left:'calc('+Math.round(livePhase*100)+'% - 5px)'}}/></div>
       <button className="skill-main-action" disabled={done} onClick={()=>{const earned=timingScore(.52,.14);finish(earned,earned>=85?'ACELERACIÓN PERFECTA':earned>=55?'BUEN PIQUE':'SALISTE PASADO')}}>⚡ FRENAR IMPULSO</button>
     </div>}
 
@@ -805,7 +804,7 @@ function AdvancedSkillMiniGame({
     </div>}
 
     {game==='through-pass'&&<div className="visual-game visual-game--pass">
-      <div className="pass-scene"><i className="defender-line"/><span className="runner">●</span><span className="ball">⚽</span><b className="gap"/></div>
+      <div className="pass-scene"><i className="defender-line" style={{top:(8+livePhase*45)+'%'}}/><span className="runner" style={{top:(18+livePhase*42)+'%'}}>●</span><span className="ball">⚽</span><b className="gap"/></div>
       <button className="skill-main-action" disabled={done} onClick={()=>{const earned=timingScore(.64,.13);finish(earned,earned>=85?'PASE PERFECTO':earned>=55?'LLEGÓ JUSTO':'OFFSIDE / INTERCEPTADO')}}>⇢ FILTRAR PASE</button>
     </div>}
 
@@ -816,7 +815,7 @@ function AdvancedSkillMiniGame({
 
     {game==='long-kick'&&<div className="visual-game visual-game--kick">
       <div className="kick-targets">{[0,1,2].map(index=><button key={index} className={direction===index?'active':''} disabled={done} onClick={()=>setDirection(index)}>{index===0?'↖ BANDA':index===1?'↑ 9': 'BANDA ↗'}</button>)}</div>
-      <div className="timing-bar timing-bar--kick"><i/><b/></div>
+      <div className="timing-bar timing-bar--kick"><i/><b style={{left:'calc('+Math.round(livePhase*100)+'% - 6px)'}}/></div>
       <button className="skill-main-action" disabled={done} onClick={kickPower}>⚽ SACAR</button>
     </div>}
 
