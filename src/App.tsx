@@ -169,7 +169,7 @@ const effectLabels:Record<string,string>={
   form:'FORMA',
   energy:'ENERGÍA',
   reputation:'REPUTACIÓN',
-  fans:'IDOLOTRÍA',
+  fans:'POPULARIDAD',
   coachTrust:'CONFIANZA DT',
   discipline:'DISCIPLINA',
   leadership:'LIDERAZGO',
