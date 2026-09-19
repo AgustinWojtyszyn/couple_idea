@@ -7,6 +7,10 @@ export type LeagueSeed = {
 
 export const verifiedLeagueSeeds: LeagueSeed[] = [
   {
+    id:'arg-1',country:'Argentina',division:1,
+    teams:['Tigre','Vélez Sarsfield','Godoy Cruz','Rosario Central',"Newell's Old Boys",'Independiente Rivadavia','Defensa y Justicia','Banfield','Lanús','Deportivo Riestra','Barracas Central','Racing Club','Independiente','Sarmiento de Junín','Belgrano de Córdoba','Huracán','San Martín de San Juan','Atlético Tucumán','San Lorenzo','Talleres de Córdoba','Estudiantes','Unión de Santa Fe','Instituto de Córdoba','Gimnasia de La Plata','Platense','River Plate','Boca Juniors','Argentinos Juniors','Central Córdoba SdE','Aldosivi']
+  },
+  {
     id:'eng-1',country:'Inglaterra',division:1,
     teams:['Arsenal FC','Coventry City FC','Hull City AFC','Manchester United FC','Ipswich Town FC','Sunderland AFC','Nottingham Forest FC','Leeds United FC','Everton FC','Crystal Palace FC','Brentford FC','Tottenham Hotspur FC','Manchester City FC','AFC Bournemouth','Brighton & Hove Albion FC','Aston Villa FC','Newcastle United FC','Liverpool FC','Fulham FC','Chelsea FC']
   },
