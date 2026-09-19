@@ -264,10 +264,7 @@ export const playerEvents:CareerEvent[] = [
     {id:'sweeper1',label:'ARQUERO JUGADOR',description:'Salís del área y empezás ataques.',effects:{passing:6,pace:3,reflexes:2}},
     {id:'commander1',label:'COMANDANTE',description:'Dominás el área y ordenás la defensa.',effects:{reflexes:3,physical:4,leadership:8}},
   ]},
-  {id:'selection',category:'football',eyebrow:'SELECCIÓN',title:'Te llaman para una gira internacional',body:'Llegás con poco descanso y tu club juega una final apenas volvés.',minSeason:3,options:[
-    {id:'go',label:'Ir igual',description:'La camiseta nacional pesa.',effects:{reputation:10,energy:-12,fans:6}},
-    {id:'club',label:'Priorizar al club',description:'El DT te lo agradece.',effects:{coachTrust:8,reputation:-3,energy:6}},
-  ]},
+
 ]
 
 export const coachEvents:CoachEvent[] = [
