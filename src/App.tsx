@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
+  baseStatsByPosition,
   clubs,
   clubsByLeague,
   clubById,
@@ -132,6 +133,14 @@ function EffectChips({effects}:{effects:EventOption['effects']}){
       :(numeric>0?'+':'')+numeric+' '+(effectLabels[key]??key.toUpperCase())
     return <span key={key} className={positive?'positive':'negative'}>{amount}</span>
   })}</div>
+}
+
+function positionTopStats(position:Position){
+  const stats=baseStatsByPosition[position]
+  return (Object.keys(stats) as PlayerStatKey[])
+    .map(key=>[key,stats[key]] as const)
+    .sort((a,b)=>b[1]-a[1])
+    .slice(0,3)
 }
 
 function PlayerAttributes({state}:{state:CareerState}){
@@ -298,6 +307,7 @@ function Home({
           {gameMode==='player'&&<div className="positions">
             {positions.map(p=><button key={p.id} className={position===p.id?'active':''} onClick={()=>setPosition(p.id)}>
               <b>{p.id}</b><strong>{p.title.split('·')[1]}</strong><span>{p.subtitle}</span>
+              <div className="position-stat-preview">{positionTopStats(p.id).map(([key,value])=><em key={key}>{statLabels[key].slice(0,3).toUpperCase()} {value}</em>)}</div>
             </button>)}
           </div>}
 
