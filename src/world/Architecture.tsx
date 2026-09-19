@@ -1,4 +1,4 @@
-import { verifiedLeagueSeeds } from '../data/verifiedLeagues'
+import { verifiedLeagueSeeds, type LeagueSeed } from '../data/verifiedLeagues'
 export type Position = '9' | '10' | '7' | '5' | '2' | '1'
 export type PlayerMode = 'classic' | 'daily'
 export type FinalStyle = 'cabulero' | 'mixto' | 'habilidoso'
@@ -192,6 +192,36 @@ export const clubs:Club[] = verifiedLeagueSeeds.flatMap(seed=>seed.teams.map((na
     secondary:colors.secondary,
   }
 }))
+
+export const registerLeagueSeed=(seed:LeagueSeed)=>{
+  if(!leagues.some(league=>league.id===seed.id)){
+    leagues.push({
+      id:seed.id,
+      name:`Liga ${seed.country} · ${seed.division}ª División`,
+      country:seed.country,
+      tier:seed.division,
+      color:seedColor(seed.id).primary,
+    })
+  }
+  const basePrestige=Math.max(42,92-seed.division*8)
+  seed.teams.forEach((name,index)=>{
+    const id=`${seed.id}-${slug(name)}`
+    if(clubs.some(club=>club.id===id))return
+    const colors=seedColor(name)
+    clubs.push({
+      id,
+      leagueId:seed.id,
+      name,
+      short:initials(name).slice(0,3),
+      country:seed.country,
+      prestige:Math.max(40,Math.min(94,basePrestige-(index%9))),
+      salary:Math.round((18000+(basePrestige*1600))*(1-(seed.division-1)*.28)),
+      minOverall:Math.max(55,Math.min(88,56+Math.round(basePrestige*.32)-(seed.division-1)*4)),
+      primary:colors.primary,
+      secondary:colors.secondary,
+    })
+  })
+}
 
 export const statLabels:Record<PlayerStatKey,string> = {
   pace:'Velocidad',
