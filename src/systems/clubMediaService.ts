@@ -6,7 +6,7 @@ export type ClubMedia = {
   wikidataId?: string
 }
 
-const CACHE_KEY='leyenda-club-media-v2'
+const CACHE_KEY='leyenda-club-media-v3'
 const inFlight=new Map<string,Promise<ClubMedia>>()
 
 function readCache():Record<string,ClubMedia>{
@@ -123,10 +123,7 @@ export async function getClubMedia(name:string):Promise<ClubMedia>{
     writeCache(cache)
     return result
   }catch{
-    const result:ClubMedia={}
-    cache[name]=result
-    writeCache(cache)
-    return result
+    return {}
   }finally{
     inFlight.delete(name)
   }
