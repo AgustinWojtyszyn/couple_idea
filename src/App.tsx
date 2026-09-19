@@ -410,7 +410,7 @@ function Home({
   useEffect(()=>{
     if(country!=='Argentina'||!activeLeague)return
     const id=window.setTimeout(()=>{
-      void preloadClubMedia(availableClubs.map(club=>club.name),5,true)
+      void preloadClubMedia(availableClubs.map(club=>club.name),5,false)
     },120)
     return()=>window.clearTimeout(id)
   },[country,activeLeague])
