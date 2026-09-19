@@ -7456,3 +7456,54 @@ button.gesture-pitch{
   .career-final__hero h2{font-size:24px!important}
   .career-final__hero>p{font-size:9px!important}
 }
+
+
+/* V10 · compact but readable career-style picker on real phone widths */
+@media(max-width:560px){
+  .final-style-grid{
+    grid-template-columns:1fr!important;
+    gap:5px!important;
+  }
+  .final-style-card{
+    min-height:74px!important;
+    display:grid!important;
+    grid-template-columns:36px minmax(0,1fr) auto!important;
+    grid-template-rows:1fr!important;
+    align-items:center!important;
+    gap:8px!important;
+    padding:8px 9px!important;
+  }
+  .final-style-card>b{
+    width:34px!important;
+    height:34px!important;
+    margin:0!important;
+  }
+  .final-style-card>div{
+    min-width:0;
+    display:block!important;
+  }
+  .final-style-card small{
+    display:block!important;
+    font-size:7px!important;
+  }
+  .final-style-card strong{
+    display:block!important;
+    margin-top:2px!important;
+    font-size:17px!important;
+  }
+  .final-style-card span{
+    display:block!important;
+    max-width:100%;
+    margin-top:3px!important;
+    overflow:hidden;
+    color:var(--muted);
+    font-size:8px!important;
+    line-height:1.2!important;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .final-style-card>em{
+    margin:0!important;
+    font-size:7px!important;
+  }
+}
