@@ -1551,6 +1551,11 @@ export function App(){
   },[theme])
 
   useEffect(()=>{
+    const argentinaCrestNames=clubs.filter(club=>club.country==='Argentina').map(club=>club.name)
+    void preloadClubMedia(argentinaCrestNames,Math.min(16,argentinaCrestNames.length),false)
+  },[])
+
+  useEffect(()=>{
     if(save)sessionStorage.setItem(SAVE_KEY,JSON.stringify(save))
   },[save])
 
