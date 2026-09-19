@@ -606,6 +606,67 @@ function RankingPanel({scores}:{scores:RunScore[]}){
   </section>
 }
 
+function useGamePhase(active:boolean,duration=1800){
+  const [phase,setPhase]=useState(0)
+  useEffect(()=>{
+    if(!active){setPhase(0);return}
+    let frame=0
+    let last=0
+    const start=performance.now()
+    const tick=(now:number)=>{
+      if(now-last>28){
+        const raw=((now-start)%duration)/duration
+        setPhase(raw<.5?raw*2:(1-raw)*2)
+        last=now
+      }
+      frame=requestAnimationFrame(tick)
+    }
+    frame=requestAnimationFrame(tick)
+    return()=>cancelAnimationFrame(frame)
+  },[active,duration])
+  return phase
+}
+
+function SkillGameThumb({id}:{id:MiniGameId}){
+  const group=
+    id==='penalties'||id==='freekicks'?'shot':
+    id==='keeper'||id==='duel'?'defence':
+    id==='dribble'||id==='personal-run'||id==='timing-run'?'run':
+    id==='memory-board'||id==='code-call'||id==='grid-gap'?'brain':
+    id==='through-pass'||id==='pressure-exit'||id==='long-kick'?'pass':'ball'
+  return <span className={'game-thumb game-thumb--'+group} aria-hidden="true">
+    <svg viewBox="0 0 120 78">
+      <rect x="2" y="2" width="116" height="74" rx="15" className="thumb-bg"/>
+      {group==='shot'&&<><path d="M65 15h38v30H65z" className="thumb-line"/><path d="M70 17v26M82 17v26M94 17v26M66 25h36M66 35h36" className="thumb-grid"/><circle cx="25" cy="58" r="7" className="thumb-ball"/><path d="M31 54C48 42 55 31 75 27" className="thumb-path"/></>}
+      {group==='defence'&&<><path d="M16 19h88v43H16z" className="thumb-line"/><circle cx="36" cy="40" r="9" className="thumb-player"/><circle cx="84" cy="38" r="7" className="thumb-ball"/><path d="M45 41h26" className="thumb-path"/><path d="M28 28l8 12 8-12M28 52l8-12 8 12" className="thumb-grid"/></>}
+      {group==='run'&&<><path d="M14 62C35 57 37 20 58 22s19 34 48 19" className="thumb-path"/><circle cx="18" cy="59" r="6" className="thumb-ball"/><circle cx="45" cy="35" r="5" className="thumb-cone"/><circle cx="70" cy="39" r="5" className="thumb-cone"/><circle cx="94" cy="31" r="5" className="thumb-cone"/></>}
+      {group==='brain'&&<>{[0,1,2].map(r=>[0,1,2].map(col=><rect key={r+'-'+col} x={28+col*23} y={11+r*20} width="16" height="14" rx="3" className={(r===1&&col===2)?'thumb-hot':'thumb-cell'}/>))}</>}
+      {group==='pass'&&<><circle cx="22" cy="55" r="7" className="thumb-ball"/><circle cx="91" cy="23" r="8" className="thumb-player"/><circle cx="79" cy="58" r="8" className="thumb-player"/><path d="M29 52C46 47 58 34 83 27" className="thumb-path"/><path d="M58 12v54" className="thumb-grid"/></>}
+      {group==='ball'&&<><circle cx="60" cy="39" r="14" className="thumb-ball"/><path d="M20 20l21 10M100 20L79 30M20 59l22-11M100 59L79 48" className="thumb-path"/></>}
+    </svg>
+  </span>
+}
+
+function CabalaGameThumb({id}:{id:CabalaGameId}){
+  const group=
+    id==='higher-lower'||id==='grid-reveal'?'cards':
+    id==='dice-seven'||id==='lucky-number'?'dice':
+    id==='coin-run'||id==='wheel'?'wheel':
+    id==='three-cups'||id==='lucky-shirt'?'ritual':
+    id==='tower'?'tower':'boots'
+  return <span className={'game-thumb game-thumb--luck game-thumb--'+group} aria-hidden="true">
+    <svg viewBox="0 0 120 78">
+      <rect x="2" y="2" width="116" height="74" rx="15" className="thumb-bg"/>
+      {group==='cards'&&<><rect x="28" y="14" width="32" height="48" rx="6" className="thumb-card"/><rect x="58" y="11" width="32" height="48" rx="6" className="thumb-card thumb-card--back"/><path d="M39 38l5-8 5 8-5 8z" className="thumb-hot"/></>}
+      {group==='dice'&&<><rect x="23" y="20" width="34" height="34" rx="8" className="thumb-card"/><rect x="64" y="24" width="34" height="34" rx="8" className="thumb-card"/>{[32,48,73,89].map((x,i)=><circle key={i} cx={x} cy={i<2?30:48} r="3.5" className="thumb-hot"/>)}</>}
+      {group==='wheel'&&<><circle cx="60" cy="39" r="25" className="thumb-card"/><path d="M60 14v50M35 39h50M43 22l34 34M77 22L43 56" className="thumb-grid"/><circle cx="60" cy="39" r="6" className="thumb-hot"/></>}
+      {group==='ritual'&&<><path d="M24 55l8-34h22l8 34zM65 55l8-34h22l8 34z" className="thumb-card"/><circle cx="60" cy="58" r="6" className="thumb-ball"/></>}
+      {group==='tower'&&<><rect x="23" y="52" width="74" height="10" rx="3" className="thumb-card"/><rect x="32" y="39" width="56" height="10" rx="3" className="thumb-card"/><rect x="42" y="26" width="38" height="10" rx="3" className="thumb-card"/><rect x="51" y="13" width="20" height="10" rx="3" className="thumb-hot"/></>}
+      {group==='boots'&&<><path d="M24 52c18 0 20-23 20-33 13 10 17 22 32 22h19v13H54c-13 0-21 2-30-2z" className="thumb-card"/><path d="M23 17l5-6M40 13l2-7M92 16l-4-6" className="thumb-path"/></>}
+    </svg>
+  </span>
+}
+
 const advancedSkillIds:MiniGameId[]=[
   'memory-board','personal-run','timing-run','ball-track','code-call','hold-up','through-pass','grid-gap','long-kick','pressure-exit'
 ]
