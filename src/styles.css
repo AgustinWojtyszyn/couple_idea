@@ -6337,3 +6337,110 @@ html,body,#root{max-width:100%;overflow-x:hidden}
     display:none!important;
   }
 }
+
+
+/* V9 · asset boot and clean transfer carousel */
+.asset-boot{
+  min-height:100dvh;
+  display:grid;
+  place-items:center;
+  align-content:center;
+  gap:10px;
+  padding:24px;
+  background:
+    radial-gradient(circle at 50% 35%,rgba(49,124,255,.18),transparent 28%),
+    linear-gradient(180deg,#07111e,#030811);
+  color:#fff;
+  text-align:center;
+}
+.asset-boot__mark{
+  animation:boot-float 1.8s ease-in-out infinite alternate;
+}
+.asset-boot>strong{
+  margin-top:3px;
+  font:900 32px/1 var(--font-display);
+  letter-spacing:.08em;
+}
+.asset-boot>span{
+  color:#8da4bc;
+  font-size:10px;
+}
+.asset-boot__track{
+  width:min(280px,70vw);
+  height:5px;
+  margin-top:8px;
+  overflow:hidden;
+  border-radius:99px;
+  background:#0c1a2c;
+}
+.asset-boot__track i{
+  display:block;
+  width:38%;
+  height:100%;
+  border-radius:inherit;
+  background:linear-gradient(90deg,#2e7cff,#67d9ff);
+  animation:boot-load 1.15s ease-in-out infinite;
+}
+@keyframes boot-load{
+  0%{transform:translateX(-110%)}
+  100%{transform:translateX(290%)}
+}
+@keyframes boot-float{
+  from{transform:translateY(2px) scale(.98)}
+  to{transform:translateY(-4px) scale(1.02)}
+}
+
+.offer-counter{
+  display:flex;
+  align-items:center;
+  gap:5px;
+}
+.offer-counter>b{
+  min-width:42px;
+  color:#7ebfff;
+  font-size:9px;
+  text-align:center;
+}
+.offer-counter button{
+  width:32px;
+  height:32px;
+  border:1px solid var(--line);
+  border-radius:9px;
+  background:var(--surface-2);
+  color:var(--text);
+  font-size:19px;
+}
+.market-offer-carousel{
+  display:grid;
+  gap:8px;
+}
+.transfer-offer-card--single{
+  width:100%!important;
+  max-width:none!important;
+  flex:none!important;
+}
+.offer-dots{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+}
+.offer-dots button{
+  width:7px;
+  height:7px;
+  padding:0;
+  border:0;
+  border-radius:50%;
+  background:#25384f;
+}
+.offer-dots button.active{
+  width:22px;
+  border-radius:99px;
+  background:#4597ff;
+}
+@media(max-width:700px){
+  .transfer-offer-list{display:none!important}
+  .transfer-offer-card--single{
+    padding:12px!important;
+  }
+}
