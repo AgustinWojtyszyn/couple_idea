@@ -4,6 +4,8 @@ import {
   clubs,
   coachEvents,
   playerEvents,
+  type CabalaGameId,
+  type CareerOutcomeKind,
   type CareerState,
   type CoachEventOption,
   type CoachState,
@@ -16,6 +18,7 @@ import {
   type Position,
   type RunScore,
   type SeasonRecord,
+  type TrophyRecord,
   type TransferOffer,
   type CoachSeason,
 } from '../world/Architecture'
@@ -188,7 +191,7 @@ const finalizeRetirement=(s:CareerState):CareerState=>{
 }
 
 export function chooseFinalStyle(s:CareerState,style:FinalStyle):CareerState{
-  return {...s,finalStyle:style}
+  return {...s,finalStyle:style,activeEvent:openingEvent(s.position)}
 }
 
 
@@ -207,9 +210,9 @@ export function createCareer(name:string,position:Position,mode:PlayerMode,clubI
     coachTrust:55,discipline:62,leadership:42,morale:72,injuryRisk:8,money:12000,matches:0,goals:0,
     assists:0,titles:0,caps:0,nationalGoals:0,trainingCredits:2,seenEvents:[],history:[],achievements:[],offers:[],transferOffers:[],
     marketDecisionRequired:false,currentSalary:club.salary,contractYearsLeft:contractYears,contractYearsTotal:contractYears,
-    finalStyle:null,pendingFinal:null,retirementPending:false,activeEvent:null,retired:false
+    finalStyle:null,pendingFinal:null,retirementPending:false,trophies:[],glory:0,lastSeasonGlory:0,activeEvent:null,retired:false
   }
-  return {...s,activeEvent:openingEvent(position)}
+  return s
 }
 
 export function applyEffects(s:CareerState,e:Effects):CareerState{
@@ -241,9 +244,24 @@ export function applyEffects(s:CareerState,e:Effects):CareerState{
   }
 }
 
+export function careerDecisionEffects(eventId:string|undefined,e:Effects):Effects{
+  const opening=eventId?.startsWith('origin-')??false
+  const numericKeys=new Set(['overall','form','energy','reputation','fans','coachTrust','discipline','leadership','morale','injuryRisk','pace','finishing','passing','dribbling','defending','physical','reflexes'])
+  const next:Effects={}
+  for(const [key,value] of Object.entries(e)){
+    if(typeof value!=='number')continue
+    if(key==='money'){(next as Record<string,number>)[key]=value;continue}
+    if(!numericKeys.has(key)){(next as Record<string,number>)[key]=value;continue}
+    const max=opening?8:4
+    const min=opening?-2:-4
+    ;(next as Record<string,number>)[key]=Math.max(min,Math.min(max,value))
+  }
+  return next
+}
+
 export function choosePlayerEvent(s:CareerState,o:EventOption){
   const eventId=s.activeEvent?.id
-  const next=applyEffects(s,o.effects)
+  const next=applyEffects(s,careerDecisionEffects(eventId,o.effects))
   return {
     ...next,
     seenEvents:eventId?[...new Set([...(s.seenEvents??[]),eventId])]:s.seenEvents,
