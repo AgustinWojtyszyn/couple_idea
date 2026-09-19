@@ -2,6 +2,7 @@ import {
   baseStatsByPosition,
   clubById,
   clubs,
+  leagueById,
   coachEvents,
   playerEvents,
   type CabalaGameId,
@@ -147,28 +148,28 @@ const finalMiniGameFor=(position:Position,r:()=>number):MiniGameId=>{
 const transferOffersFor=(s:CareerState):TransferOffer[]=>{
   const current=clubById(s.clubId)
   const r=rngFrom(s.seed+s.season*1709+s.overall*13+s.reputation*7)
-  const localOnly=s.reputation<42
   const candidates=clubs
-    .filter(c=>c.id!==s.clubId&&s.overall+7>=c.minOverall&&(!localOnly||c.country===current.country))
+    .filter(c=>c.id!==s.clubId&&c.country===current.country)
     .map(c=>{
-      const prestigeDelta=c.prestige-current.prestige
-      const fit=Math.abs(c.minOverall-s.overall)+(prestigeDelta<0?2:0)-r()*2.5
+      const prestigeGap=Math.abs(c.prestige-current.prestige)
+      const overallGap=Math.abs(c.minOverall-s.overall)
+      const ambitionPenalty=c.minOverall>s.overall+9?5:0
+      const fit=overallGap*.75+prestigeGap*.12+ambitionPenalty-r()*4
       return {club:c,fit}
     })
     .sort((a,b)=>a.fit-b.fit)
-    .slice(0,8)
 
   const picked:TransferOffer[]=[]
   for(const entry of candidates){
     if(picked.length>=4)break
     const c=entry.club
     const diff=s.overall-c.minOverall
-    const role:TransferOffer['role']=diff>=9?'FIGURA':diff>=3?'TITULAR':diff>=-2?'PROYECTO':'ROTACIÓN'
+    const role:TransferOffer['role']=diff>=8?'FIGURA':diff>=2?'TITULAR':diff>=-4?'PROYECTO':'ROTACIÓN'
     const years=1+Math.floor(r()*4)
-    const salaryBase=Math.max(c.salary,(s.currentSalary??current.salary)*(.94+r()*.24))
-    const reputationBoost=1+s.reputation/420
-    const salary=Math.round(salaryBase*reputationBoost/1000)*1000
-    const signingBonus=Math.round(salary*(1.2+r()*2.3)/1000)*1000
+    const salaryBase=Math.max(c.salary*.72,(s.currentSalary??current.salary)*(.9+r()*.22))
+    const reputationBoost=1+s.reputation/520
+    const salary=Math.max(4000,Math.round(salaryBase*reputationBoost/1000)*1000)
+    const signingBonus=Math.round(salary*(1.1+r()*2.1)/1000)*1000
     picked.push({clubId:c.id,salary,years,role,signingBonus})
   }
   return picked
