@@ -6207,3 +6207,133 @@ html,body,#root{max-width:100%;overflow-x:hidden}
   }
   .retirement-section__head h2{font-size:21px}
 }
+
+
+/* V9 · mobile onboarding should feel like a game menu, not a form */
+@media(max-width:700px){
+  .shell--home .site-header{
+    min-height:72px!important;
+  }
+  .home-main--compact{
+    gap:10px!important;
+  }
+  .hero-card--compact{
+    min-height:152px!important;
+    padding:14px!important;
+    border-radius:18px!important;
+  }
+  .hero-card--compact .hero-card__brand{
+    min-height:80px!important;
+  }
+  .hero-card--compact .hero-card__brand .leyenda-logo--lg{
+    width:58px!important;
+    height:66px!important;
+  }
+  .hero-card--compact .hero-card__brand>span{
+    font-size:40px!important;
+  }
+  .hero-card--compact .hero-card__brand>small{
+    font-size:7px!important;
+  }
+  .hero-card--compact .mode-tabs button{
+    min-height:42px!important;
+    font-size:10px!important;
+  }
+
+  .create-card--primary{
+    padding:14px!important;
+    border-radius:18px!important;
+  }
+  .setup-heading{
+    gap:10px!important;
+  }
+  .setup-heading h2{
+    font-size:26px!important;
+  }
+  .setup-heading p{
+    font-size:10px!important;
+  }
+  .setup-progress>span{
+    min-height:38px!important;
+    font-size:12px!important;
+  }
+  .form-grid--start{
+    margin-top:12px!important;
+    gap:8px!important;
+  }
+  .club-choice-zone{
+    margin-top:10px!important;
+    padding:10px!important;
+  }
+  .club-choice-head h3{
+    font-size:20px!important;
+  }
+  .club-picker-open{
+    min-height:34px!important;
+    padding:0 9px!important;
+    font-size:7px!important;
+  }
+  .club-strip--choice button{
+    min-width:92px!important;
+    min-height:92px!important;
+    padding:8px!important;
+  }
+  .club-preview--selected{
+    min-height:80px!important;
+    margin-top:10px!important;
+    padding:9px!important;
+  }
+  .name-field{
+    margin-top:10px!important;
+  }
+  .name-field input{
+    min-height:50px!important;
+  }
+
+  .position-choice{
+    margin-top:11px!important;
+  }
+  .position-choice__head{
+    align-items:center!important;
+  }
+  .position-choice__head>strong{
+    display:none!important;
+  }
+  .positions{
+    display:flex!important;
+    gap:7px!important;
+    overflow-x:auto!important;
+    scroll-snap-type:x mandatory;
+    scrollbar-width:none;
+    padding-bottom:3px;
+  }
+  .positions::-webkit-scrollbar{display:none}
+  .positions button{
+    flex:0 0 145px!important;
+    min-height:88px!important;
+    padding:9px!important;
+    scroll-snap-align:start;
+  }
+  .positions button>b{
+    font-size:25px!important;
+  }
+  .positions button>strong{
+    font-size:12px!important;
+  }
+  .positions button>span{
+    font-size:8px!important;
+    line-height:1.2!important;
+  }
+
+  .start-career-button{
+    margin-top:11px!important;
+    min-height:52px!important;
+    font-size:15px!important;
+  }
+
+  .daily-card--compact,
+  .feature-grid--compact,
+  .shell--home .legal-note{
+    display:none!important;
+  }
+}
