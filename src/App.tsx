@@ -541,13 +541,29 @@ function RankingPanel({scores}:{scores:RunScore[]}){
   </section>
 }
 
-function MiniGamesPanel({mode,onScore}:{mode:'player'|'coach';onScore:(game:MiniGameId,score:number)=>void}){
+function MiniGamesPanel({
+  mode,onScore,forcedGame,onComplete
+}:{
+  mode:'player'|'coach'
+  onScore:(game:MiniGameId,score:number)=>void
+  forcedGame?:MiniGameId
+  onComplete?:(score:number)=>void
+}){
   const games=miniGames.filter(game=>mode==='player'?game.playerOnly:game.coachOnly)
-  const [active,setActive]=useState<MiniGameId|null>(null)
+  const [active,setActive]=useState<MiniGameId|null>(forcedGame??null)
   const [round,setRound]=useState(0)
   const [score,setScore]=useState(0)
   const [feedback,setFeedback]=useState('')
   const [completed,setCompleted]=useState(false)
+
+  useEffect(()=>{
+    if(!forcedGame)return
+    setActive(forcedGame)
+    setRound(0)
+    setScore(0)
+    setFeedback('')
+    setCompleted(false)
+  },[forcedGame])
 
   const reset=(id:MiniGameId)=>{
     setActive(id)
@@ -567,6 +583,7 @@ function MiniGamesPanel({mode,onScore}:{mode:'player'|'coach';onScore:(game:Mini
     if(nextRound>=5){
       setCompleted(true)
       onScore(active,nextScore)
+      onComplete?.(nextScore)
     }
   }
 
@@ -637,7 +654,7 @@ function MiniGamesPanel({mode,onScore}:{mode:'player'|'coach';onScore:(game:Mini
 
     return <section className="panel minigame-arena minigame-arena--v2">
       <div className="minigame-topline">
-        <button className="back-link" onClick={()=>setActive(null)}>← Volver</button>
+        {!forcedGame?<button className="back-link" onClick={()=>setActive(null)}>← Volver</button>:<span className="final-game-badge">FINAL · SIN REINTENTO</span>}
         <span>RONDA {roundLabel}/5</span>
       </div>
       <div className="minigame-title"><b>{game.icon}</b><div><span className="eyebrow">{mode==='player'?'HABILIDAD':'DESPACHO DEL DT'}</span><h2>{game.name}</h2><p>{game.description}</p></div></div>
@@ -704,7 +721,7 @@ function MiniGamesPanel({mode,onScore}:{mode:'player'|'coach';onScore:(game:Mini
       </div>}
 
       <div className={'minigame-feedback '+(completed?'complete':'')}>{completed?'DESAFÍO COMPLETO · '+score+' PTS':feedback||'JUGÁ LA RONDA'}</div>
-      {completed&&<button className="play-button" onClick={()=>reset(active)}>JUGAR DE NUEVO</button>}
+      {completed&&!forcedGame&&<button className="play-button" onClick={()=>reset(active)}>JUGAR DE NUEVO</button>}
     </section>
   }
 
