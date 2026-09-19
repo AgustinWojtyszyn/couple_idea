@@ -7336,3 +7336,88 @@ button.gesture-pitch{
     padding-inline:max(14px,calc((100vw - 760px)/2));
   }
 }
+
+
+/* V10 · Cabulero single-scene crowd ritual */
+.cabala-tribuna-stage{
+  display:grid;
+  gap:12px;
+}
+.tribuna-night{
+  position:relative;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:6px;
+  min-height:210px;
+  padding:14px 8px 10px;
+  overflow:hidden;
+  border-radius:16px;
+  background:
+    radial-gradient(circle at 50% 0,rgba(112,180,255,.16),transparent 34%),
+    linear-gradient(180deg,#101725 0 28%,#172230 28% 100%);
+  border:1px solid rgba(255,255,255,.09);
+}
+.tribuna-night:before{
+  content:'';
+  position:absolute;
+  left:0;right:0;bottom:0;
+  height:34%;
+  background:linear-gradient(180deg,#14362b,#0f2b22);
+  opacity:.8;
+}
+.tribuna-night button{
+  position:relative;
+  z-index:2;
+  overflow:hidden;
+  min-width:0;
+  min-height:172px;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
+  align-items:center;
+  gap:5px;
+  padding:8px 4px;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:11px;
+  background:
+    radial-gradient(circle at 50% 16%,rgba(255,255,255,.06),transparent 24%),
+    rgba(4,10,18,.5);
+  color:#dbe9f7;
+}
+.tribuna-night button i{
+  position:absolute;
+  width:5px;height:5px;
+  border-radius:50%;
+  background:#a9b8c9;
+  opacity:.55;
+}
+.tribuna-night button i:nth-child(1){left:18%;top:18%}
+.tribuna-night button i:nth-child(2){left:62%;top:26%}
+.tribuna-night button i:nth-child(3){left:34%;top:42%}
+.tribuna-night button i:nth-child(4){left:78%;top:51%}
+.tribuna-night button i:nth-child(5){left:51%;top:64%}
+.tribuna-night button b{
+  position:relative;
+  z-index:3;
+  font-size:6px;
+  letter-spacing:.06em;
+}
+.tribuna-night button span{
+  position:absolute;
+  top:13%;
+  color:#f1d46e;
+  font-size:18px;
+  opacity:.42;
+  transform:rotate(-5deg);
+}
+.tribuna-night button.pulse{
+  animation:tribuna-pulse 1.2s ease-in-out infinite alternate;
+}
+.tribuna-night button.pulse span{
+  opacity:.95;
+  text-shadow:0 0 15px rgba(255,215,92,.65);
+}
+@keyframes tribuna-pulse{
+  from{box-shadow:inset 0 0 0 rgba(255,214,88,0)}
+  to{box-shadow:inset 0 0 28px rgba(255,214,88,.12)}
+}
