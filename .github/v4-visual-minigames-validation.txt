@@ -1,0 +1,1 @@
+Validate V4 role stats, media preload and visible minigames.
