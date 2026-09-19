@@ -1079,3 +1079,75 @@ button:focus-visible,input:focus-visible,select:focus-visible{box-shadow:0 0 0 3
   .attributes-grid{grid-template-columns:repeat(4,1fr)}
   .attribute:last-child{grid-column:auto}
 }
+
+
+/* V2 · club media */
+.real-crest{
+  flex:none;
+  display:grid;
+  place-items:center;
+  width:48px;
+  height:54px;
+  border-radius:12px;
+  background:rgba(255,255,255,.94);
+  border:1px solid rgba(255,255,255,.14);
+  box-shadow:0 9px 24px rgba(0,0,0,.24);
+  overflow:hidden;
+}
+.real-crest img{
+  display:block;
+  max-width:84%;
+  max-height:84%;
+  width:auto;
+  height:auto;
+  object-fit:contain;
+}
+.real-crest--sm{width:34px;height:38px;border-radius:9px}
+.real-crest--lg{width:66px;height:74px;border-radius:15px}
+
+.club-preview--media,
+.identity-card--media{
+  background-size:cover!important;
+  background-position:center!important;
+  isolation:isolate;
+}
+.club-preview--media:before,
+.identity-card--media:before{
+  content:'';
+  position:absolute;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  background:linear-gradient(90deg,rgba(47,124,255,.1),transparent 52%);
+}
+.club-preview--media{
+  position:relative;
+  overflow:hidden;
+  min-height:88px;
+}
+.club-preview--media strong{
+  text-shadow:0 2px 10px rgba(0,0,0,.35);
+}
+.identity-card--media{
+  min-height:132px;
+  background-size:cover!important;
+}
+.identity-card--media .identity-card__copy,
+.identity-card--media .overall,
+.identity-card--media .real-crest,
+.identity-card--media .crest{
+  position:relative;
+  z-index:2;
+}
+
+@media(max-width:520px){
+  .identity-card--media{
+    grid-template-columns:auto minmax(0,1fr) auto;
+    min-height:126px;
+  }
+  .identity-card--media .real-crest--lg,
+  .identity-card--media .crest--lg{
+    width:58px;
+    height:64px;
+  }
+}
