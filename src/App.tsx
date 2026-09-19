@@ -1039,6 +1039,7 @@ function CabalaMiniGame({game,onComplete}:{game:CabalaGameId;onComplete:(won:boo
   const loopPhase=useLoopPhase(!finished&&!animating,2200)
 
   useEffect(()=>{
+    if(round>=maxRounds)return
     if(game==='grid-reveal'){
       setRevealed(true)
       const id=window.setTimeout(()=>setRevealed(false),1100)
@@ -1082,7 +1083,7 @@ function CabalaMiniGame({game,onComplete}:{game:CabalaGameId;onComplete:(won:boo
     }
   },[game,round])
 
-  const commit=(success:boolean,message:string,earned=100)=>{
+  const commit=(success:boolean,message:string)=>{
     if(finished)return
     const nextRound=round+1
     const nextHits=hits+(success?1:0)
