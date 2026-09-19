@@ -1,10 +1,12 @@
 export type ClubMedia = {
   logo?: string
   image?: string
+  stadiumImage?: string
+  stadiumName?: string
   wikidataId?: string
 }
 
-const CACHE_KEY='leyenda-club-media-v1'
+const CACHE_KEY='leyenda-club-media-v2'
 
 function readCache():Record<string,ClubMedia>{
   try{return JSON.parse(localStorage.getItem(CACHE_KEY)||'{}')}catch{return{}}
@@ -60,7 +62,7 @@ export async function getClubMedia(name:string):Promise<ClubMedia>{
       'https://www.wikidata.org/w/api.php?'+new URLSearchParams({
         action:'wbgetentities',
         ids:football.id,
-        props:'claims',
+        props:'claims|labels',
         format:'json',
         origin:'*',
       })
@@ -70,7 +72,31 @@ export async function getClubMedia(name:string):Promise<ClubMedia>{
     const claims=entityData.entities?.[football.id]?.claims??{}
     const logo=claims.P154?.[0]?.mainsnak?.datavalue?.value
     const image=claims.P18?.[0]?.mainsnak?.datavalue?.value
-    const result:ClubMedia={logo:commonsUrl(logo),image:commonsUrl(image),wikidataId:football.id}
+    const venueId=(claims.P115?.[0]?.mainsnak?.datavalue?.value as {id?:string}|undefined)?.id
+    let stadiumImage:string|undefined
+    let stadiumName:string|undefined
+    if(venueId){
+      try{
+        const venueRes=await fetch(
+          'https://www.wikidata.org/w/api.php?'+new URLSearchParams({
+            action:'wbgetentities',
+            ids:venueId,
+            props:'claims|labels',
+            languages:'es|en',
+            format:'json',
+            origin:'*',
+          })
+        )
+        if(venueRes.ok){
+          const venueData=await venueRes.json() as {entities?:Record<string,{claims?:Record<string,Array<{mainsnak?:{datavalue?:{value?:string}}}>>;labels?:Record<string,{value:string}>}>}
+          const venue=venueData.entities?.[venueId]
+          const venueImage=venue?.claims?.P18?.[0]?.mainsnak?.datavalue?.value
+          stadiumImage=commonsUrl(venueImage)
+          stadiumName=venue?.labels?.es?.value??venue?.labels?.en?.value
+        }
+      }catch{}
+    }
+    const result:ClubMedia={logo:commonsUrl(logo),image:commonsUrl(image),stadiumImage,stadiumName,wikidataId:football.id}
     cache[name]=result
     writeCache(cache)
     return result
