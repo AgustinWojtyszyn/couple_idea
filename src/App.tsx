@@ -1450,7 +1450,7 @@ function MarketPanel({
 
 function TrophyCabinet({state}:{state:CareerState}){
   const trophies=state.trophies??[]
-  if(!trophies.length)return <section className="trophy-cabinet trophy-cabinet--empty"><div><span className="eyebrow">PALMARÉS</span><h3>La vitrina está esperando.</h3><p>Los trofeos aparecen sólo si ganás el partido decisivo.</p></div><b>♛</b></section>
+  if(!trophies.length)return null
   const grouped=Object.values(trophies.reduce<Record<string,{name:string;icon:string;count:number}>>((acc,trophy)=>{
     const current=acc[trophy.name]??{name:trophy.name,icon:trophy.icon,count:0}
     current.count+=1
@@ -1686,21 +1686,23 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
             <Stat value={seasonSummary.rating} label="RATING"/>
           </div>
           <div className="season-result__score"><span>SCORE DE TEMPORADA</span><strong>{seasonSummary.score.toLocaleString('es-AR')}</strong></div>
+          {seasonSummary.outcomeKind&&<div className={'season-outcome-chip '+(seasonSummary.outcomeWon?'won':'lost')}>
+            <b>{seasonSummary.outcomeWon?'✓':'×'}</b><span>{seasonSummary.competition??'PARTIDO DECISIVO'}</span><strong>{seasonSummary.outcomeWon?'GANADO':'PERDIDO'}</strong>
+          </div>}
           {typeof seasonSummary.glory==='number'&&seasonSummary.glory>0&&<div className="season-glory-reveal"><span>GLORIA GANADA</span><strong>+{seasonSummary.glory.toLocaleString('es-AR')}</strong><small>Se revela recién al terminar la temporada.</small></div>}
           <em>{seasonSummary.note}</em>
           <button className="play-button" onClick={closeSeasonSummary}>CONTINUAR →</button>
         </section>
       </div>}
-      {tab==='career'&&<div className="career-overview">
+      {tab==='career'&&state.retired&&<CareerRetirementSummary state={state}/>}
+      {tab==='career'&&!state.retired&&<div className="career-overview">
       <section className="identity-card identity-card--media" style={(playerMedia.stadiumImage??playerMedia.image)?{backgroundImage:'linear-gradient(90deg,var(--surface) 35%,rgba(5,10,18,.58)),url("'+(playerMedia.stadiumImage??playerMedia.image)+'")'}:undefined}>
         <ClubCrest name={club.name} size="lg"/>
         <div className="identity-card__copy"><span className="eyebrow">{displayLeague}</span><h1>{state.playerName}</h1><p>{state.position} · {state.age} años · {club.name}</p>{state.finalStyle&&<small className={'career-style-badge career-style-badge--'+state.finalStyle}>{state.finalStyle.toUpperCase()}</small>}</div>
         <div className="overall"><strong>{state.overall}</strong><span>OVR</span></div>
       </section>
-      <MatchdayScene clubName={club.name} media={playerMedia} mode="player" season={state.season} age={state.age}/>
-
-      <div className="quick-stats">
-        <Stat value={state.matches} label="PJ"/><Stat value={state.goals} label="GOLES"/><Stat value={state.assists} label="ASIST."/><Stat value={state.titles} label="TÍTULOS"/>
+      <div className="quick-stats quick-stats--career">
+        <Stat value={state.matches} label="PJ"/><Stat value={state.goals} label="GOLES"/><Stat value={state.assists} label="ASIST."/><Stat value={state.titles} label="TÍTULOS"/><Stat value={(state.glory??0).toLocaleString('es-AR')} label="GLORIA"/>
       </div>
 
       <PlayerAttributes state={{...state,stats:playerStats}}/>
@@ -1709,7 +1711,7 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
 
       </div>}
 
-      {tab==='career'&&<div className="dashboard-grid">
+      {tab==='career'&&!state.retired&&<div className="dashboard-grid">
         <section className="panel event-panel">
           {lastEffects&&<div className="decision-feedback"><div><span className="eyebrow">DECISIÓN TOMADA</span><strong>Tu jugador cambió</strong><EffectChips effects={lastEffects}/></div><button onClick={()=>setLastEffects(null)}>×</button></div>}
           {state.retired?<><span className="eyebrow">FINAL DE CARRERA</span><h2>Tu historia ya está escrita.</h2><p>Terminaste {state.history.length} temporadas con {state.matches} partidos y {state.titles} títulos.</p><div className="final-score"><span>SCORE FINAL</span><strong>{careerScore(state).toLocaleString('es-AR')}</strong></div></>:
@@ -1720,9 +1722,10 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
           <><span className="eyebrow">TEMPORADA {state.season} DE {state.maxSeasons}</span><h2>Todo listo para competir.</h2><p>Tu estado físico, la confianza, el vestuario y las decisiones ya están en juego.</p><button className="play-button" onClick={playSeason}>▶ JUGAR TEMPORADA</button></>}
         </section>
 
-        <aside className="panel condition-panel">
-          <div className="panel-head"><div><span className="eyebrow">CONDICIÓN</span><h3>Estado del jugador</h3></div><span className="condition-label">{state.energy>70?'ÓPTIMO':state.energy>45?'CARGADO':'AL LÍMITE'}</span></div>
-          <Meter label="Forma" value={state.form}/><Meter label="Energía" value={state.energy}/><Meter label="Moral" value={state.morale}/><Meter label="Confianza DT" value={state.coachTrust}/><Meter label="Disciplina" value={state.discipline}/><Meter label="Liderazgo" value={state.leadership}/>
+        <aside className="panel condition-panel condition-panel--compact">
+          <div className="panel-head"><div><span className="eyebrow">CONDICIÓN</span><h3>Cómo llegás</h3></div><span className="condition-label">{state.energy>70?'ÓPTIMO':state.energy>45?'CARGADO':'AL LÍMITE'}</span></div>
+          <Meter label="Forma" value={state.form}/><Meter label="Energía" value={state.energy}/><Meter label="Moral" value={state.morale}/>
+          <div className="condition-mini"><span>DT <b>{Math.round(state.coachTrust)}</b></span><span>DISC <b>{Math.round(state.discipline)}</b></span><span>LID <b>{Math.round(state.leadership)}</b></span></div>
         </aside>
       </div>}
 
