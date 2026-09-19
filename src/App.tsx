@@ -962,7 +962,7 @@ function MiniGamesPanel({
   }
 
   return <section className="panel minigame-hub">
-    <div className="panel-head"><div><span className="eyebrow">{mode==='player'?'CENTRO DE HABILIDAD':'LABORATORIO DEL DT'}</span><h2>{mode==='player'?'Cinco pruebas jugables':'Cinco desafíos de gestión'}</h2></div><span className="pill">5 MODOS</span></div>
+    <div className="panel-head"><div><span className="eyebrow">{mode==='player'?'CENTRO DE HABILIDAD':'LABORATORIO DEL DT'}</span><h2>{mode==='player'?'Quince pruebas jugables':'Cinco desafíos de gestión'}</h2></div><span className="pill">{mode==='player'?'15 JUEGOS':'5 MODOS'}</span></div>
     <p className="minigame-hub__intro">{mode==='player'?'Cada prueba entrena una parte distinta de tu jugador. No son decisiones de texto: tenés que acertar.':'Táctica, scouting, vestuario, formación y mercado. Tus decisiones puntúan el trabajo de entrenador.'}</p>
     <div className="minigame-grid minigame-grid--v2">{games.map(game=><button key={game.id} onClick={()=>reset(game.id)}>
       <b>{game.icon}</b>
@@ -1268,11 +1268,16 @@ function TrophyCabinet({state}:{state:CareerState}){
 }
 function CabalaPracticePanel(){
   const games:Array<{id:CabalaGameId;icon:string;name:string;description:string}>=[
-    {id:'higher-lower',icon:'♠',name:'Mayor o menor',description:'Leé la carta y jugate por la siguiente.'},
+    {id:'higher-lower',icon:'♠',name:'El pálpito',description:'Mayor o menor. Tres cartas para sostener la fe.'},
     {id:'dice-seven',icon:'⚄',name:'Los dados del 7',description:'Abajo, siete exacto o arriba.'},
-    {id:'coin-run',icon:'◐',name:'Racha de moneda',description:'Cara o ceca durante cinco lanzamientos.'},
-    {id:'lucky-number',icon:'17',name:'Número marcado',description:'Encontrá el casillero que guarda la pelota.'},
-    {id:'lucky-shirt',icon:'▾',name:'La camiseta',description:'Elegí el número que hoy trae suerte.'},
+    {id:'coin-run',icon:'◐',name:'Moneda de vestuario',description:'Leé una racha de cara o ceca.'},
+    {id:'lucky-number',icon:'17',name:'Número marcado',description:'Encontrá el casillero con la pelota.'},
+    {id:'lucky-shirt',icon:'▾',name:'La camiseta',description:'Una sola elección antes de salir.'},
+    {id:'three-cups',icon:'◒',name:'Tres vasos',description:'Seguí dónde escondieron la pelota.'},
+    {id:'wheel',icon:'✺',name:'Rueda del destino',description:'Frená la rueda en una zona dorada.'},
+    {id:'tower',icon:'▥',name:'La torre',description:'Evitá la salida que el rival estudió.'},
+    {id:'grid-reveal',icon:'▦',name:'Grilla de la suerte',description:'Memorizá dónde apareció el gol.'},
+    {id:'boots',icon:'⌁',name:'Los tapones',description:'Leé el clima y elegí antes del partido.'},
   ]
   const [active,setActive]=useState<CabalaGameId|null>(null)
   const [result,setResult]=useState<string>('')
@@ -1282,7 +1287,7 @@ function CabalaPracticePanel(){
     {result&&<div className={'practice-result '+(result.startsWith('CÁBALA')?'good':'bad')}>{result}</div>}
   </section>
   return <section className="panel games-style-hub">
-    <div className="panel-head"><div><span className="eyebrow">CABULERO · 5 JUEGOS</span><h2>La suerte también se juega.</h2></div><span className="pill">⚄</span></div>
+    <div className="panel-head"><div><span className="eyebrow">CABULERO · 10 JUEGOS</span><h2>La suerte también se juega.</h2></div><span className="pill">⚄</span></div>
     <p className="games-style-intro">Practicá las mismas cábalas que pueden definir un título, un ascenso o una permanencia.</p>
     <div className="cabala-practice-grid">{games.map(game=><button key={game.id} onClick={()=>{setActive(game.id);setResult('')}}><b>{game.icon}</b><span><strong>{game.name}</strong><small>{game.description}</small></span><em>JUGAR →</em></button>)}</div>
   </section>
@@ -1293,7 +1298,7 @@ function PlayerGamesHub({style,onSkillScore}:{style:FinalStyle|null|undefined;on
   if(style==='cabulero')return <CabalaPracticePanel/>
   if(style==='habilidoso')return <MiniGamesPanel mode="player" onScore={onSkillScore}/>
   return <div className="mixed-games-hub">
-    <div className="mixed-games-tabs"><button className={mix==='skill'?'active':''} onClick={()=>setMix('skill')}>◎ HABILIDOSO · 5</button><button className={mix==='luck'?'active':''} onClick={()=>setMix('luck')}>⚄ CABULERO · 5</button></div>
+    <div className="mixed-games-tabs"><button className={mix==='skill'?'active':''} onClick={()=>setMix('skill')}>◎ HABILIDOSO · 15</button><button className={mix==='luck'?'active':''} onClick={()=>setMix('luck')}>⚄ CABULERO · 10</button></div>
     {mix==='skill'?<MiniGamesPanel mode="player" onScore={onSkillScore}/>:<CabalaPracticePanel/>}
   </div>
 }
