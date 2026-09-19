@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
-  baseStatsByPosition,
   clubs,
   clubsByLeague,
   clubById,
@@ -40,7 +39,7 @@ import {
   transferTo,
 } from './systems/buildingStore'
 import { globalRankingEnabled, loadLeaderboard, submitLeaderboardScore } from './systems/rankingService'
-import { getClubMedia, type ClubMedia } from './systems/clubMediaService'
+import { getClubMedia, preloadClubMedia, type ClubMedia } from './systems/clubMediaService'
 
 type SaveState = CareerState | CoachState | null
 
@@ -99,20 +98,15 @@ function ClubCrest({name,size='md'}:{name:string;size?:'sm'|'md'|'lg'}){
 
 function MatchdayScene({clubName,media,mode,season,age}:{clubName:string;media:ClubMedia;mode:'player'|'coach';season:number;age?:number}){
   const background=media.stadiumImage??media.image
-  return <section className="matchday-scene" style={background?{backgroundImage:'linear-gradient(180deg,rgba(3,8,17,.18),rgba(3,8,17,.9)),url("'+background+'")'}:undefined}>
+  return <section className={'matchday-scene '+(background?'matchday-scene--photo':'matchday-scene--fallback')} style={background?{backgroundImage:'linear-gradient(180deg,rgba(3,8,17,.08),rgba(3,8,17,.88)),url("'+background+'")'}:undefined}>
     <div className="matchday-scene__lights"><i/><i/><i/><i/></div>
+    <div className="matchday-scene__stands"><i/><i/><i/></div>
     <div className="matchday-scene__pitch"><span/><span/><span/></div>
-    <div className="matchday-scene__content">
-      <div className="matchday-scene__meta">
-        <span className="eyebrow">{mode==='player'?'JORNADA DE CARRERA':'DÍA DE PARTIDO'}</span>
-        <strong>{media.stadiumName??'Estadio del club'}</strong>
-        <small>Temporada {season}{typeof age==='number'?' · '+age+' años':''}</small>
-      </div>
-      <div className="matchday-scene__identity">
-        <ClubCrest name={clubName} size="lg"/>
-        <div className={mode==='player'?'human-silhouette':'coach-silhouette'}><i/><b/><span/></div>
-      </div>
+    <div className="matchday-scene__scoreboard">
+      <ClubCrest name={clubName} size="lg"/>
+      <div><small>{mode==='player'?'JORNADA DE CARRERA':'DÍA DE PARTIDO'}</small><strong>{clubName}</strong><span>{media.stadiumName??'Sede del club'}</span></div>
     </div>
+    <div className="matchday-scene__meta"><span>Temporada {season}</span>{typeof age==='number'&&<b>{age} años</b>}</div>
     <div className="matchday-scene__name">{clubName}</div>
   </section>
 }
@@ -191,27 +185,25 @@ function EffectChips({effects}:{effects:EventOption['effects']}){
   })}</div>
 }
 
-function positionTopStats(position:Position){
-  const stats=baseStatsByPosition[position]
-  return (Object.keys(stats) as PlayerStatKey[])
-    .map(key=>[key,stats[key]] as const)
-    .sort((a,b)=>b[1]-a[1])
-    .slice(0,3)
+const visibleStatsByPosition:Record<Position,PlayerStatKey[]> = {
+  '9':['pace','finishing','dribbling','physical','passing'],
+  '10':['passing','dribbling','pace','finishing','physical'],
+  '7':['pace','dribbling','passing','finishing','physical'],
+  '5':['passing','defending','physical','pace','dribbling'],
+  '2':['defending','physical','pace','passing'],
+  '1':['reflexes','physical','passing'],
 }
 
 function PlayerAttributes({state}:{state:CareerState}){
   const stats=statsFor(state)
-  const entries=(Object.keys(stats) as PlayerStatKey[]).map(key=>[key,stats[key]] as const)
+  const keys=visibleStatsByPosition[state.position]
+  const entries=keys.map(key=>[key,stats[key]] as const)
   const best=new Set(
-    entries
-      .slice()
-      .sort((a,b)=>b[1]-a[1])
-      .slice(0,3)
-      .map(([key])=>key)
+    entries.slice().sort((a,b)=>b[1]-a[1]).slice(0,2).map(([key])=>key)
   )
   return <section className="attributes-card">
     <div className="attributes-head">
-      <div><span className="eyebrow">ATRIBUTOS</span><h3>Tu jugador</h3></div>
+      <div><span className="eyebrow">ATRIBUTOS DE TU PUESTO</span><h3>{positions.find(p=>p.id===state.position)?.title.split('·')[1]??'Jugador'}</h3></div>
       <span className="attributes-ovr">{state.overall}<small>OVR</small></span>
     </div>
     <div className="attributes-grid">{entries.map(([key,value])=><div className={best.has(key)?'attribute best':'attribute'} key={key}>
@@ -300,6 +292,14 @@ function Home({
 
   const selectedClub=clubById(activeClub)
   const selectedMedia=useClubMedia(selectedClub.name)
+
+  useEffect(()=>{
+    if(country!=='Argentina')return
+    const id=window.setTimeout(()=>{
+      void preloadClubMedia(availableClubs.map(club=>club.name),4)
+    },180)
+    return()=>window.clearTimeout(id)
+  },[country,activeLeague])
 
   return <div className="shell shell--home">
     <header className="site-header">
@@ -407,7 +407,6 @@ function Home({
           {gameMode==='player'&&<div className="positions">
             {positions.map(p=><button key={p.id} className={position===p.id?'active':''} onClick={()=>setPosition(p.id)}>
               <b>{p.id}</b><strong>{p.title.split('·')[1]}</strong><span>{p.subtitle}</span>
-              <div className="position-stat-preview">{positionTopStats(p.id).map(([key,value])=><em key={key}>{statLabels[key].slice(0,3).toUpperCase()} {value}</em>)}</div>
             </button>)}
           </div>}
 
@@ -425,7 +424,7 @@ function Home({
 
         <section className="feature-grid">
           <article><span>⌁</span><div><strong>RANKING</strong><small>Compará runs y récords</small></div></article>
-          <article><span>◎</span><div><strong>MINIJUEGOS</strong><small>6 desafíos jugables</small></div></article>
+          <article><span>◎</span><div><strong>10 MINIJUEGOS</strong><small>5 jugador · 5 entrenador</small></div></article>
           <article><span>↗</span><div><strong>MERCADO</strong><small>Decisiones de carrera</small></div></article>
           <article><span>◇</span><div><strong>MODO DT</strong><small>8 temporadas de presión</small></div></article>
         </section>
