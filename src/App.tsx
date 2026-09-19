@@ -78,20 +78,27 @@ function Crest({name,size='md'}:{name:string;size?:'sm'|'md'|'lg'}){
 
 function useClubMedia(name:string){
   const [media,setMedia]=useState<ClubMedia>({})
+  const [loading,setLoading]=useState(true)
   useEffect(()=>{
     let alive=true
-    void getClubMedia(name).then(value=>{if(alive)setMedia(value)})
+    setLoading(true)
+    void getClubMedia(name).then(value=>{
+      if(!alive)return
+      setMedia(value)
+      setLoading(false)
+    })
     return()=>{alive=false}
   },[name])
-  return media
+  return {media,loading}
 }
 
 function ClubCrest({name,size='md'}:{name:string;size?:'sm'|'md'|'lg'}){
-  const media=useClubMedia(name)
+  const {media,loading}=useClubMedia(name)
   const [failed,setFailed]=useState(false)
   useEffect(()=>setFailed(false),[name])
+  if(loading)return <span className={'crest-skeleton crest-skeleton--'+size} aria-label={'Cargando escudo de '+name}/>
   if(media.logo&&!failed){
-    return <span className={'real-crest real-crest--'+size}><img src={media.logo} alt={'Escudo de '+name} loading="lazy" onError={()=>setFailed(true)}/></span>
+    return <span className={'real-crest real-crest--'+size}><img src={media.logo} alt={'Escudo de '+name} loading="eager" decoding="async" onError={()=>setFailed(true)}/></span>
   }
   return <Crest name={name} size={size}/>
 }
@@ -291,7 +298,7 @@ function Home({
   }
 
   const selectedClub=clubById(activeClub)
-  const selectedMedia=useClubMedia(selectedClub.name)
+  const {media:selectedMedia}=useClubMedia(selectedClub.name)
 
   useEffect(()=>{
     if(country!=='Argentina')return
@@ -667,7 +674,7 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
   const [seasonSummary,setSeasonSummary]=useState<SeasonRecord|null>(null)
   const club=clubById(state.clubId)
   const playerStats=statsFor(state)
-  const playerMedia=useClubMedia(club.name)
+  const {media:playerMedia}=useClubMedia(club.name)
 
   useEffect(()=>{
     loadLeaderboard().then(setScores)
@@ -789,7 +796,7 @@ function CoachGame({state,setState,theme,onTheme,onExit}:{state:CoachState;setSt
   const [tab,setTab]=useState<Tab>('career')
   const [scores,setScores]=useState<RunScore[]>(()=>getRunScores())
   const club=clubById(state.clubId)
-  const coachMedia=useClubMedia(club.name)
+  const {media:coachMedia}=useClubMedia(club.name)
 
   useEffect(()=>{
     loadLeaderboard().then(setScores)
