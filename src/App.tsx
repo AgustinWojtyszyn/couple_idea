@@ -90,9 +90,36 @@ const AUTH_KEY='leyenda-demo-auth-v1'
 
 function LeyendaLogo({size='md'}:{size?:'sm'|'md'|'lg'}){
   return <span className={'leyenda-logo leyenda-logo--'+size} aria-label="Leyenda">
-    <span className="leyenda-logo__laurel leyenda-logo__laurel--left"><i/><i/><i/><i/></span>
-    <span className="leyenda-logo__ball"><b>L</b><i/><i/><i/></span>
-    <span className="leyenda-logo__laurel leyenda-logo__laurel--right"><i/><i/><i/><i/></span>
+    <svg className="leyenda-emblem" viewBox="0 0 140 156" role="img" aria-hidden="true">
+      <defs>
+        <linearGradient id="legendShield" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#7ec8ff"/>
+          <stop offset="48%" stopColor="#317cff"/>
+          <stop offset="100%" stopColor="#123f9b"/>
+        </linearGradient>
+        <linearGradient id="legendGold" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#fff0a8"/>
+          <stop offset="52%" stopColor="#e7ba4a"/>
+          <stop offset="100%" stopColor="#8d621b"/>
+        </linearGradient>
+      </defs>
+      <g className="emblem-laurels">
+        <path d="M34 123C17 112 9 94 11 73C12 56 19 41 31 30" fill="none" stroke="url(#legendGold)" strokeWidth="5" strokeLinecap="round"/>
+        <path d="M106 123C123 112 131 94 129 73C128 56 121 41 109 30" fill="none" stroke="url(#legendGold)" strokeWidth="5" strokeLinecap="round"/>
+        <path d="M22 106l-12-2 8-9m-2-9L5 80l12-5m1-10L8 56l14-2m4-10l-7-11 14 2" fill="none" stroke="#e7ba4a" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M118 106l12-2-8-9m2-9 11-6-12-5m-1-10 10-9-14-2m-4-10 7-11-14 2" fill="none" stroke="#e7ba4a" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
+      </g>
+      <path className="emblem-star" d="M70 4l5 10 11 2-8 8 2 11-10-5-10 5 2-11-8-8 11-2z" fill="url(#legendGold)"/>
+      <path d="M70 23L111 39V78c0 29-17 48-41 62-24-14-41-33-41-62V39z" fill="#071323" stroke="#d9edff" strokeWidth="3"/>
+      <path d="M70 30l33 13v34c0 23-13 39-33 52-20-13-33-29-33-52V43z" fill="url(#legendShield)" stroke="rgba(255,255,255,.35)" strokeWidth="2"/>
+      <path d="M70 39l24 9v27c0 17-9 29-24 40-15-11-24-23-24-40V48z" fill="rgba(5,16,37,.32)" stroke="rgba(255,255,255,.24)" strokeWidth="1.5"/>
+      <circle cx="70" cy="72" r="23" fill="rgba(4,14,31,.62)" stroke="#e8f4ff" strokeWidth="2"/>
+      <path d="M55 59l11 7 13-4 8 10-7 12-14 1-10-10z" fill="none" stroke="rgba(255,255,255,.42)" strokeWidth="1.7"/>
+      <path d="M66 66l-4 12m17-16-2 14m-11 9 7 8" fill="none" stroke="rgba(255,255,255,.32)" strokeWidth="1.4"/>
+      <text x="70" y="82" textAnchor="middle" className="emblem-letter">L</text>
+      <path d="M35 118h70l-8 20H43z" fill="#071323" stroke="url(#legendGold)" strokeWidth="2"/>
+      <text x="70" y="132" textAnchor="middle" className="emblem-word">LEYENDA</text>
+    </svg>
   </span>
 }
 
