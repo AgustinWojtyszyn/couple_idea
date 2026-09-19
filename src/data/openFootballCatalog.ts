@@ -89,6 +89,9 @@ const entries:CatalogEntry[]=[
   {country:'Ghana',code:'gh',tiers:[1]},
   {country:'Kenia',code:'ke',tiers:[1]},
   {country:'Nueva Zelanda',code:'nz',tiers:[1]},
+  {country:'Rusia',code:'ru',tiers:[1,2]},
+  {country:'Kazajistán',code:'kz',tiers:[1]},
+  {country:'Camerún',code:'cm',tiers:[1]},
 ]
 
 const seasonCandidates=['2026-27','2026','2025-26','2025']
