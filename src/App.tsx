@@ -38,6 +38,7 @@ import {
   transferTo,
 } from './systems/buildingStore'
 import { globalRankingEnabled, loadLeaderboard, submitLeaderboardScore } from './systems/rankingService'
+import { getClubMedia, type ClubMedia } from './systems/clubMediaService'
 
 type SaveState = CareerState | CoachState | null
 
@@ -52,6 +53,26 @@ function Crest({name,size='md'}:{name:string;size?:'sm'|'md'|'lg'}){
   return <span className={'crest crest--'+size} style={{'--crest-hue':String(hue)} as React.CSSProperties}>
     <span>{letters}</span>
   </span>
+}
+
+function useClubMedia(name:string){
+  const [media,setMedia]=useState<ClubMedia>({})
+  useEffect(()=>{
+    let alive=true
+    void getClubMedia(name).then(value=>{if(alive)setMedia(value)})
+    return()=>{alive=false}
+  },[name])
+  return media
+}
+
+function ClubCrest({name,size='md'}:{name:string;size?:'sm'|'md'|'lg'}){
+  const media=useClubMedia(name)
+  const [failed,setFailed]=useState(false)
+  useEffect(()=>setFailed(false),[name])
+  if(media.logo&&!failed){
+    return <span className={'real-crest real-crest--'+size}><img src={media.logo} alt={'Escudo de '+name} loading="lazy" onError={()=>setFailed(true)}/></span>
+  }
+  return <Crest name={name} size={size}/>
 }
 
 function ThemeToggle({theme,onToggle}:{theme:Theme;onToggle:()=>void}){
@@ -107,7 +128,7 @@ function Home({
   const [playerMode,setPlayerMode]=useState<PlayerMode>('classic')
   const [name,setName]=useState('')
   const [nationality,setNationality]=useState('Argentina')
-  const [country,setCountry]=useState(countries.includes('Inglaterra')?'Inglaterra':countries[0]??'')
+  const [country,setCountry]=useState(countries.includes('Argentina')?'Argentina':countries[0]??'')
   const countryLeagues=leagues.filter(l=>l.country===country).sort((a,b)=>a.tier-b.tier)
   const [leagueId,setLeagueId]=useState(countryLeagues[0]?.id??leagues[0]?.id??'')
   const availableLeagues=leagues.filter(l=>l.country===country).sort((a,b)=>a.tier-b.tier)
@@ -130,6 +151,7 @@ function Home({
   }
 
   const selectedClub=clubById(activeClub)
+  const selectedMedia=useClubMedia(selectedClub.name)
 
   return <div className="shell shell--home">
     <header className="site-header">
@@ -212,8 +234,8 @@ function Home({
             </SelectField>
           </div>
 
-          <div className="club-preview">
-            <Crest name={selectedClub.name} size="lg"/>
+          <div className="club-preview club-preview--media" style={selectedMedia.image?{backgroundImage:'linear-gradient(90deg,var(--surface) 18%,rgba(5,10,18,.72)),url("'+selectedMedia.image+'")'}:undefined}>
+            <ClubCrest name={selectedClub.name} size="lg"/>
             <div><span>{leagueById(selectedClub.leagueId).name}</span><strong>{selectedClub.name}</strong><small>Escudo original generado por LEYENDA</small></div>
           </div>
 
@@ -325,6 +347,7 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
   const [scores,setScores]=useState<RunScore[]>(()=>getRunScores())
   const club=clubById(state.clubId)
   const playerStats=statsFor(state)
+  const playerMedia=useClubMedia(club.name)
 
   useEffect(()=>{
     loadLeaderboard().then(setScores)
@@ -359,8 +382,8 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
     </header>
 
     <main className="game-main">
-      <section className="identity-card">
-        <Crest name={club.name} size="lg"/>
+      <section className="identity-card identity-card--media" style={playerMedia.image?{backgroundImage:'linear-gradient(90deg,var(--surface) 35%,rgba(5,10,18,.58)),url("'+playerMedia.image+'")'}:undefined}>
+        <ClubCrest name={club.name} size="lg"/>
         <div className="identity-card__copy"><span className="eyebrow">{league.name}</span><h1>{state.playerName}</h1><p>{state.position} · {state.age} años · {club.name}</p></div>
         <div className="overall"><strong>{state.overall}</strong><span>OVR</span></div>
       </section>
@@ -387,7 +410,7 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
       {tab==='market'&&<section className="panel">
         <div className="panel-head"><div><span className="eyebrow">MERCADO</span><h2>Tu próximo paso</h2></div><span className="pill">$ {formatMoney(club.salary)}/mes</span></div>
         {state.offers.length===0?<div className="empty-state"><b>↗</b><strong>No hay ofertas formales.</strong><span>Terminá otra temporada para mover el mercado.</span></div>:
-        <div className="offer-grid">{state.offers.map(id=>{const next=clubById(id);return <button key={id} onClick={()=>{setState(transferTo(state,id));setTab('career')}}><Crest name={next.name}/><div><span>{leagueById(next.leagueId).name}</span><strong>{next.name}</strong><small>$ {formatMoney(next.salary)}/mes</small></div><b>FIRMAR</b></button>})}</div>}
+        <div className="offer-grid">{state.offers.map(id=>{const next=clubById(id);return <button key={id} onClick={()=>{setState(transferTo(state,id));setTab('career')}}><ClubCrest name={next.name}/><div><span>{leagueById(next.leagueId).name}</span><strong>{next.name}</strong><small>$ {formatMoney(next.salary)}/mes</small></div><b>FIRMAR</b></button>})}</div>}
       </section>}
 
       {tab==='training'&&<section className="panel">
@@ -408,7 +431,7 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
       {tab==='history'&&<section className="panel">
         <div className="panel-head"><div><span className="eyebrow">ARCHIVO</span><h2>Tu historia</h2></div><span className="pill">{state.history.length} TEMP.</span></div>
         {state.history.length===0?<div className="empty-state"><b>≡</b><strong>La historia está en blanco.</strong><span>Terminá la primera temporada.</span></div>:
-          <div className="timeline">{[...state.history].reverse().map(s=><article key={s.season}><Crest name={clubById(s.clubId).name} size="sm"/><div><strong>{clubById(s.clubId).name}</strong><span>Temporada {s.season} · {s.age} años</span><p>{s.note}</p></div><aside><b>{s.rating}</b><span>RAT</span></aside></article>)}</div>}
+          <div className="timeline">{[...state.history].reverse().map(s=><article key={s.season}><ClubCrest name={clubById(s.clubId).name} size="sm"/><div><strong>{clubById(s.clubId).name}</strong><span>Temporada {s.season} · {s.age} años</span><p>{s.note}</p></div><aside><b>{s.rating}</b><span>RAT</span></aside></article>)}</div>}
       </section>}
     </main>
     <BottomNav tab={tab} setTab={setTab} coach={false}/>
@@ -419,6 +442,7 @@ function CoachGame({state,setState,theme,onTheme,onExit}:{state:CoachState;setSt
   const [tab,setTab]=useState<Tab>('career')
   const [scores,setScores]=useState<RunScore[]>(()=>getRunScores())
   const club=clubById(state.clubId)
+  const coachMedia=useClubMedia(club.name)
 
   useEffect(()=>{
     loadLeaderboard().then(setScores)
@@ -439,8 +463,8 @@ function CoachGame({state,setState,theme,onTheme,onExit}:{state:CoachState;setSt
     </header>
 
     <main className="game-main">
-      <section className="identity-card coach-identity">
-        <Crest name={club.name} size="lg"/>
+      <section className="identity-card coach-identity identity-card--media" style={coachMedia.image?{backgroundImage:'linear-gradient(90deg,var(--surface) 35%,rgba(5,10,18,.58)),url("'+coachMedia.image+'")'}:undefined}>
+        <ClubCrest name={club.name} size="lg"/>
         <div className="identity-card__copy"><span className="eyebrow">MODO ENTRENADOR · {leagueById(club.leagueId).name}</span><h1>{state.coachName}</h1><p>{club.name} · Temporada {state.season}/{state.maxSeasons}</p></div>
         <div className="overall"><strong>{state.tacticalRating}</strong><span>TÁCTICA</span></div>
       </section>
@@ -464,7 +488,7 @@ function CoachGame({state,setState,theme,onTheme,onExit}:{state:CoachState;setSt
 
       {tab==='minigames'&&<MiniGamesPanel onScore={(_,value)=>setState({...state,tacticalRating:Math.min(100,state.tacticalRating+Math.round(value/150))})}/>}
       {tab==='ranking'&&<RankingPanel scores={scores}/>}
-      {tab==='history'&&<section className="panel"><div className="panel-head"><div><span className="eyebrow">ARCHIVO DEL DT</span><h2>Temporadas</h2></div></div><div className="timeline">{[...state.history].reverse().map(s=><article key={s.season}><Crest name={clubById(s.clubId).name} size="sm"/><div><strong>{clubById(s.clubId).name}</strong><span>Temporada {s.season}</span><p>{s.note}</p></div><aside><b>#{s.position}</b><span>{s.points} PTS</span></aside></article>)}</div></section>}
+      {tab==='history'&&<section className="panel"><div className="panel-head"><div><span className="eyebrow">ARCHIVO DEL DT</span><h2>Temporadas</h2></div></div><div className="timeline">{[...state.history].reverse().map(s=><article key={s.season}><ClubCrest name={clubById(s.clubId).name} size="sm"/><div><strong>{clubById(s.clubId).name}</strong><span>Temporada {s.season}</span><p>{s.note}</p></div><aside><b>#{s.position}</b><span>{s.points} PTS</span></aside></article>)}</div></section>}
     </main>
     <BottomNav tab={tab} setTab={setTab} coach={true}/>
   </div>
@@ -803,7 +827,7 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
       {tab==='market'&&<section className="panel">
         <div className="panel-head"><div><span className="eyebrow">MERCADO</span><h2>Tu próximo paso</h2></div><span className="pill">$ {formatMoney(club.salary)}/mes</span></div>
         {state.offers.length===0?<div className="empty-state"><b>↗</b><strong>No hay ofertas formales.</strong><span>Terminá otra temporada para mover el mercado.</span></div>:
-        <div className="offer-grid">{state.offers.map(id=>{const next=clubById(id);return <button key={id} onClick={()=>{setState(transferTo(state,id));setTab('career')}}><Crest name={next.name}/><div><span>{leagueById(next.leagueId).name}</span><strong>{next.name}</strong><small>$ {formatMoney(next.salary)}/mes</small></div><b>FIRMAR</b></button>})}</div>}
+        <div className="offer-grid">{state.offers.map(id=>{const next=clubById(id);return <button key={id} onClick={()=>{setState(transferTo(state,id));setTab('career')}}><ClubCrest name={next.name}/><div><span>{leagueById(next.leagueId).name}</span><strong>{next.name}</strong><small>$ {formatMoney(next.salary)}/mes</small></div><b>FIRMAR</b></button>})}</div>}
       </section>}
 
       {tab==='training'&&<section className="panel">
@@ -824,7 +848,7 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
       {tab==='history'&&<section className="panel">
         <div className="panel-head"><div><span className="eyebrow">ARCHIVO</span><h2>Tu historia</h2></div><span className="pill">{state.history.length} TEMP.</span></div>
         {state.history.length===0?<div className="empty-state"><b>≡</b><strong>La historia está en blanco.</strong><span>Terminá la primera temporada.</span></div>:
-          <div className="timeline">{[...state.history].reverse().map(s=><article key={s.season}><Crest name={clubById(s.clubId).name} size="sm"/><div><strong>{clubById(s.clubId).name}</strong><span>Temporada {s.season} · {s.age} años</span><p>{s.note}</p></div><aside><b>{s.rating}</b><span>RAT</span></aside></article>)}</div>}
+          <div className="timeline">{[...state.history].reverse().map(s=><article key={s.season}><ClubCrest name={clubById(s.clubId).name} size="sm"/><div><strong>{clubById(s.clubId).name}</strong><span>Temporada {s.season} · {s.age} años</span><p>{s.note}</p></div><aside><b>{s.rating}</b><span>RAT</span></aside></article>)}</div>}
       </section>}
     </main>
     <BottomNav tab={tab} setTab={setTab} coach={false}/>
@@ -880,7 +904,7 @@ function CoachGame({state,setState,theme,onTheme,onExit}:{state:CoachState;setSt
 
       {tab==='minigames'&&<MiniGamesPanel onScore={(_,value)=>setState({...state,tacticalRating:Math.min(100,state.tacticalRating+Math.round(value/150))})}/>}
       {tab==='ranking'&&<RankingPanel scores={scores}/>}
-      {tab==='history'&&<section className="panel"><div className="panel-head"><div><span className="eyebrow">ARCHIVO DEL DT</span><h2>Temporadas</h2></div></div><div className="timeline">{[...state.history].reverse().map(s=><article key={s.season}><Crest name={clubById(s.clubId).name} size="sm"/><div><strong>{clubById(s.clubId).name}</strong><span>Temporada {s.season}</span><p>{s.note}</p></div><aside><b>#{s.position}</b><span>{s.points} PTS</span></aside></article>)}</div></section>}
+      {tab==='history'&&<section className="panel"><div className="panel-head"><div><span className="eyebrow">ARCHIVO DEL DT</span><h2>Temporadas</h2></div></div><div className="timeline">{[...state.history].reverse().map(s=><article key={s.season}><ClubCrest name={clubById(s.clubId).name} size="sm"/><div><strong>{clubById(s.clubId).name}</strong><span>Temporada {s.season}</span><p>{s.note}</p></div><aside><b>#{s.position}</b><span>{s.points} PTS</span></aside></article>)}</div></section>}
     </main>
     <BottomNav tab={tab} setTab={setTab} coach={true}/>
   </div>
