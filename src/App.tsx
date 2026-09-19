@@ -101,20 +101,61 @@ function Stat({value,label}:{value:string|number;label:string}){
 }
 
 const effectLabels:Record<string,string>={
-  pace:'VELOCIDAD',finishing:'DEFINICIÓN',passing:'PASE',dribbling:'REGATE',
-  defending:'DEFENSA',physical:'FÍSICO',reflexes:'REFLEJOS',overall:'OVR',
-  form:'FORMA',energy:'ENERGÍA',reputation:'REPUTACIÓN',fans:'IDOLOTRÍA',
-  coachTrust:'CONFIANZA DT',discipline:'DISCIPLINA',leadership:'LIDERAZGO',
-  morale:'MORAL',injuryRisk:'RIESGO LESIÓN',money:'DINERO',
+  pace:'VELOCIDAD',
+  finishing:'DEFINICIÓN',
+  passing:'PASE',
+  dribbling:'REGATE',
+  defending:'DEFENSA',
+  physical:'FÍSICO',
+  reflexes:'REFLEJOS',
+  overall:'OVR',
+  form:'FORMA',
+  energy:'ENERGÍA',
+  reputation:'REPUTACIÓN',
+  fans:'IDOLOTRÍA',
+  coachTrust:'CONFIANZA DT',
+  discipline:'DISCIPLINA',
+  leadership:'LIDERAZGO',
+  morale:'MORAL',
+  injuryRisk:'RIESGO LESIÓN',
+  money:'DINERO',
 }
 
 function EffectChips({effects}:{effects:EventOption['effects']}){
   const entries=Object.entries(effects).filter(([,value])=>typeof value==='number'&&value!==0)
   return <div className="effect-chips">{entries.map(([key,value])=>{
+    const numeric=Number(value)
     const dangerous=key==='injuryRisk'
-    const positive=dangerous?Number(value)<0:Number(value)>0
-    const text=key==='money'
-      ?(Number(value)>0?'+':'-')+'
+    const positive=dangerous?numeric<0:numeric>0
+    const amount=key==='money'
+      ?(numeric>0?'+':'-')+'$'+formatMoney(Math.abs(numeric))
+      :(numeric>0?'+':'')+numeric+' '+(effectLabels[key]??key.toUpperCase())
+    return <span key={key} className={positive?'positive':'negative'}>{amount}</span>
+  })}</div>
+}
+
+function PlayerAttributes({state}:{state:CareerState}){
+  const stats=statsFor(state)
+  const entries=(Object.keys(stats) as PlayerStatKey[]).map(key=>[key,stats[key]] as const)
+  const best=new Set(
+    entries
+      .slice()
+      .sort((a,b)=>b[1]-a[1])
+      .slice(0,3)
+      .map(([key])=>key)
+  )
+  return <section className="attributes-card">
+    <div className="attributes-head">
+      <div><span className="eyebrow">ATRIBUTOS</span><h3>Tu jugador</h3></div>
+      <span className="attributes-ovr">{state.overall}<small>OVR</small></span>
+    </div>
+    <div className="attributes-grid">{entries.map(([key,value])=><div className={best.has(key)?'attribute best':'attribute'} key={key}>
+      <div><span>{statLabels[key]}</span><strong>{Math.round(value)}</strong></div>
+      <i><b style={{width:Math.max(2,value)+'%'}}/></i>
+    </div>)}</div>
+  </section>
+}
+
 function Home({
   theme,onTheme,startPlayer,startCoach
 }:{
