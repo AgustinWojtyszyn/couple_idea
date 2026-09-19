@@ -85,6 +85,38 @@ function normalizeSaveState(value:SaveState):SaveState{
 
 const SAVE_KEY='leyenda-save-v2'
 const THEME_KEY='leyenda-theme-v1'
+const AUTH_KEY='leyenda-demo-auth-v1'
+
+function LeyendaLogo({size='md'}:{size?:'sm'|'md'|'lg'}){
+  return <span className={'leyenda-logo leyenda-logo--'+size} aria-label="Leyenda">
+    <span className="leyenda-logo__laurel leyenda-logo__laurel--left"><i/><i/><i/><i/></span>
+    <span className="leyenda-logo__ball"><b>L</b><i/><i/><i/></span>
+    <span className="leyenda-logo__laurel leyenda-logo__laurel--right"><i/><i/><i/><i/></span>
+  </span>
+}
+
+function MockLogin({onEnter}:{onEnter:(name:string)=>void}){
+  const [name,setName]=useState('')
+  const [password,setPassword]=useState('')
+  const submit=(event:React.FormEvent)=>{
+    event.preventDefault()
+    onEnter(name.trim()||'Invitado')
+  }
+  return <div className="demo-login">
+    <div className="demo-login__stadium"><i/><i/><i/><i/></div>
+    <section className="demo-login__card">
+      <div className="demo-login__brand"><LeyendaLogo size="lg"/><div><span>LEYENDA</span><small>FÚTBOL · DESTINO · HISTORIA</small></div></div>
+      <div className="demo-login__copy"><span className="eyebrow">ACCESO DE PRUEBA</span><h1>Tu carrera empieza antes del primer partido.</h1><p>Inicio de sesión local para esta demo. No hay base de datos ni se envían credenciales.</p></div>
+      <form onSubmit={submit}>
+        <label><span>USUARIO O APODO</span><input autoFocus value={name} onChange={e=>setName(e.target.value)} placeholder="Ej: Agustín"/></label>
+        <label><span>CONTRASEÑA DEMO</span><input type="password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="Cualquier valor"/></label>
+        <button type="submit">ENTRAR A LEYENDA →</button>
+      </form>
+      <button className="demo-login__guest" onClick={()=>onEnter('Invitado')}>Entrar como invitado</button>
+      <small className="demo-login__note">La sesión dura mientras esta pestaña siga abierta.</small>
+    </section>
+  </div>
+}
 
 function Crest({name,size='md'}:{name:string;size?:'sm'|'md'|'lg'}){
   const letters=name.split(/\s+/).filter(Boolean).slice(0,3).map(x=>x[0]).join('').toUpperCase()
@@ -312,6 +344,7 @@ function Home({
   startPlayer:(name:string,position:Position,mode:PlayerMode,clubId:string,nationality:string)=>void
   startCoach:(name:string,clubId:string)=>void
 }){
+  useEffect(()=>{window.scrollTo({top:0,behavior:'auto'})},[])
   const countries=useMemo(()=>[...new Set(leagues.map(l=>l.country))].sort((a,b)=>a.localeCompare(b,'es')),[])
   const [gameMode,setGameMode]=useState<GameMode>('player')
   const [playerMode,setPlayerMode]=useState<PlayerMode>('classic')
@@ -354,7 +387,7 @@ function Home({
   return <div className="shell shell--home">
     <header className="site-header">
       <a className="brand" href="#" onClick={e=>e.preventDefault()}>
-        <span className="brand__mark">L</span>
+        <LeyendaLogo size="sm"/>
         <span><strong>LEYENDA</strong><small>FÚTBOL · DECISIONES · HISTORIA</small></span>
       </a>
       <ThemeToggle theme={theme} onToggle={onTheme}/>
@@ -950,6 +983,38 @@ function TrophyCabinet({state}:{state:CareerState}){
   },{}))
   return <section className="trophy-cabinet"><div className="trophy-cabinet__head"><div><span className="eyebrow">PALMARÉS</span><h3>Tu vitrina</h3></div><strong>{trophies.length} TROFEOS</strong></div><div className="trophy-grid">{grouped.map(item=><article key={item.name}><b>{item.icon}</b><span><strong>{item.name}</strong><small>x{item.count}</small></span></article>)}</div></section>
 }
+function CabalaPracticePanel(){
+  const games:Array<{id:CabalaGameId;icon:string;name:string;description:string}>=[
+    {id:'higher-lower',icon:'♠',name:'Mayor o menor',description:'Leé la carta y jugate por la siguiente.'},
+    {id:'dice-seven',icon:'⚄',name:'Los dados del 7',description:'Abajo, siete exacto o arriba.'},
+    {id:'coin-run',icon:'◐',name:'Racha de moneda',description:'Cara o ceca durante cinco lanzamientos.'},
+    {id:'lucky-number',icon:'17',name:'Número marcado',description:'Encontrá el casillero que guarda la pelota.'},
+    {id:'lucky-shirt',icon:'▾',name:'La camiseta',description:'Elegí el número que hoy trae suerte.'},
+  ]
+  const [active,setActive]=useState<CabalaGameId|null>(null)
+  const [result,setResult]=useState<string>('')
+  if(active)return <section className="panel cabala-practice">
+    <button className="back-link" onClick={()=>{setActive(null);setResult('')}}>← Volver a las cábalas</button>
+    <CabalaMiniGame game={active} onComplete={(won,score)=>setResult((won?'CÁBALA CUMPLIDA':'MALA SEÑAL')+' · '+score+' PTS')}/>
+    {result&&<div className={'practice-result '+(result.startsWith('CÁBALA')?'good':'bad')}>{result}</div>}
+  </section>
+  return <section className="panel games-style-hub">
+    <div className="panel-head"><div><span className="eyebrow">CABULERO · 5 JUEGOS</span><h2>La suerte también se juega.</h2></div><span className="pill">⚄</span></div>
+    <p className="games-style-intro">Practicá las mismas cábalas que pueden definir un título, un ascenso o una permanencia.</p>
+    <div className="cabala-practice-grid">{games.map(game=><button key={game.id} onClick={()=>{setActive(game.id);setResult('')}}><b>{game.icon}</b><span><strong>{game.name}</strong><small>{game.description}</small></span><em>JUGAR →</em></button>)}</div>
+  </section>
+}
+
+function PlayerGamesHub({style,onSkillScore}:{style:FinalStyle|null|undefined;onSkillScore:(game:MiniGameId,score:number)=>void}){
+  const [mix,setMix]=useState<'skill'|'luck'>('skill')
+  if(style==='cabulero')return <CabalaPracticePanel/>
+  if(style==='habilidoso')return <MiniGamesPanel mode="player" onScore={onSkillScore}/>
+  return <div className="mixed-games-hub">
+    <div className="mixed-games-tabs"><button className={mix==='skill'?'active':''} onClick={()=>setMix('skill')}>◎ HABILIDOSO · 5</button><button className={mix==='luck'?'active':''} onClick={()=>setMix('luck')}>⚄ CABULERO · 5</button></div>
+    {mix==='skill'?<MiniGamesPanel mode="player" onScore={onSkillScore}/>:<CabalaPracticePanel/>}
+  </div>
+}
+
 function trainingOptionsFor(position:Position){
   const common={
     physical:['physical','Potencia física','Físico · velocidad · energía'],
@@ -1036,7 +1101,7 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
 
   return <div className="shell game-shell">
     <header className="game-header">
-      <button className="brand brand--button" onClick={onExit}><span className="brand__mark">L</span><span><strong>LEYENDA</strong><small>← MENÚ</small></span></button>
+      <button className="brand brand--button" onClick={onExit}><LeyendaLogo size="sm"/><span><strong>LEYENDA</strong><small>← MENÚ</small></span></button>
       <ThemeToggle theme={theme} onToggle={onTheme}/>
     </header>
 
@@ -1100,7 +1165,7 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
         </div>
       </section>}
 
-      {tab==='shop'&&<ShopPanel state={state} setState={setState}/>}\n      {tab==='minigames'&&<MiniGamesPanel mode="player" onScore={playMini}/>}
+      {tab==='shop'&&<ShopPanel state={state} setState={setState}/>}\n      {tab==='minigames'&&<PlayerGamesHub style={state.finalStyle} onSkillScore={playMini}/>}
       {tab==='ranking'&&<RankingPanel scores={scores}/>}
       {tab==='history'&&<section className="panel">
         <div className="panel-head"><div><span className="eyebrow">ARCHIVO</span><h2>Tu historia</h2></div><span className="pill">{state.history.length} TEMP.</span></div>
@@ -1132,7 +1197,7 @@ function CoachGame({state,setState,theme,onTheme,onExit}:{state:CoachState;setSt
 
   return <div className="shell game-shell">
     <header className="game-header">
-      <button className="brand brand--button" onClick={onExit}><span className="brand__mark">L</span><span><strong>LEYENDA</strong><small>← MENÚ</small></span></button>
+      <button className="brand brand--button" onClick={onExit}><LeyendaLogo size="sm"/><span><strong>LEYENDA</strong><small>← MENÚ</small></span></button>
       <ThemeToggle theme={theme} onToggle={onTheme}/>
     </header>
 
@@ -1171,6 +1236,7 @@ function CoachGame({state,setState,theme,onTheme,onExit}:{state:CoachState;setSt
 
 export function App(){
   const [theme,setTheme]=useState<Theme>(()=>(localStorage.getItem(THEME_KEY) as Theme)||'dark')
+  const [demoUser,setDemoUser]=useState(()=>sessionStorage.getItem(AUTH_KEY)||'')
   const [save,setSave]=useState<SaveState>(()=>{
     try{
       const raw=localStorage.getItem(SAVE_KEY)
@@ -1188,7 +1254,10 @@ export function App(){
   },[save])
 
   const toggleTheme=()=>setTheme(t=>t==='dark'?'light':'dark')
+  const enterDemo=(name:string)=>{sessionStorage.setItem(AUTH_KEY,name);setDemoUser(name);window.scrollTo({top:0,behavior:'auto'})}
   const exit=()=>{setSave(null);localStorage.removeItem(SAVE_KEY)}
+
+  if(!demoUser)return <MockLogin onEnter={enterDemo}/>
 
   if(!save){
     return <Home theme={theme} onTheme={toggleTheme}
