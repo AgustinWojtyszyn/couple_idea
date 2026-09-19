@@ -84,6 +84,7 @@ export type CareerState = {
   contractYearsTotal?:number
   finalStyle?:FinalStyle|null
   pendingFinal?:FinalChallenge|null
+  retirementPending?:boolean
   activeEvent:CareerEvent|null
   retired:boolean
   finalScore?:number
