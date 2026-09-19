@@ -551,13 +551,15 @@ function Home({
 }
 
 function GameTopNav({
-  tab,setTab,coach,clubName,onExit,theme,onTheme
+  tab,setTab,coach,clubName,onExit,onRetire,retired,theme,onTheme
 }:{
   tab:Tab
   setTab:(t:Tab)=>void
   coach:boolean
   clubName:string
   onExit:()=>void
+  onRetire?:()=>void
+  retired?:boolean
   theme:Theme
   onTheme:()=>void
 }){
@@ -586,6 +588,8 @@ function GameTopNav({
     <button className="game-topbar__theme" onClick={onTheme} aria-label="Cambiar tema">{theme==='dark'?'☾':'☀'}</button>
     {moreOpen&&<div className="game-topbar__more">
       {secondary.map(([id,label])=><button key={id} className={tab===id?'active':''} onClick={()=>go(id)}>{label}</button>)}
+      {!coach&&!retired&&onRetire&&<button className="game-topbar__danger" onClick={()=>{setMoreOpen(false);onRetire()}}>⌛ Retirarme ahora</button>}
+      <button className="game-topbar__new" onClick={()=>{setMoreOpen(false);if(window.confirm('¿Empezar otra carrera? La carrera actual se cerrará en este dispositivo.'))onExit()}}>↻ Nueva carrera</button>
     </div>}
   </header>
 }
@@ -1021,9 +1025,9 @@ function CabalaMiniGame({game,onComplete}:{game:CabalaGameId;onComplete:(won:boo
   const [round,setRound]=useState(0)
   const [hits,setHits]=useState(0)
   const [feedback,setFeedback]=useState('Elegí. No hay vuelta atrás.')
-  const [card,setCard]=useState(()=>2+Math.floor(Math.random()*12))
+  const [card,setCard]=useState(()=>1+Math.floor(Math.random()*12))
   const [cardTrail,setCardTrail]=useState<number[]>([])
-  const [lastCoin,setLastCoin]=useState<'CARA'|'CECA'|null>(null)
+  const [lastCoin,setLastCoin]=useState<'CARA'|'SECA'|null>(null)
   const [luckyNumber,setLuckyNumber]=useState(()=>Math.floor(Math.random()*3))
   const [shirtWinner,setShirtWinner]=useState(()=>[7,9,10,11,23][Math.floor(Math.random()*5)])
   const [revealed,setRevealed]=useState(true)
@@ -1099,8 +1103,8 @@ function CabalaMiniGame({game,onComplete}:{game:CabalaGameId;onComplete:(won:boo
 
   const higherLower=(higher:boolean)=>{
     const previous=card
-    let next=2+Math.floor(Math.random()*12)
-    if(next===previous)next=next===14?13:next+1
+    let next=1+Math.floor(Math.random()*12)
+    while(next===previous)next=1+Math.floor(Math.random()*12)
     const success=higher?next>previous:next<previous
     setCardTrail(current=>[...current,previous])
     setCard(next)
@@ -1154,12 +1158,12 @@ function CabalaMiniGame({game,onComplete}:{game:CabalaGameId;onComplete:(won:boo
     setGeneralaHeld(current=>current.map((value,i)=>i===index?!value:value))
   }
 
-  const coinPick=(pick:'CARA'|'CECA')=>{
+  const coinPick=(pick:'CARA'|'SECA')=>{
     if(animating)return
     setAnimating(true)
     setLastCoin(null)
     window.setTimeout(()=>{
-      const result=Math.random()>.5?'CARA':'CECA'
+      const result=Math.random()>.5?'CARA':'SECA'
       setLastCoin(result)
       setAnimating(false)
       commit(result===pick,'🪙 '+result+' · '+(result===pick?'SIGUE LA RACHA':'SE CORTÓ'))
@@ -1268,9 +1272,9 @@ function CabalaMiniGame({game,onComplete}:{game:CabalaGameId;onComplete:(won:boo
     </div>}
 
     {game==='coin-run'&&<div className="cabala-coin-stage">
-      <div className={'giant-coin '+(animating?'giant-coin--spinning ':'')+(lastCoin==='CECA'?'flip':'')}><span>{animating?'?':lastCoin==='CECA'?'C':'L'}</span></div>
+      <div className={'giant-coin '+(animating?'giant-coin--spinning ':'')+(lastCoin==='SECA'?'flip':'')}><span>{animating?'?':lastCoin==='SECA'?'C':'L'}</span></div>
       <div className="cabala-question">Cuatro lanzamientos. Tratá de leer la racha.</div>
-      <div className="two-actions"><button disabled={finished||animating} onClick={()=>coinPick('CARA')}>CARA</button><button disabled={finished||animating} onClick={()=>coinPick('CECA')}>CECA</button></div>
+      <div className="two-actions"><button disabled={finished||animating} onClick={()=>coinPick('CARA')}>CARA</button><button disabled={finished||animating} onClick={()=>coinPick('SECA')}>SECA</button></div>
     </div>}
 
     {game==='lucky-number'&&<div className="cabala-number-stage">
@@ -1423,7 +1427,7 @@ function TrophyCabinet({state}:{state:CareerState}){
   },{}))
   return <section className="trophy-cabinet"><div className="trophy-cabinet__head"><div><span className="eyebrow">PALMARÉS</span><h3>Tu vitrina</h3></div><strong>{trophies.length} TROFEOS</strong></div><div className="trophy-grid">{grouped.map(item=><article key={item.name}><b>{item.icon}</b><span><strong>{item.name}</strong><small>x{item.count}</small></span></article>)}</div></section>
 }
-function CareerRetirementSummary({state}:{state:CareerState}){
+function CareerRetirementSummary({state,onNewCareer}:{state:CareerState;onNewCareer:()=>void}){
   const club=clubById(state.clubId)
   const {media}=useClubMedia(club.name)
   const finals=state.history.filter(item=>item.outcomeKind)
@@ -1506,6 +1510,7 @@ function CareerRetirementSummary({state}:{state:CareerState}){
         <b>{record.outcomeWon?'GANADA':'PERDIDA'}</b>
       </article>)}</div>:<div className="retirement-empty">No quedaron definiciones registradas en esta carrera.</div>}
     </section>
+    <button className="new-career-button" onClick={onNewCareer}>↻ EMPEZAR OTRA CARRERA</button>
   </section>
 }
 
@@ -1513,7 +1518,7 @@ function CabalaPracticePanel(){
   const games:Array<{id:CabalaGameId;icon:string;name:string;description:string}>=[
     {id:'higher-lower',icon:'🃏',name:'El pálpito',description:'Arrancás con un número y jugás tres predicciones de mayor o menor.'},
     {id:'dice-seven',icon:'⚄',name:'La Generala',description:'Cinco dados, tres tiradas y podés guardar los que te sirvan.'},
-    {id:'coin-run',icon:'◐',name:'Moneda de vestuario',description:'Leé una racha de cara o ceca.'},
+    {id:'coin-run',icon:'◐',name:'Moneda de vestuario',description:'Leé una racha de cara o seca.'},
     {id:'lucky-number',icon:'17',name:'Número marcado',description:'Encontrá el casillero con la pelota.'},
     {id:'lucky-shirt',icon:'▾',name:'La camiseta',description:'Una sola elección antes de salir.'},
     {id:'three-cups',icon:'🥤',name:'Tres vasos',description:'Mirá la pelota, seguí la mezcla y elegí el vaso correcto.'},
@@ -1574,6 +1579,23 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
   const playerStats=statsFor(state)
   const {media:playerMedia}=useClubMedia(club.name)
 
+  const retireNow=()=>{
+    if(!window.confirm('¿Retirarte ahora? Vas a cerrar la carrera con tu edad y estadísticas actuales.'))return
+    const base:CareerState={
+      ...state,
+      retired:true,
+      retirementPending:false,
+      pendingFinal:null,
+      marketDecisionRequired:false,
+      activeEvent:null,
+    }
+    setSeasonSummary(null)
+    setLastEffects(null)
+    setTab('career')
+    setState({...base,finalScore:careerScore(base)})
+    window.scrollTo({top:0,behavior:'auto'})
+  }
+
   useEffect(()=>{
     loadLeaderboard().then(setScores)
   },[])
@@ -1631,7 +1653,7 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
   }
 
   return <div className="shell game-shell">
-    <GameTopNav tab={tab} setTab={setTab} coach={false} clubName={club.name} onExit={onExit} theme={theme} onTheme={onTheme}/>
+    <GameTopNav tab={tab} setTab={setTab} coach={false} clubName={club.name} onExit={onExit} onRetire={retireNow} retired={state.retired} theme={theme} onTheme={onTheme}/>
 
     <main className="game-main">
       {seasonSummary&&<div className="season-result-overlay" onClick={()=>setSeasonSummary(null)}>
@@ -1654,7 +1676,7 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
           <button className="play-button" onClick={closeSeasonSummary}>CONTINUAR →</button>
         </section>
       </div>}
-      {tab==='career'&&state.retired&&<CareerRetirementSummary state={state}/>}
+      {tab==='career'&&state.retired&&<CareerRetirementSummary state={state} onNewCareer={()=>{if(window.confirm('¿Empezar una nueva carrera?'))onExit()}}/>}
       {tab==='career'&&!state.retired&&<div className="career-overview">
       <section className="identity-card identity-card--media" style={(playerMedia.stadiumImage??playerMedia.image)?{backgroundImage:'linear-gradient(90deg,var(--surface) 35%,rgba(5,10,18,.58)),url("'+(playerMedia.stadiumImage??playerMedia.image)+'")'}:undefined}>
         <ClubCrest name={club.name} size="lg"/>
