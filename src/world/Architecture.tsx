@@ -76,6 +76,7 @@ export type CareerState = {
   trainingCredits:number
   purchases?:string[]
   seenEvents?:string[]
+  lastStorySeason?:number
   history:SeasonRecord[]
   achievements:string[]
   offers:string[]
