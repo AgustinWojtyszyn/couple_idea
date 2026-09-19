@@ -627,6 +627,26 @@ function useGamePhase(active:boolean,duration=1800){
   return phase
 }
 
+function useLoopPhase(active:boolean,duration=2200){
+  const [phase,setPhase]=useState(0)
+  useEffect(()=>{
+    if(!active){setPhase(0);return}
+    let frame=0
+    let last=0
+    const start=performance.now()
+    const tick=(now:number)=>{
+      if(now-last>28){
+        setPhase(((now-start)%duration)/duration)
+        last=now
+      }
+      frame=requestAnimationFrame(tick)
+    }
+    frame=requestAnimationFrame(tick)
+    return()=>cancelAnimationFrame(frame)
+  },[active,duration])
+  return phase
+}
+
 function SkillGameThumb({id}:{id:MiniGameId}){
   const group=
     id==='penalties'||id==='freekicks'?'shot':
@@ -1084,6 +1104,9 @@ function CabalaMiniGame({game,onComplete}:{game:CabalaGameId;onComplete:(won:boo
   const [shirtWinner,setShirtWinner]=useState(()=>[7,9,10,11,23][Math.floor(Math.random()*5)])
   const [revealed,setRevealed]=useState(true)
   const [weather,setWeather]=useState(()=>Math.floor(Math.random()*3))
+  const [animating,setAnimating]=useState(false)
+  const [diceFaces,setDiceFaces]=useState<[number,number]>([3,5])
+  const loopPhase=useLoopPhase(!finished&&!animating,2200)
   const finished=round>=maxRounds
 
   useEffect(()=>{
@@ -1114,18 +1137,32 @@ function CabalaMiniGame({game,onComplete}:{game:CabalaGameId;onComplete:(won:boo
   }
 
   const dicePick=(pick:'under'|'seven'|'over')=>{
-    const a=1+Math.floor(Math.random()*6)
-    const b=1+Math.floor(Math.random()*6)
-    const sum=a+b
-    setLastRoll(sum)
-    const success=pick==='under'?sum<7:pick==='over'?sum>7:sum===7
-    commit(success,'🎲 '+a+' + '+b+' = '+sum+' · '+(success?'CÁBALA VIVA':'NO ERA'))
+    if(animating)return
+    setAnimating(true)
+    const id=window.setInterval(()=>setDiceFaces([1+Math.floor(Math.random()*6),1+Math.floor(Math.random()*6)]),70)
+    window.setTimeout(()=>{
+      window.clearInterval(id)
+      const a=1+Math.floor(Math.random()*6)
+      const b=1+Math.floor(Math.random()*6)
+      setDiceFaces([a,b])
+      const sum=a+b
+      setLastRoll(sum)
+      const success=pick==='under'?sum<7:pick==='over'?sum>7:sum===7
+      setAnimating(false)
+      commit(success,'🎲 '+a+' + '+b+' = '+sum+' · '+(success?'CÁBALA VIVA':'NO ERA'))
+    },620)
   }
 
   const coinPick=(pick:'CARA'|'CECA')=>{
-    const result=Math.random()>.5?'CARA':'CECA'
-    setLastCoin(result)
-    commit(result===pick,'🪙 '+result+' · '+(result===pick?'SIGUE LA RACHA':'SE CORTÓ'))
+    if(animating)return
+    setAnimating(true)
+    setLastCoin(null)
+    window.setTimeout(()=>{
+      const result=Math.random()>.5?'CARA':'CECA'
+      setLastCoin(result)
+      setAnimating(false)
+      commit(result===pick,'🪙 '+result+' · '+(result===pick?'SIGUE LA RACHA':'SE CORTÓ'))
+    },720)
   }
 
   const numberPick=(value:number)=>{
@@ -1146,9 +1183,13 @@ function CabalaMiniGame({game,onComplete}:{game:CabalaGameId;onComplete:(won:boo
   }
 
   const wheelStop=()=>{
-    const phase=(Date.now()%2200)/2200
-    const success=(phase>.12&&phase<.28)||(phase>.58&&phase<.72)
-    commit(success,success?'CAYÓ EN ZONA DORADA':'CAYÓ EN ZONA FRÍA')
+    if(animating)return
+    const success=(loopPhase>.10&&loopPhase<.25)||(loopPhase>.56&&loopPhase<.70)
+    setAnimating(true)
+    window.setTimeout(()=>{
+      setAnimating(false)
+      commit(success,success?'CAYÓ EN ZONA DORADA':'CAYÓ EN ZONA FRÍA')
+    },360)
   }
 
   const towerPick=(value:number)=>{
@@ -1198,22 +1239,22 @@ function CabalaMiniGame({game,onComplete}:{game:CabalaGameId;onComplete:(won:boo
 
     {game==='higher-lower'&&<div className="cabala-cards-stage">
       <div className="cabala-table-art"><i/><i/><i/></div>
-      <div className="playing-card"><span>♠</span><strong>{card===14?'A':card===13?'K':card===12?'Q':card===11?'J':card}</strong><i>♠</i></div>
+      <div className="playing-card playing-card--deal" key={card}><span>♠</span><strong>{card===14?'A':card===13?'K':card===12?'Q':card===11?'J':card}</strong><i>♠</i></div>
       <div className="cabala-question">Tres cartas. ¿La próxima sale mayor o menor?</div>
       <div className="two-actions"><button disabled={finished} onClick={()=>higherLower(false)}>↓ MENOR</button><button disabled={finished} onClick={()=>higherLower(true)}>MAYOR ↑</button></div>
     </div>}
 
     {game==='dice-seven'&&<div className="cabala-dice-stage">
-      <div className="dice-table"><b>⚂</b><b>⚄</b><span/></div>
+      <div className={'dice-table '+(animating?'dice-table--rolling':'')}><b>{['⚀','⚁','⚂','⚃','⚄','⚅'][diceFaces[0]-1]}</b><b>{['⚀','⚁','⚂','⚃','⚄','⚅'][diceFaces[1]-1]}</b><span/></div>
       <div className="cabala-question">¿La suma queda abajo, justo o arriba de 7?</div>
       {lastRoll!==null&&<div className="cabala-last">ÚLTIMA SUMA · {lastRoll}</div>}
-      <div className="three-actions"><button disabled={finished} onClick={()=>dicePick('under')}>MENOS DE 7</button><button disabled={finished} onClick={()=>dicePick('seven')}>JUSTO 7</button><button disabled={finished} onClick={()=>dicePick('over')}>MÁS DE 7</button></div>
+      <div className="three-actions"><button disabled={finished||animating} onClick={()=>dicePick('under')}>MENOS DE 7</button><button disabled={finished||animating} onClick={()=>dicePick('seven')}>JUSTO 7</button><button disabled={finished||animating} onClick={()=>dicePick('over')}>MÁS DE 7</button></div>
     </div>}
 
     {game==='coin-run'&&<div className="cabala-coin-stage">
-      <div className={'giant-coin '+(lastCoin==='CECA'?'flip':'')}><span>{lastCoin==='CECA'?'C':'L'}</span></div>
+      <div className={'giant-coin '+(animating?'giant-coin--spinning ':'')+(lastCoin==='CECA'?'flip':'')}><span>{animating?'?':lastCoin==='CECA'?'C':'L'}</span></div>
       <div className="cabala-question">Cuatro lanzamientos. Tratá de leer la racha.</div>
-      <div className="two-actions"><button disabled={finished} onClick={()=>coinPick('CARA')}>CARA</button><button disabled={finished} onClick={()=>coinPick('CECA')}>CECA</button></div>
+      <div className="two-actions"><button disabled={finished||animating} onClick={()=>coinPick('CARA')}>CARA</button><button disabled={finished||animating} onClick={()=>coinPick('CECA')}>CECA</button></div>
     </div>}
 
     {game==='lucky-number'&&<div className="cabala-number-stage">
@@ -1227,14 +1268,14 @@ function CabalaMiniGame({game,onComplete}:{game:CabalaGameId;onComplete:(won:boo
     </div>}
 
     {game==='three-cups'&&<div className="cabala-cups-stage">
-      <div className="cups-row">{[0,1,2].map(value=><button key={value} disabled={revealed||finished} className={revealed&&value===luckyNumber?'reveal':''} onClick={()=>cupPick(value)}><i>▱</i><span>{revealed&&value===luckyNumber?'⚽':''}</span></button>)}</div>
+      <div className={'cups-row '+(!revealed?'cups-row--shuffling':'')}>{[0,1,2].map(value=><button key={value} disabled={revealed||finished} className={revealed&&value===luckyNumber?'reveal':''} onClick={()=>cupPick(value)}><i>▱</i><span>{revealed&&value===luckyNumber?'⚽':''}</span></button>)}</div>
       <div className="cabala-question">{revealed?'Mirá dónde queda la pelota.':'Elegí el vaso.'}</div>
     </div>}
 
     {game==='wheel'&&<div className="cabala-wheel-stage">
-      <div className="destiny-wheel"><i/><i/><i/><i/><b>✦</b></div>
+      <div className="wheel-wrap"><span className="wheel-pointer">▼</span><div className="destiny-wheel" style={{transform:'rotate('+Math.round(loopPhase*1080)+'deg)'}}><i/><i/><i/><i/><b>✦</b></div></div>
       <div className="cabala-question">La rueda gira. Frenala cuando sientas el momento.</div>
-      <button className="skill-main-action luck-action" disabled={finished} onClick={wheelStop}>FRENAR RUEDA</button>
+      <button className="skill-main-action luck-action" disabled={finished||animating} onClick={wheelStop}>{animating?'DECIDIENDO…':'FRENAR RUEDA'}</button>
     </div>}
 
     {game==='tower'&&<div className="cabala-tower-stage">
@@ -1283,12 +1324,12 @@ function CareerFinalPanel({
     </div>}
 
     {luckMode&&<div className="cabala-game">
-      <div className="cabala-game__head"><span>⚄ CABULERO</span><strong>{pending.kind==='title'?'El título se juega con la suerte.':pending.kind==='promotion'?'El ascenso depende de tu cábala.':'La permanencia se define ahora.'}</strong><small>Cinco rondas. El resultado del minijuego decide el partido.</small></div>
+      <div className="cabala-game__head"><span>⚄ CABULERO</span><strong>{pending.kind==='title'?'El título se juega con la suerte.':pending.kind==='promotion'?'El ascenso depende de tu cábala.':'La permanencia se define ahora.'}</strong><small>Partida decisiva. Cada cábala tiene su propia duración y una sola oportunidad.</small></div>
       <CabalaMiniGame game={pending.cabalaGame} onComplete={(won,score)=>onResolved(resolveCabalFinal(state,won,score))}/>
     </div>}
 
     {skillMode&&<div className="final-skill-game">
-      <div className="final-skill-game__intro"><span>◎ HABILIDOSO</span><strong>{miniGames.find(game=>game.id===pending.miniGame)?.name??'Desafío final'}</strong><small>5 rondas. Un solo intento. El resultado decide {pending.kind==='title'?'el título':pending.kind==='promotion'?'el ascenso':'la permanencia'}.</small></div>
+      <div className="final-skill-game__intro"><span>◎ HABILIDOSO</span><strong>{miniGames.find(game=>game.id===pending.miniGame)?.name??'Desafío final'}</strong><small>Un solo intento. La mecánica define la duración y el resultado decide {pending.kind==='title'?'el título':pending.kind==='promotion'?'el ascenso':'la permanencia'}.</small></div>
       <MiniGamesPanel mode="player" forcedGame={pending.miniGame} onScore={()=>{}} onComplete={score=>onResolved(resolveSkillFinal(state,score))}/>
     </div>}
   </div>
