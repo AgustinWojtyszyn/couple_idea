@@ -578,6 +578,169 @@ function RankingPanel({scores}:{scores:RunScore[]}){
   </section>
 }
 
+const advancedSkillIds:MiniGameId[]=[
+  'memory-board','personal-run','timing-run','ball-track','code-call','hold-up','through-pass','grid-gap','long-kick','pressure-exit'
+]
+
+function AdvancedSkillMiniGame({
+  game,onComplete,onBack,forced
+}:{
+  game:MiniGameId
+  onComplete:(score:number)=>void
+  onBack:()=>void
+  forced?:boolean
+}){
+  const roundsByGame:Partial<Record<MiniGameId,number>>={
+    'memory-board':3,'personal-run':4,'timing-run':3,'ball-track':3,'code-call':3,
+    'hold-up':3,'through-pass':3,'grid-gap':3,'long-kick':3,'pressure-exit':4,
+  }
+  const maxRounds=roundsByGame[game]??3
+  const [round,setRound]=useState(0)
+  const [score,setScore]=useState(0)
+  const [feedback,setFeedback]=useState('Preparado.')
+  const [target,setTarget]=useState(()=>Math.floor(Math.random()*9))
+  const [revealed,setRevealed]=useState(true)
+  const [direction,setDirection]=useState<number|null>(null)
+  const [done,setDone]=useState(false)
+
+  useEffect(()=>{
+    if(!['memory-board','ball-track','code-call','grid-gap','pressure-exit'].includes(game))return
+    setRevealed(true)
+    const id=window.setTimeout(()=>setRevealed(false),game==='code-call'?1250:900)
+    return()=>window.clearTimeout(id)
+  },[game,round,target])
+
+  const finish=(earned:number,message:string)=>{
+    if(done)return
+    const nextScore=score+earned
+    const nextRound=round+1
+    setScore(nextScore)
+    setFeedback(message+' · +'+earned)
+    setDirection(null)
+    if(nextRound>=maxRounds){
+      setDone(true)
+      window.setTimeout(()=>onComplete(nextScore),380)
+    }else{
+      setRound(nextRound)
+      setTarget(Math.floor(Math.random()*9))
+    }
+  }
+
+  const timingScore=(center=.52,width=.18)=>{
+    const phase=(Date.now()%1800)/1800
+    const distance=Math.abs(phase-center)
+    const normalized=Math.min(distance,1-distance)
+    return normalized<=width/2?100:normalized<=width?70:normalized<=width*1.6?42:18
+  }
+
+  const chooseSafeLane=(lane:number)=>{
+    const blocked=target%3
+    finish(lane===blocked?20:100,lane===blocked?'TE CERRARON':'ROMPISTE LA LÍNEA')
+  }
+
+  const chooseMemory=(cell:number)=>{
+    finish(cell===target?100:18,cell===target?'MEMORIA PERFECTA':'SE TE ESCAPÓ')
+  }
+
+  const chooseCode=(index:number)=>{
+    const correct=target%3
+    finish(index===correct?100:25,index===correct?'SEÑAL CLAVADA':'CÓDIGO ERRADO')
+  }
+
+  const choosePressure=(index:number)=>{
+    const safe=target%3
+    finish(index===safe?100:28,index===safe?'SALIDA LIMPIA':'TE ENCERRARON')
+  }
+
+  const kickPower=()=>{
+    if(direction===null){setFeedback('Primero elegí el destino del saque.');return}
+    const earned=timingScore(.58,.16)
+    finish(Math.max(18,earned-(direction===1?0:8)),earned>=85?'SAQUE PERFECTO':earned>=55?'BUENA SALIDA':'QUEDÓ CORTO')
+  }
+
+  const labels:Partial<Record<MiniGameId,{kicker:string;title:string;desc:string}>>={
+    'memory-board':{kicker:'MEMORIA TÁCTICA',title:'Pizarra relámpago',desc:'La zona se ilumina un instante. Recordala cuando desaparezca.'},
+    'personal-run':{kicker:'UNO CONTRA TODOS',title:'La diagonal',desc:'Un defensor cierra un carril. Elegí por dónde romper.'},
+    'timing-run':{kicker:'TIMING',title:'La corrida',desc:'La potencia oscila. Frenala dentro de la ventana celeste.'},
+    'ball-track':{kicker:'VISIÓN',title:'Ojo en la pelota',desc:'Seguí la pelota y marcá dónde terminó después del cruce.'},
+    'code-call':{kicker:'LECTURA DE BANCO',title:'La señal',desc:'Memorizá el código que aparece y elegilo cuando se oculte.'},
+    'hold-up':{kicker:'CUERPO A CUERPO',title:'El aguante',desc:'La presión sube y baja. Protegé la pelota en el momento justo.'},
+    'through-pass':{kicker:'LECTURA',title:'Pase al hueco',desc:'Esperá a que se abra la ventana y soltá el pase.'},
+    'grid-gap':{kicker:'VISIÓN PERIFÉRICA',title:'El hueco',desc:'Un espacio queda libre por menos de un segundo. Encontralo.'},
+    'long-kick':{kicker:'POTENCIA + DIRECCIÓN',title:'Saque largo',desc:'Elegí destino y soltá la potencia cuando entre en zona.'},
+    'pressure-exit':{kicker:'SALIDA',title:'Bajo presión',desc:'Un compañero queda libre un instante. Encontralo antes del robo.'},
+  }
+  const meta=labels[game]??{kicker:'DESAFÍO',title:'Juego decisivo',desc:'Resolvé la jugada.'}
+  const codes=['3 · 1 · 4','2 · 4 · 1','4 · 2 · 3']
+  const ballTarget=target%3
+
+  return <section className={'panel advanced-skill advanced-skill--'+game}>
+    <div className="minigame-topline">
+      {!forced?<button className="back-link" onClick={onBack}>← Volver</button>:<span className="final-game-badge">PARTIDO DECISIVO</span>}
+      <span>{done?'TERMINADO':'JUGADA '+(round+1)+'/'+maxRounds}</span>
+    </div>
+    <div className="advanced-skill__head"><span className="eyebrow">{meta.kicker}</span><h2>{meta.title}</h2><p>{meta.desc}</p></div>
+    <div className="advanced-skill__score"><span>PUNTOS</span><strong>{score}</strong></div>
+
+    {game==='memory-board'&&<div className="visual-game visual-game--memory">
+      <div className="stadium-bg"><i/><i/><i/></div>
+      <div className="memory-grid">{Array.from({length:9},(_,cell)=><button key={cell} disabled={revealed||done} className={revealed&&cell===target?'target':''} onClick={()=>chooseMemory(cell)}><span>{cell+1}</span></button>)}</div>
+      <strong>{revealed?'MEMORIZÁ LA ZONA':'¿DÓNDE ESTABA?'}</strong>
+    </div>}
+
+    {game==='personal-run'&&<div className="visual-game visual-game--lanes">
+      <div className="runner-pitch">{[0,1,2].map(lane=><button key={lane} disabled={done} onClick={()=>chooseSafeLane(lane)}><i/><span>{lane===0?'IZQ':lane===1?'CENTRO':'DER'}</span></button>)}</div>
+      <div className="runner-shadow" style={{left:(12+(target%3)*33)+'%'}}/>
+      <strong>Elegí el carril antes del cierre.</strong>
+    </div>}
+
+    {game==='timing-run'&&<div className="visual-game visual-game--timing">
+      <div className="sprint-track"><span/><span/><span/><i/><b/></div>
+      <button className="skill-main-action" disabled={done} onClick={()=>{const earned=timingScore(.52,.14);finish(earned,earned>=85?'ACELERACIÓN PERFECTA':earned>=55?'BUEN PIQUE':'SALISTE PASADO')}}>⚡ FRENAR IMPULSO</button>
+    </div>}
+
+    {game==='ball-track'&&<div className="visual-game visual-game--track">
+      <div className="ball-crossing">{[0,1,2].map(slot=><button key={slot} disabled={revealed||done} onClick={()=>finish(slot===ballTarget?100:20,slot===ballTarget?'LA SEGUISTE':'LA PERDISTE')}><span>{revealed&&slot===ballTarget?'⚽':'●'}</span><i/></button>)}</div>
+      <strong>{revealed?'SEGUÍ LA PELOTA':'¿DÓNDE TERMINÓ?'}</strong>
+    </div>}
+
+    {game==='code-call'&&<div className="visual-game visual-game--code">
+      <div className="bench-screen">{revealed?<strong>{codes[target%3]}</strong>:<strong>• · • · •</strong>}</div>
+      <div className="code-options">{codes.map((code,index)=><button key={code} disabled={revealed||done} onClick={()=>chooseCode(index)}>{code}</button>)}</div>
+      <small>{revealed?'Memorizá la señal del banco.':'Marcá la señal correcta.'}</small>
+    </div>}
+
+    {game==='hold-up'&&<div className="visual-game visual-game--hold">
+      <div className="pressure-ring"><i/><b>⚽</b><span/></div>
+      <button className="skill-main-action" disabled={done} onClick={()=>{const earned=timingScore(.48,.12);finish(earned,earned>=85?'CUERPO PERFECTO':earned>=55?'AGUANTASTE':'TE LA ROBARON')}}>⬢ PROTEGER</button>
+    </div>}
+
+    {game==='through-pass'&&<div className="visual-game visual-game--pass">
+      <div className="pass-scene"><i className="defender-line"/><span className="runner">●</span><span className="ball">⚽</span><b className="gap"/></div>
+      <button className="skill-main-action" disabled={done} onClick={()=>{const earned=timingScore(.64,.13);finish(earned,earned>=85?'PASE PERFECTO':earned>=55?'LLEGÓ JUSTO':'OFFSIDE / INTERCEPTADO')}}>⇢ FILTRAR PASE</button>
+    </div>}
+
+    {game==='grid-gap'&&<div className="visual-game visual-game--gap">
+      <div className="gap-grid">{Array.from({length:9},(_,cell)=><button key={cell} disabled={revealed||done} className={revealed&&cell===target?'target':''} onClick={()=>chooseMemory(cell)}><span/></button>)}</div>
+      <strong>{revealed?'EL HUECO ESTÁ ACÁ':'TOCÁ EL HUECO'}</strong>
+    </div>}
+
+    {game==='long-kick'&&<div className="visual-game visual-game--kick">
+      <div className="kick-targets">{[0,1,2].map(index=><button key={index} className={direction===index?'active':''} disabled={done} onClick={()=>setDirection(index)}>{index===0?'↖ BANDA':index===1?'↑ 9': 'BANDA ↗'}</button>)}</div>
+      <div className="timing-bar timing-bar--kick"><i/><b/></div>
+      <button className="skill-main-action" disabled={done} onClick={kickPower}>⚽ SACAR</button>
+    </div>}
+
+    {game==='pressure-exit'&&<div className="visual-game visual-game--pressure">
+      <div className="pressure-pitch"><span className="you">⚽</span>{[0,1,2].map(index=><button key={index} disabled={revealed||done} className={revealed&&index===target%3?'safe':''} onClick={()=>choosePressure(index)}><b>●</b><small>{index===0?'A':index===1?'B':'C'}</small></button>)}</div>
+      <strong>{revealed?'MIRÁ QUIÉN QUEDA LIBRE':'SALÍ JUGANDO'}</strong>
+    </div>}
+
+    <div className={'minigame-feedback '+(done?'complete':'')}>{done?'PARTIDO RESUELTO · '+score+' PTS':feedback}</div>
+    {done&&!forced&&<button className="play-button" onClick={onBack}>VOLVER A JUEGOS</button>}
+  </section>
+}
+
 function MiniGamesPanel({
   mode,onScore,forcedGame,onComplete
 }:{
@@ -667,6 +830,15 @@ function MiniGamesPanel({
     }
     const expected=correct[active]?.[roundIndex]??0
     commit(choice===expected?100:choice===((expected+1)%3)?55:20,choice===expected?'DECISIÓN PERFECTA':'DECISIÓN DISCUTIBLE')
+  }
+
+  if(active&&advancedSkillIds.includes(active)){
+    return <AdvancedSkillMiniGame
+      game={active}
+      forced={Boolean(forcedGame)}
+      onBack={()=>setActive(null)}
+      onComplete={value=>{onScore(active,value);onComplete?.(value)}}
+    />
   }
 
   if(active){
