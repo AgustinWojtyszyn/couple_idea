@@ -1,4 +1,5 @@
 import {
+  baseStatsByPosition,
   clubById,
   clubs,
   coachEvents,
@@ -10,6 +11,7 @@ import {
   type Effects,
   type EventOption,
   type PlayerMode,
+  type PlayerStats,
   type Position,
   type RunScore,
   type SeasonRecord,
@@ -29,6 +31,48 @@ const rngFrom=(seed:number)=>{
   }
 }
 
+const roleOverall=(stats:PlayerStats,position:Position)=>{
+  const w:Record<Position,Partial<Record<keyof PlayerStats,number>>>={
+    '9':{finishing:.38,pace:.2,dribbling:.14,physical:.13,passing:.09,defending:.03,reflexes:.03},
+    '10':{passing:.31,dribbling:.28,finishing:.14,pace:.1,physical:.07,defending:.07,reflexes:.03},
+    '7':{pace:.3,dribbling:.28,finishing:.18,passing:.12,physical:.06,defending:.03,reflexes:.03},
+    '5':{passing:.24,defending:.23,physical:.18,dribbling:.12,pace:.1,finishing:.08,reflexes:.05},
+    '2':{defending:.38,physical:.27,pace:.11,passing:.1,dribbling:.05,finishing:.04,reflexes:.05},
+    '1':{reflexes:.55,physical:.15,passing:.1,defending:.08,pace:.05,dribbling:.04,finishing:.03},
+  }
+  return Object.entries(w[position]).reduce((sum,[key,weight])=>sum+stats[key as keyof PlayerStats]*(weight??0),0)
+}
+
+export const statsFor=(s:CareerState):PlayerStats=>{
+  if(s.stats)return s.stats
+  const base=baseStatsByPosition[s.position]
+  const shift=s.overall-roleOverall(base,s.position)
+  return Object.fromEntries(Object.entries(base).map(([key,value])=>[key,clamp(value+shift,20,95)])) as PlayerStats
+}
+
+const evolveStats=(s:CareerState,rating:number)=>{
+  const current=statsFor(s)
+  const youth=s.age<=21?2:s.age<=25?1:0
+  const hot=rating>=7.8?1:0
+  const decline=s.age>=32?1:0
+  const next={...current}
+  const keyStats:Record<Position,Array<keyof PlayerStats>>={
+    '9':['finishing','pace','physical'],
+    '10':['passing','dribbling','finishing'],
+    '7':['pace','dribbling','finishing'],
+    '5':['passing','defending','physical'],
+    '2':['defending','physical','passing'],
+    '1':['reflexes','physical','passing'],
+  }
+  for(const key of keyStats[s.position]) next[key]=clamp(next[key]+youth+hot,20,97)
+  if(decline){
+    next.pace=clamp(next.pace-2,20,97)
+    next.physical=clamp(next.physical-1,20,97)
+    if(s.position==='1')next.reflexes=clamp(next.reflexes-1,20,97)
+  }
+  return next
+}
+
 const hash=(s:string)=>{
   let h=2166136261
   for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}
@@ -36,36 +80,36 @@ const hash=(s:string)=>{
 }
 
 const openingEvent=(position:Position)=>{
-  const base={category:'football' as const,eyebrow:'TU IDENTIDAD',body:'Elegí una identidad. Esta primera decisión define cómo arrancás y qué fortalezas llevás desde el día uno.'}
+  const base={category:'football' as const,eyebrow:'TU IDENTIDAD',body:'Elegí una identidad. Esta decisión define tus stats de arranque y no es cosmética: cambia cómo rendís durante toda la carrera.'}
   if(position==='9')return {...base,id:'origin-9',title:'¿Qué clase de delantero sos?',options:[
-    {id:'hunter',label:'CAZADOR DEL ÁREA',description:'Vivís del gol. Adentro del área no perdonás.',effects:{overall:2,reputation:4,form:3}},
-    {id:'vertical',label:'VERTICAL',description:'Atacás el espacio y ganás por velocidad.',effects:{energy:7,form:5,injuryRisk:2}},
-    {id:'complete',label:'REFERENCIA TOTAL',description:'Gol, juego aéreo y liderazgo.',effects:{overall:1,leadership:6,coachTrust:4}},
+    {id:'hunter',label:'CAZADOR DEL ÁREA',description:'Vivís del gol. Adentro del área no perdonás.',effects:{finishing:8,physical:2,passing:-2,reputation:3}},
+    {id:'vertical',label:'FLECHA',description:'Te tiran una pelota al espacio y no te agarran más.',effects:{pace:8,dribbling:3,physical:-1,form:3}},
+    {id:'complete',label:'TODOTERRENO',description:'Un poco de todo, bien hecho.',effects:{finishing:3,pace:3,physical:3,passing:3,leadership:3}},
   ]}
   if(position==='2')return {...base,id:'origin-2',title:'¿Qué clase de 2 sos?',options:[
-    {id:'wall',label:'MURALLA',description:'Primero pasa la pelota. Después vemos.',effects:{overall:2,discipline:5,leadership:4}},
-    {id:'anticipate',label:'ANTICIPO',description:'Leés antes que el delantero y salís jugando.',effects:{form:5,coachTrust:5,energy:3}},
-    {id:'boss',label:'CAUDILLO',description:'Ordenás el fondo y te hacés escuchar.',effects:{leadership:9,reputation:3,discipline:-2}},
+    {id:'wall',label:'MURALLA',description:'Primero pasa la pelota. Después vemos.',effects:{defending:8,physical:5,pace:-2,discipline:3}},
+    {id:'anticipate',label:'ANTICIPO',description:'Leés antes que el delantero y salís jugando.',effects:{defending:5,passing:5,pace:2,coachTrust:4}},
+    {id:'boss',label:'CAUDILLO',description:'Ordenás el fondo y te hacés escuchar.',effects:{defending:4,physical:6,leadership:8,discipline:-2}},
   ]}
   if(position==='1')return {...base,id:'origin-1',title:'¿Qué clase de arquero sos?',options:[
-    {id:'reflex',label:'REFLEJOS',description:'Vivís de la reacción pura.',effects:{form:7,overall:1}},
-    {id:'sweeper',label:'ARQUERO LIBERO',description:'Jugás lejos del arco y ayudás a salir.',effects:{coachTrust:6,energy:4,injuryRisk:2}},
-    {id:'leader',label:'JEFE DEL ÁREA',description:'Mandás en cada pelota parada.',effects:{leadership:8,reputation:3}},
+    {id:'reflex',label:'GATO',description:'Tu carrera vive de una reacción imposible.',effects:{reflexes:9,physical:2}},
+    {id:'sweeper',label:'ARQUERO LÍBERO',description:'Jugás lejos del arco y ayudás a salir.',effects:{passing:7,pace:3,reflexes:2,coachTrust:4}},
+    {id:'leader',label:'DUEÑO DEL ÁREA',description:'Mandás en cada pelota parada.',effects:{reflexes:4,physical:4,leadership:8}},
   ]}
   if(position==='10')return {...base,id:'origin-10',title:'¿Qué clase de enganche sos?',options:[
-    {id:'vision',label:'CEREBRO',description:'Ves pases que otros no ven.',effects:{overall:2,coachTrust:5}},
-    {id:'artist',label:'ARTISTA',description:'Jugás para romper líneas y levantar a la gente.',effects:{fans:8,reputation:5,discipline:-2}},
-    {id:'runner',label:'ENGANCHE MODERNO',description:'Técnica y despliegue.',effects:{energy:6,form:5}},
+    {id:'vision',label:'CEREBRO',description:'Ves el pase antes de que exista.',effects:{passing:8,dribbling:4,physical:-1}},
+    {id:'artist',label:'ARTISTA',description:'Jugás para romper líneas y levantar a la gente.',effects:{dribbling:8,passing:3,physical:-2,fans:4}},
+    {id:'runner',label:'ENGANCHE MODERNO',description:'Técnica con recorrido.',effects:{pace:5,passing:4,physical:4}},
   ]}
   if(position==='7')return {...base,id:'origin-7',title:'¿Qué clase de extremo sos?',options:[
-    {id:'dribble',label:'DESEQUILIBRIO',description:'Uno contra uno y sin pedir permiso.',effects:{form:7,fans:5}},
-    {id:'speed',label:'RAYO',description:'Te tiran larga y no te alcanzan.',effects:{energy:8,injuryRisk:2}},
-    {id:'inside',label:'EXTREMO INTERIOR',description:'Entrás por dentro y pensás como un 10.',effects:{overall:2,coachTrust:4}},
+    {id:'dribble',label:'DESEQUILIBRIO',description:'Uno contra uno y sin pedir permiso.',effects:{dribbling:8,pace:3,defending:-2,fans:4}},
+    {id:'speed',label:'RAYO',description:'Atacás cuarenta metros como si fueran diez.',effects:{pace:9,finishing:2,physical:-1}},
+    {id:'inside',label:'EXTREMO INTERIOR',description:'Entrás por dentro y pensás como un 10.',effects:{passing:6,dribbling:4,finishing:3}},
   ]}
   return {...base,id:'origin-5',title:'¿Qué clase de volante sos?',options:[
-    {id:'anchor',label:'ANCLA',description:'Equilibrás todo y no regalás una transición.',effects:{discipline:7,coachTrust:6}},
-    {id:'box',label:'BOX TO BOX',description:'Llegás a las dos áreas.',effects:{energy:8,form:4}},
-    {id:'captain',label:'CAPITÁN SILENCIOSO',description:'Orden, pase y liderazgo.',effects:{leadership:8,overall:1}},
+    {id:'anchor',label:'ANCLA',description:'Equilibrás todo y no regalás una transición.',effects:{defending:7,physical:4,passing:2,pace:-1}},
+    {id:'box',label:'BOX TO BOX',description:'Llegás a las dos áreas.',effects:{pace:5,physical:6,finishing:3,energy:4}},
+    {id:'captain',label:'CAPITÁN SILENCIOSO',description:'Orden, pase y liderazgo.',effects:{passing:6,defending:4,leadership:8}},
   ]}
 }
 
@@ -101,7 +145,7 @@ export function createCareer(name:string,position:Position,mode:PlayerMode,clubI
   const maxSeasons=11+(seed%7)
   const s:CareerState={
     version:2,gameMode:'player',mode,seed,playerName:name.trim()||'El Pibe',nationality,position,
-    age:17,season:1,maxSeasons,clubId,overall:58+pos.boost,form:68,energy:92,reputation:8,fans:12,
+    age:17,season:1,maxSeasons,clubId,overall:58+pos.boost,stats:{...baseStatsByPosition[position]},form:68,energy:92,reputation:8,fans:12,
     coachTrust:55,discipline:62,leadership:42,morale:72,injuryRisk:8,money:12000,matches:0,goals:0,
     assists:0,titles:0,caps:0,nationalGoals:0,trainingCredits:2,history:[],achievements:[],offers:[],
     activeEvent:null,retired:false
@@ -110,9 +154,20 @@ export function createCareer(name:string,position:Position,mode:PlayerMode,clubI
 }
 
 export function applyEffects(s:CareerState,e:Effects):CareerState{
+  const current=statsFor(s)
+  const nextStats:PlayerStats={
+    pace:clamp(current.pace+(e.pace??0),20,99),
+    finishing:clamp(current.finishing+(e.finishing??0),20,99),
+    passing:clamp(current.passing+(e.passing??0),20,99),
+    dribbling:clamp(current.dribbling+(e.dribbling??0),20,99),
+    defending:clamp(current.defending+(e.defending??0),20,99),
+    physical:clamp(current.physical+(e.physical??0),20,99),
+    reflexes:clamp(current.reflexes+(e.reflexes??0),20,99),
+  }
   return {
     ...s,
-    overall:clamp(s.overall+(e.overall??0),40,99),
+    stats:nextStats,
+    overall:clamp(Math.round(roleOverall(nextStats,s.position)+(e.overall??0)),40,99),
     form:clamp(s.form+(e.form??0)),
     energy:clamp(s.energy+(e.energy??0)),
     reputation:clamp(s.reputation+(e.reputation??0)),
@@ -134,21 +189,24 @@ export function choosePlayerEvent(s:CareerState,o:EventOption){
 export function simulateSeason(s:CareerState):CareerState{
   const club=clubById(s.clubId)
   const r=rngFrom(s.seed+s.season*4999+s.overall+s.discipline*11)
+  const stats=statsFor(s)
   const availability=clamp(100-s.injuryRisk*.55)
+  const role=roleOverall(stats,s.position)
   const perf=clamp(
-    s.overall*.43+s.form*.18+s.coachTrust*.1+s.energy*.08+s.morale*.08+
-    s.discipline*.05+s.leadership*.04+availability*.04
+    role*.45+s.form*.16+s.coachTrust*.09+s.energy*.07+s.morale*.07+
+    s.discipline*.05+s.leadership*.04+availability*.04+club.prestige*.03
   )
   const matches=Math.max(8,Math.round((24+r()*16+perf/12)*(availability/100)))
   const atk=s.position==='9'?1.35:s.position==='10'?.78:s.position==='7'?.95:s.position==='5'?.32:s.position==='2'?.11:.02
   const ast=s.position==='10'?1.25:s.position==='7'?.9:s.position==='5'?.7:s.position==='9'?.38:s.position==='2'?.1:.05
-  const goals=Math.max(0,Math.round(matches*atk*(perf/100)*(.33+r()*.22)))
-  const assists=Math.max(0,Math.round(matches*ast*(perf/100)*(.24+r()*.2)))
-  const defensiveBonus=s.position==='2'?Math.round((s.leadership+s.discipline+perf)/30):0
+  const finishingFactor=(stats.finishing/100)*.72+.28
+  const passingFactor=(stats.passing/100)*.72+.28
+  const goals=Math.max(0,Math.round(matches*atk*(perf/100)*finishingFactor*(.33+r()*.22)))
+  const assists=Math.max(0,Math.round(matches*ast*(perf/100)*passingFactor*(.24+r()*.2)))
+  const defensiveBonus=s.position==='2'?Math.round((stats.defending+stats.physical+s.leadership+perf)/38):s.position==='1'?Math.round((stats.reflexes+stats.physical+perf)/34):0
   const title=r()<(club.prestige+s.overall+s.form+s.morale)/430?1:0
   const rating=Math.round((6+perf/58+r()*.95+(s.position==='2'?defensiveBonus*.015:0))*10)/10
-  const growthBase=s.age<=22?2:s.age<=27?1:s.age>=33?-1:0
-  const growth=growthBase+(s.trainingCredits===0?1:0)+(rating>=7.8?1:0)
+  const nextStats=evolveStats(s,rating)
   const called=s.reputation>52&&s.overall>76&&r()>.4
   const caps=called?Math.round(2+r()*7):0
   const nationalGoals=called&&s.position!=='1'?Math.round(caps*atk*.2*r()):0
@@ -167,7 +225,8 @@ export function simulateSeason(s:CareerState):CareerState{
     ...s,
     age:s.age+1,
     season:s.season+1,
-    overall:clamp(s.overall+growth,45,97),
+    stats:nextStats,
+    overall:clamp(Math.round(roleOverall(nextStats,s.position)),45,97),
     form:clamp(56+r()*32),
     energy:clamp(78+r()*21),
     reputation:clamp(s.reputation+Math.round(rating*2)+title*9),
@@ -211,11 +270,11 @@ export function simulateSeason(s:CareerState):CareerState{
 export function trainCareer(s:CareerState,focus:'physical'|'technique'|'finishing'|'mind'|'defending'){
   if(!s.trainingCredits)return s
   const effects:Effects=
-    focus==='physical'?{overall:1,energy:7,form:2,injuryRisk:-2}:
-    focus==='technique'?{overall:1,form:5,energy:-4}:
-    focus==='finishing'?{overall:1,reputation:3,energy:-5}:
-    focus==='defending'?{overall:1,leadership:4,discipline:2,energy:-4}:
-    {morale:8,discipline:4,form:2}
+    focus==='physical'?{physical:4,pace:2,energy:7,form:2,injuryRisk:-2}:
+    focus==='technique'?{dribbling:4,passing:3,form:4,energy:-4}:
+    focus==='finishing'?{finishing:5,reputation:2,energy:-5}:
+    focus==='defending'?{defending:5,physical:2,leadership:3,discipline:2,energy:-4}:
+    s.position==='1'?{reflexes:3,morale:8,discipline:4}:{passing:2,morale:8,discipline:4,form:2}
   const n=applyEffects(s,effects)
   return {...n,activeEvent:s.activeEvent,trainingCredits:s.trainingCredits-1}
 }
