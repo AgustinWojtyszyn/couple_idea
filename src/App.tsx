@@ -1000,11 +1000,13 @@ function MiniGamesPanel({
   </section>
 }
 
+const finalStyleLabel=(style:FinalStyle|null|undefined)=>style==='cabulero'?'AL PÁLPITO':style==='habilidoso'?'VIRTUOSO':'MIXTO'
+
 function FinalStyleChoice({onChoose}:{onChoose:(style:FinalStyle)=>void}){
   const styles:Array<{id:FinalStyle;icon:string;title:string;kicker:string;body:string;accent:string}>=[
-    {id:'cabulero',icon:'⚄',title:'CABULERO',kicker:'QUE DECIDA EL DESTINO',body:'Las finales se resuelven con rituales, intuición y suerte. Elegís tu cábala y bancás el resultado.',accent:'luck'},
+    {id:'cabulero',icon:'🔮',title:'AL PÁLPITO',kicker:'QUE DECIDA EL DESTINO',body:'Las finales se resuelven con rituales, intuición y suerte. Elegís tu señal y bancás el resultado.',accent:'luck'},
     {id:'mixto',icon:'⇄',title:'MIXTO',kicker:'CABEZA + INSTINTO',body:'En cada final decidís: jugar un minijuego o confiar en la cábala. Más libertad, más decisiones.',accent:'mix'},
-    {id:'habilidoso',icon:'◎',title:'HABILIDOSO',kicker:'TODO EN TUS MANOS',body:'Todas las finales se juegan. Timing, puntería, reflejos o duelo según tu posición.',accent:'skill'},
+    {id:'habilidoso',icon:'⚡',title:'VIRTUOSO',kicker:'TODO EN TUS MANOS',body:'Todas las finales se juegan. Timing, puntería, reflejos o lectura según tu posición.',accent:'skill'},
   ]
   return <div className="final-style-choice">
     <div className="final-style-choice__head"><span className="eyebrow">REGLA DE TU CARRERA · NO SE PUEDE CAMBIAR</span><h2>¿Qué clase de jugador sos?</h2><p>Esto define cómo se juegan todas las finales de tu carrera.</p></div>
@@ -1352,7 +1354,7 @@ function CareerFinalPanel({
       <div><span className="eyebrow">FINAL · {pending.competition.toUpperCase()}</span><h2>Noventa minutos para cambiar tu carrera.</h2></div>
       <div className="career-final__versus"><ClubCrest name={clubById(state.clubId).name} size="lg"/><b>VS</b><ClubCrest name={opponent.name} size="lg"/></div>
       <div className="career-final__clubs"><strong>{clubById(state.clubId).name}</strong><span>{opponent.name}</span></div>
-      <p>Tu estilo permanente es <b>{style.toUpperCase()}</b>. Esta final no se simula por detrás.</p>
+      <p>Tu estilo permanente es <b>{finalStyleLabel(style)}</b>. Esta final no se simula por detrás.</p>
     </div>
 
     {style==='mixto'&&!mixedMode&&<div className="mixed-final-choice">
@@ -1361,12 +1363,12 @@ function CareerFinalPanel({
     </div>}
 
     {luckMode&&<div className="cabala-game">
-      <div className="cabala-game__head"><span>⚄ CABULERO</span><strong>{pending.kind==='title'?'El título se juega con la suerte.':pending.kind==='promotion'?'El ascenso depende de tu cábala.':'La permanencia se define ahora.'}</strong><small>Partida decisiva. Cada cábala tiene su propia duración y una sola oportunidad.</small></div>
+      <div className="cabala-game__head"><span>🔮 AL PÁLPITO</span><strong>{pending.kind==='title'?'El título se juega con la suerte.':pending.kind==='promotion'?'El ascenso depende de tu cábala.':'La permanencia se define ahora.'}</strong><small>Partida decisiva. Cada cábala tiene su propia duración y una sola oportunidad.</small></div>
       <CabalaMiniGame game={pending.cabalaGame} onComplete={(won,score)=>onResolved(resolveCabalFinal(state,won,score))}/>
     </div>}
 
     {skillMode&&<div className="final-skill-game">
-      <div className="final-skill-game__intro"><span>◎ HABILIDOSO</span><strong>{miniGames.find(game=>game.id===pending.miniGame)?.name??'Desafío final'}</strong><small>Una sola jugada. Tu gesto decide {pending.kind==='title'?'el título':pending.kind==='promotion'?'el ascenso':'la permanencia'}.</small></div>
+      <div className="final-skill-game__intro"><span>⚡ VIRTUOSO</span><strong>{miniGames.find(game=>game.id===pending.miniGame)?.name??'Desafío final'}</strong><small>Una sola jugada. Tu gesto decide {pending.kind==='title'?'el título':pending.kind==='promotion'?'el ascenso':'la permanencia'}.</small></div>
       <MiniGamesPanel mode="player" forcedGame={pending.miniGame} onScore={()=>{}} onComplete={score=>onResolved(resolveSkillFinal(state,score))}/>
     </div>}
   </div>
@@ -1535,7 +1537,7 @@ function CabalaPracticePanel(){
     {result&&<div className={'practice-result '+(result.startsWith('CÁBALA')?'good':'bad')}>{result}</div>}
   </section>
   return <section className="panel games-style-hub">
-    <div className="panel-head"><div><span className="eyebrow">CABULERO · 10 JUEGOS</span><h2>La suerte también se juega.</h2></div><span className="pill">⚄</span></div>
+    <div className="panel-head"><div><span className="eyebrow">AL PÁLPITO · 10 JUEGOS</span><h2>La suerte también se juega.</h2></div><span className="pill">⚄</span></div>
     <p className="games-style-intro">Practicá las mismas cábalas que pueden definir un título, un ascenso o una permanencia.</p>
     <div className="cabala-practice-grid">{games.map(game=><button key={game.id} onClick={()=>{setActive(game.id);setResult('')}}><CabalaGameThumb id={game.id}/><span><strong>{game.name}</strong><small>{game.description}</small></span><em>JUGAR →</em></button>)}</div>
   </section>
@@ -1546,7 +1548,7 @@ function PlayerGamesHub({style,onSkillScore}:{style:FinalStyle|null|undefined;on
   if(style==='cabulero')return <CabalaPracticePanel/>
   if(style==='habilidoso')return <MiniGamesPanel mode="player" onScore={onSkillScore}/>
   return <div className="mixed-games-hub">
-    <div className="mixed-games-tabs"><button className={mix==='skill'?'active':''} onClick={()=>setMix('skill')}>◎ HABILIDOSO · 15</button><button className={mix==='luck'?'active':''} onClick={()=>setMix('luck')}>⚄ CABULERO · 10</button></div>
+    <div className="mixed-games-tabs"><button className={mix==='skill'?'active':''} onClick={()=>setMix('skill')}>⚡ VIRTUOSO · 15</button><button className={mix==='luck'?'active':''} onClick={()=>setMix('luck')}>🔮 AL PÁLPITO · 10</button></div>
     {mix==='skill'?<MiniGamesPanel mode="player" onScore={onSkillScore}/>:<CabalaPracticePanel/>}
   </div>
 }
@@ -1680,7 +1682,7 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
       {tab==='career'&&!state.retired&&<div className="career-overview">
       <section className="identity-card identity-card--media" style={(playerMedia.stadiumImage??playerMedia.image)?{backgroundImage:'linear-gradient(90deg,var(--surface) 35%,rgba(5,10,18,.58)),url("'+(playerMedia.stadiumImage??playerMedia.image)+'")'}:undefined}>
         <ClubCrest name={club.name} size="lg"/>
-        <div className="identity-card__copy"><span className="eyebrow">{displayLeague}</span><h1>{state.playerName}</h1><p>{state.position} · {state.age} años · {club.name}</p>{state.finalStyle&&<small className={'career-style-badge career-style-badge--'+state.finalStyle}>{state.finalStyle.toUpperCase()}</small>}</div>
+        <div className="identity-card__copy"><span className="eyebrow">{displayLeague}</span><h1>{state.playerName}</h1><p>{state.position} · {state.age} años · {club.name}</p>{state.finalStyle&&<small className={'career-style-badge career-style-badge--'+state.finalStyle}>{finalStyleLabel(state.finalStyle)}</small>}</div>
         <div className="overall"><strong>{state.overall}</strong><span>OVR</span></div>
       </section>
       <div className="quick-stats quick-stats--career">
