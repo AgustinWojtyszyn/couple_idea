@@ -343,14 +343,14 @@ function StoryModes({start}:{start:(name:string,position:Position,clubId:string)
   </section>
 }
 
-function ClubPickerModal({clubsList,selectedId,onSelect,onClose}:{clubsList:typeof clubs;selectedId:string;onSelect:(id:string)=>void;onClose:()=>void}){
+function ClubPickerModal({clubsList,selectedId,title,onSelect,onClose}:{clubsList:typeof clubs;selectedId:string;title:string;onSelect:(id:string)=>void;onClose:()=>void}){
   const [query,setQuery]=useState('')
   const filtered=clubsList.filter(club=>club.name.toLowerCase().includes(query.trim().toLowerCase()))
   return <div className="club-picker-overlay" onClick={onClose}>
     <section className="club-picker-modal" onClick={event=>event.stopPropagation()}>
       <div className="club-picker-grab"/>
       <div className="club-picker-modal__head">
-        <div><span className="eyebrow">ARGENTINA · 1ª DIVISIÓN</span><h2>Elegí tu club</h2></div>
+        <div><span className="eyebrow">{title.toUpperCase()}</span><h2>Elegí tu club</h2></div>
         <button onClick={onClose} aria-label="Cerrar">×</button>
       </div>
       <label className="club-picker-search"><span>⌕</span><input autoFocus value={query} onChange={event=>setQuery(event.target.value)} placeholder="Buscar equipo..."/></label>
@@ -533,7 +533,7 @@ function Home({
           <article><span>⌁</span><div><strong>RANKING</strong><small>Compará carreras completas</small></div></article>
         </section>
 
-        {clubPickerOpen&&activeLeague&&<ClubPickerModal clubsList={availableClubs} selectedId={activeClub} onSelect={setClubId} onClose={()=>setClubPickerOpen(false)}/>}
+        {clubPickerOpen&&activeLeague&&<ClubPickerModal clubsList={availableClubs} selectedId={activeClub} title={country+' · '+(leagueLabel?.tier??'')+'ª División'} onSelect={setClubId} onClose={()=>setClubPickerOpen(false)}/>}
 
         <footer className="legal-note">LEYENDA usa nombres de clubes reales y referencias públicas de Wikipedia/Wikimedia para sus escudos durante esta prueba. No incluye futbolistas reales.</footer>
       </main>
