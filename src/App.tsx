@@ -1045,7 +1045,7 @@ function MiniGamesPanel({
     <div className="panel-head"><div><span className="eyebrow">{mode==='player'?'CENTRO DE HABILIDAD':'LABORATORIO DEL DT'}</span><h2>{mode==='player'?'Quince pruebas jugables':'Cinco desafíos de gestión'}</h2></div><span className="pill">{mode==='player'?'15 JUEGOS':'5 MODOS'}</span></div>
     <p className="minigame-hub__intro">{mode==='player'?'Cada prueba entrena una parte distinta de tu jugador. No son decisiones de texto: tenés que acertar.':'Táctica, scouting, vestuario, formación y mercado. Tus decisiones puntúan el trabajo de entrenador.'}</p>
     <div className="minigame-grid minigame-grid--v2">{games.map(game=><button key={game.id} onClick={()=>reset(game.id)}>
-      <b>{game.icon}</b>
+      {mode==='player'?<SkillGameThumb id={game.id}/>:<b>{game.icon}</b>}
       <div><strong>{game.name}</strong><span>{game.description}</span></div>
       <em>JUGAR →</em>
     </button>)}</div>
@@ -1369,7 +1369,7 @@ function CabalaPracticePanel(){
   return <section className="panel games-style-hub">
     <div className="panel-head"><div><span className="eyebrow">CABULERO · 10 JUEGOS</span><h2>La suerte también se juega.</h2></div><span className="pill">⚄</span></div>
     <p className="games-style-intro">Practicá las mismas cábalas que pueden definir un título, un ascenso o una permanencia.</p>
-    <div className="cabala-practice-grid">{games.map(game=><button key={game.id} onClick={()=>{setActive(game.id);setResult('')}}><b>{game.icon}</b><span><strong>{game.name}</strong><small>{game.description}</small></span><em>JUGAR →</em></button>)}</div>
+    <div className="cabala-practice-grid">{games.map(game=><button key={game.id} onClick={()=>{setActive(game.id);setResult('')}}><CabalaGameThumb id={game.id}/><span><strong>{game.name}</strong><small>{game.description}</small></span><em>JUGAR →</em></button>)}</div>
   </section>
 }
 
