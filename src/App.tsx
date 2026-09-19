@@ -932,6 +932,17 @@ function MarketPanel({
   </section>
 }
 
+function TrophyCabinet({state}:{state:CareerState}){
+  const trophies=state.trophies??[]
+  if(!trophies.length)return <section className="trophy-cabinet trophy-cabinet--empty"><div><span className="eyebrow">PALMARÉS</span><h3>La vitrina está esperando.</h3><p>Los trofeos aparecen sólo si ganás el partido decisivo.</p></div><b>♛</b></section>
+  const grouped=Object.values(trophies.reduce<Record<string,{name:string;icon:string;count:number}>>((acc,trophy)=>{
+    const current=acc[trophy.name]??{name:trophy.name,icon:trophy.icon,count:0}
+    current.count+=1
+    acc[trophy.name]=current
+    return acc
+  },{}))
+  return <section className="trophy-cabinet"><div className="trophy-cabinet__head"><div><span className="eyebrow">PALMARÉS</span><h3>Tu vitrina</h3></div><strong>{trophies.length} TROFEOS</strong></div><div className="trophy-grid">{grouped.map(item=><article key={item.name}><b>{item.icon}</b><span><strong>{item.name}</strong><small>x{item.count}</small></span></article>)}</div></section>
+}
 function trainingOptionsFor(position:Position){
   const common={
     physical:['physical','Potencia física','Físico · velocidad · energía'],
@@ -988,7 +999,7 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
   const playSeason=()=>{
     const next=simulateSeason(state)
     if(next===state)return
-    setSeasonSummary(next.history[next.history.length-1]??null)
+    setSeasonSummary(next.pendingFinal?null:(next.history[next.history.length-1]??null))
     setLastEffects(null)
     setState(next)
   }
@@ -1036,6 +1047,7 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
             <Stat value={seasonSummary.rating} label="RATING"/>
           </div>
           <div className="season-result__score"><span>SCORE DE TEMPORADA</span><strong>{seasonSummary.score.toLocaleString('es-AR')}</strong></div>
+          {typeof seasonSummary.glory==='number'&&seasonSummary.glory>0&&<div className="season-glory-reveal"><span>GLORIA GANADA</span><strong>+{seasonSummary.glory.toLocaleString('es-AR')}</strong><small>Se revela recién al terminar la temporada.</small></div>}
           <em>{seasonSummary.note}</em>
           <button className="play-button" onClick={closeSeasonSummary}>CONTINUAR →</button>
         </section>
@@ -1053,6 +1065,7 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
 
       <PlayerAttributes state={{...state,stats:playerStats}}/>
       <IdolProgress value={state.clubLegacy??0} years={state.history.filter(item=>item.clubId===state.clubId).length}/>
+      <TrophyCabinet state={state}/>
 
       {tab==='career'&&<div className="dashboard-grid">
         <section className="panel event-panel">
@@ -1061,7 +1074,7 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
           !state.finalStyle&&!state.activeEvent?<FinalStyleChoice onChoose={style=>setState(chooseFinalStyle(state,style))}/>:
           state.pendingFinal?<CareerFinalPanel state={state} onResolved={resolveFinal}/>:
           state.marketDecisionRequired?<div className="market-blocker"><span className="eyebrow">MERCADO DE PASES</span><h2>Antes de seguir, decidí tu futuro.</h2><p>Tenés que elegir si continuás, renovás o aceptás una de las ofertas que llegaron.</p><button className="play-button" onClick={()=>setTab('market')}>VER OFERTAS →</button></div>:
-          state.activeEvent?<><DecisionScene category={state.activeEvent.category} title={state.activeEvent.title} media={playerMedia} clubName={club.name}/><span className="eyebrow">{state.activeEvent.eyebrow}</span><h2>{state.activeEvent.title}</h2><p>{state.activeEvent.body}</p><div className="decision-list">{state.activeEvent.options.map(o=><button key={o.id} onClick={()=>{setLastEffects(o.effects);setState(choosePlayerEvent(state,o as EventOption))}}><div><strong>{o.label}</strong><span>{o.description}</span><EffectChips effects={o.effects}/></div><b>→</b></button>)}</div></>:
+          state.activeEvent?<><DecisionScene category={state.activeEvent.category} title={state.activeEvent.title} media={playerMedia} clubName={club.name}/><span className="eyebrow">{state.activeEvent.eyebrow}</span><h2>{state.activeEvent.title}</h2><p>{state.activeEvent.body}</p><div className="decision-list">{state.activeEvent.options.map(o=>{const effects=careerDecisionEffects(state.activeEvent?.id,o.effects);return <button key={o.id} onClick={()=>{setLastEffects(effects);setState(choosePlayerEvent(state,o as EventOption))}}><div><strong>{o.label}</strong><span>{o.description}</span><EffectChips effects={effects}/></div><b>→</b></button>})}</div></>:
           <><span className="eyebrow">TEMPORADA {state.season} DE {state.maxSeasons}</span><h2>Todo listo para competir.</h2><p>Tu estado físico, la confianza, el vestuario y las decisiones ya están en juego.</p><button className="play-button" onClick={playSeason}>▶ JUGAR TEMPORADA</button></>}
         </section>
 
