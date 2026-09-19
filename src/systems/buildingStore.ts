@@ -152,19 +152,19 @@ const nextCoachEvent=(s:CoachState)=>{
 
 const finalMiniGameFor=(position:Position,r:()=>number):MiniGameId=>{
   const pools:Record<Position,MiniGameId[]>={
-    '9':['penalties','freekicks','personal-run','timing-run','through-pass','grid-gap'],
-    '10':['memory-board','through-pass','grid-gap','dribble','code-call','freekicks'],
-    '7':['personal-run','timing-run','dribble','through-pass','ball-track','grid-gap'],
-    '5':['memory-board','hold-up','through-pass','duel','code-call','pressure-exit'],
-    '2':['duel','hold-up','long-kick','pressure-exit','memory-board'],
-    '1':['keeper','long-kick','pressure-exit','ball-track','code-call'],
+    '9':['freekicks','through-pass','personal-run'],
+    '10':['memory-board','through-pass','dribble'],
+    '7':['personal-run','dribble','through-pass'],
+    '5':['memory-board','duel','pressure-exit'],
+    '2':['duel','pressure-exit','memory-board'],
+    '1':['keeper','memory-board','pressure-exit'],
   }
   const pool=pools[position]
   return pool[Math.floor(r()*pool.length)]??pool[0]
 }
 
 const finalCabalaGameFor=(r:()=>number):CabalaGameId=>{
-  const games:CabalaGameId[]=['higher-lower','dice-seven','coin-run','lucky-number','lucky-shirt','three-cups','wheel','tower','grid-reveal','boots']
+  const games:CabalaGameId[]=['higher-lower','dice-seven','coin-run','three-cups','wheel','tower']
   return games[Math.floor(r()*games.length)]??'higher-lower'
 }
 
