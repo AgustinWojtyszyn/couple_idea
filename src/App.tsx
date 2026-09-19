@@ -880,16 +880,12 @@ function CareerFinalPanel({
     </div>}
 
     {luckMode&&<div className="cabala-game">
-      <div className="cabala-game__head"><span>⚄ CABULERO</span><strong>Elegí tu ritual. Una sola vez.</strong><small>No hay botón correcto: tu estado mental y la suerte pesan.</small></div>
-      <div className="cabala-options">
-        <button onClick={()=>onResolved(resolveCabalFinal(state,0))}><b>01</b><strong>LA CINTA</strong><span>La usaste en juveniles. Hoy vuelve.</span></button>
-        <button onClick={()=>onResolved(resolveCabalFinal(state,1))}><b>02</b><strong>TODO IGUAL</strong><span>Misma comida, mismo camino, misma música.</span></button>
-        <button onClick={()=>onResolved(resolveCabalFinal(state,2))}><b>03</b><strong>ÚLTIMO EN SALIR</strong><span>Esperás a todos y pisás la cancha al final.</span></button>
-      </div>
+      <div className="cabala-game__head"><span>⚄ CABULERO</span><strong>{pending.kind==='title'?'El título se juega con la suerte.':pending.kind==='promotion'?'El ascenso depende de tu cábala.':'La permanencia se define ahora.'}</strong><small>Cinco rondas. El resultado del minijuego decide el partido.</small></div>
+      <CabalaMiniGame game={pending.cabalaGame} onComplete={(won,score)=>onResolved(resolveCabalFinal(state,won,score))}/>
     </div>}
 
     {skillMode&&<div className="final-skill-game">
-      <div className="final-skill-game__intro"><span>◎ HABILIDOSO</span><strong>{miniGames.find(game=>game.id===pending.miniGame)?.name??'Desafío final'}</strong><small>5 rondas. Un solo intento. Tu puntaje decide el título.</small></div>
+      <div className="final-skill-game__intro"><span>◎ HABILIDOSO</span><strong>{miniGames.find(game=>game.id===pending.miniGame)?.name??'Desafío final'}</strong><small>5 rondas. Un solo intento. El resultado decide {pending.kind==='title'?'el título':pending.kind==='promotion'?'el ascenso':'la permanencia'}.</small></div>
       <MiniGamesPanel mode="player" forcedGame={pending.miniGame} onScore={()=>{}} onComplete={score=>onResolved(resolveSkillFinal(state,score))}/>
     </div>}
   </div>
