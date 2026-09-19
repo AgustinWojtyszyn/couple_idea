@@ -2685,3 +2685,25 @@ button:focus-visible,input:focus-visible,select:focus-visible{box-shadow:0 0 0 3
     margin-top:-5px;
   }
 }
+
+
+/* V4 · crest loading state */
+.crest-skeleton{
+  flex:none;
+  display:block;
+  width:48px;
+  height:54px;
+  border-radius:12px;
+  background:
+    linear-gradient(110deg,rgba(255,255,255,.06) 20%,rgba(255,255,255,.16) 38%,rgba(255,255,255,.06) 56%),
+    var(--surface-2);
+  background-size:220% 100%;
+  border:1px solid var(--line);
+  animation:crest-shimmer 1.15s linear infinite;
+}
+.crest-skeleton--sm{width:34px;height:38px;border-radius:9px}
+.crest-skeleton--lg{width:66px;height:74px;border-radius:15px}
+@keyframes crest-shimmer{
+  from{background-position:120% 0}
+  to{background-position:-120% 0}
+}
