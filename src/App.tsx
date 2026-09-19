@@ -131,9 +131,10 @@ function Crest({name,size='md'}:{name:string;size?:'sm'|'md'|'lg'}){
 
 function useClubMedia(name:string){
   const [media,setMedia]=useState<ClubMedia>({})
-  const [loading,setLoading]=useState(true)
+  const [loading,setLoading]=useState(Boolean(name))
   useEffect(()=>{
     let alive=true
+    if(!name){setMedia({});setLoading(false);return()=>{alive=false}}
     setLoading(true)
     void getClubMedia(name).then(value=>{
       if(!alive)return
@@ -351,173 +352,162 @@ function Home({
   const [playerMode,setPlayerMode]=useState<PlayerMode>('classic')
   const [name,setName]=useState('')
   const [nationality,setNationality]=useState('Argentina')
-  const [country,setCountry]=useState(countries.includes('Argentina')?'Argentina':countries[0]??'')
-  const countryLeagues=leagues.filter(l=>l.country===country).sort((a,b)=>a.tier-b.tier)
-  const [leagueId,setLeagueId]=useState(countryLeagues[0]?.id??leagues[0]?.id??'')
-  const availableLeagues=leagues.filter(l=>l.country===country).sort((a,b)=>a.tier-b.tier)
-  const activeLeague=availableLeagues.some(l=>l.id===leagueId)?leagueId:(availableLeagues[0]?.id??'')
-  const availableClubs=clubsByLeague(activeLeague)
-  const [clubId,setClubId]=useState(availableClubs[0]?.id??clubs[0]?.id??'')
-  const activeClub=availableClubs.some(c=>c.id===clubId)?clubId:(availableClubs[0]?.id??'')
+  const [country,setCountry]=useState('')
+  const [leagueId,setLeagueId]=useState('')
+  const [clubId,setClubId]=useState('')
   const [position,setPosition]=useState<Position>('9')
   const [clubPickerOpen,setClubPickerOpen]=useState(false)
 
+  const availableLeagues=country?leagues.filter(l=>l.country===country).sort((a,b)=>a.tier-b.tier):[]
+  const activeLeague=availableLeagues.some(l=>l.id===leagueId)?leagueId:''
+  const availableClubs=activeLeague?clubsByLeague(activeLeague):[]
+  const activeClub=availableClubs.some(club=>club.id===clubId)?clubId:''
+  const selectedClub=activeClub?clubById(activeClub):null
+  const {media:selectedMedia}=useClubMedia(selectedClub?.name??'')
+  const canStart=Boolean(country&&activeLeague&&activeClub)
+
   const changeCountry=(value:string)=>{
     setCountry(value)
-    const firstLeague=leagues.filter(l=>l.country===value).sort((a,b)=>a.tier-b.tier)[0]
-    setLeagueId(firstLeague?.id??'')
-    setClubId(firstLeague?clubsByLeague(firstLeague.id)[0]?.id??'':'')
+    setLeagueId('')
+    setClubId('')
+    setClubPickerOpen(false)
   }
 
   const changeLeague=(value:string)=>{
     setLeagueId(value)
-    setClubId(clubsByLeague(value)[0]?.id??'')
+    setClubId('')
+    setClubPickerOpen(false)
   }
 
-  const selectedClub=clubById(activeClub)
-  const {media:selectedMedia}=useClubMedia(selectedClub.name)
-
   useEffect(()=>{
-    if(country!=='Argentina')return
+    if(country!=='Argentina'||!activeLeague)return
     const id=window.setTimeout(()=>{
-      void preloadClubMedia(availableClubs.map(club=>club.name),4,true)
-    },180)
+      void preloadClubMedia(availableClubs.map(club=>club.name),5,true)
+    },120)
     return()=>window.clearTimeout(id)
   },[country,activeLeague])
 
+  const leagueLabel=activeLeague?leagueById(activeLeague):null
+
   return <div className="shell shell--home">
     <header className="site-header">
-      <a className="brand" href="#" onClick={e=>e.preventDefault()}>
+      <a className="brand" href="#" onClick={event=>event.preventDefault()}>
         <LeyendaLogo size="sm"/>
-        <span><strong>LEYENDA</strong><small>FÚTBOL · DECISIONES · HISTORIA</small></span>
+        <span><strong>LEYENDA</strong><small>FÚTBOL · DESTINO · GLORIA</small></span>
       </a>
       <ThemeToggle theme={theme} onToggle={onTheme}/>
     </header>
 
     <div className="home-layout">
       <aside className="desktop-rail">
-        <div className="rail-title"><span>◈</span> UNIVERSO</div>
-        <div className="rail-search">⌕ Buscar país o liga</div>
+        <div className="rail-title"><span>✦</span> MUNDO LEYENDA</div>
+        <div className="rail-search">Elegí dónde empieza tu historia</div>
         <div className="rail-list">
           {countries.slice(0,12).map(item=><button key={item} className={item===country?'active':''} onClick={()=>changeCountry(item)}>
-            <span>{item}</span><b>{leagues.filter(l=>l.country===item).length}</b>
+            <span>{item}</span><b>{leagues.filter(league=>league.country===item).length}</b>
           </button>)}
         </div>
-        <div className="rail-foot"><strong>{countries.length}</strong><span>países disponibles en la base actual</span></div>
+        <div className="rail-foot"><strong>ARG</strong><span>Primera + Primera Nacional listas para test.</span></div>
       </aside>
 
-      <main className="home-main">
-        <section className="hero-card">
+      <main className="home-main home-main--compact">
+        <section className="hero-card hero-card--compact">
           <div className="hero-card__glow"/>
-          <div className="hero-card__top">
-            <span className="eyebrow">NUEVA GENERACIÓN · V2</span>
-            <span className="status-dot">● EN DESARROLLO</span>
-          </div>
-          <div className="hero-card__brand"><LeyendaLogo size="lg"/><span>LEYENDA</span><small>Argentina Lab · club, rol, decisiones y stats</small></div>
+          <div className="hero-card__top"><span className="eyebrow">NUEVA CARRERA</span><span className="status-dot">● ARGENTINA LAB</span></div>
+          <div className="hero-card__brand"><LeyendaLogo size="lg"/><span>LEYENDA</span><small>Ganate el nombre. No te lo regala nadie.</small></div>
           <div className="mode-tabs">
             <button className={gameMode==='player'?'active':''} onClick={()=>setGameMode('player')}>MODO JUGADOR</button>
             <button className={gameMode==='coach'?'active':''} onClick={()=>setGameMode('coach')}>MODO ENTRENADOR</button>
           </div>
         </section>
 
-        <section className="daily-card">
-          <div className="section-head">
-            <div><span className="eyebrow">DESAFÍO DEL DÍA</span><h2>Misma semilla. Distinta historia.</h2></div>
-            <span className="pill">HOY</span>
-          </div>
-          <div className="daily-goals">
-            <div><b>01</b><span>Terminá una carrera</span><strong>+500</strong></div>
-            <div><b>02</b><span>Conseguí un título</span><strong>+250</strong></div>
-            <div><b>03</b><span>Superá tu mejor score</span><strong>+150</strong></div>
-          </div>
-          {gameMode==='player'&&<button className="ghost-action" onClick={()=>setPlayerMode(playerMode==='daily'?'classic':'daily')}>
-            {playerMode==='daily'?'✓ Desafío diario activado':'Activar desafío diario'}
-          </button>}
-        </section>
-
-        {gameMode==='player'&&<StoryModes start={(storyName,storyPosition,storyClub)=>startPlayer(storyName,storyPosition,'classic',storyClub,'Argentina')}/>}
-
-        <section className="create-card">
-          <div className="section-head">
-            <div>
-              <span className="eyebrow">{gameMode==='player'?'CARRERA LIBRE':'DESPACHO DEL DT'}</span>
-              <h2>{gameMode==='player'?'Creá una historia que no se repita.':'Tomá un club y bancate la presión.'}</h2>
+        <section className="create-card create-card--primary">
+          <div className="setup-heading">
+            <div><span className="eyebrow">TU ARRANQUE</span><h2>Elegí dónde empieza todo.</h2><p>Nada se asigna al azar. País, división y club son decisión tuya.</p></div>
+            <div className="setup-progress">
+              <span className={country?'done':'active'}>1<small>PAÍS</small></span>
+              <span className={activeLeague?'done':country?'active':''}>2<small>DIVISIÓN</small></span>
+              <span className={activeClub?'done':activeLeague?'active':''}>3<small>CLUB</small></span>
+              <span className={activeClub?'active':''}>4<small>ROL</small></span>
             </div>
-            <button className="random-button" onClick={()=>{
-              const randomLeague=leagues[Math.floor(Math.random()*leagues.length)]
-              const randomClub=clubsByLeague(randomLeague.id)
-              changeCountry(randomLeague.country)
-              setLeagueId(randomLeague.id)
-              setClubId(randomClub[Math.floor(Math.random()*randomClub.length)]?.id??'')
-              setPosition(positions[Math.floor(Math.random()*positions.length)].id)
-            }}>⤨ AL AZAR</button>
           </div>
 
-          {country==='Argentina'&&<section className="argentina-lab-panel">
-            <div className="argentina-lab-head"><div><span>🇦🇷 PRUEBA ARGENTINA</span><strong>Primera División</strong></div><button className="club-picker-open" onClick={()=>setClubPickerOpen(true)}>{availableClubs.length} CLUBES ↗</button></div>
-            <div className="club-strip">
-              {availableClubs.slice(0,10).map(club=><button key={club.id} className={club.id===activeClub?'active':''} onClick={()=>setClubId(club.id)}>
+          <div className="form-grid form-grid--start">
+            {gameMode==='player'&&<SelectField label="NACIONALIDAD" value={nationality} onChange={setNationality}>
+              {[...new Set(['Argentina',...countries])].map(item=><option key={item} value={item}>{item}</option>)}
+            </SelectField>}
+            <SelectField label="PAÍS DE LA LIGA" value={country} onChange={changeCountry}>
+              <option value="">Elegí un país...</option>
+              {countries.map(item=><option key={item} value={item}>{item}</option>)}
+            </SelectField>
+            <SelectField label="DIVISIÓN" value={activeLeague} onChange={changeLeague}>
+              <option value="">{country?'Elegí una división...':'Primero elegí un país'}</option>
+              {availableLeagues.map(league=><option key={league.id} value={league.id}>{league.tier}ª División · {league.country}</option>)}
+            </SelectField>
+          </div>
+
+          {activeLeague&&<section className="club-choice-zone">
+            <div className="club-choice-head">
+              <div><span className="eyebrow">{country.toUpperCase()} · {leagueLabel?.tier}ª DIVISIÓN</span><h3>Elegí tu club</h3></div>
+              <button className="club-picker-open" onClick={()=>setClubPickerOpen(true)}>{availableClubs.length} CLUBES · VER TODOS</button>
+            </div>
+            <div className="club-strip club-strip--choice">
+              {availableClubs.slice(0,12).map(club=><button key={club.id} className={club.id===activeClub?'active':''} onClick={()=>setClubId(club.id)}>
                 <ClubCrest name={club.name}/>
                 <span>{club.name}</span>
               </button>)}
             </div>
           </section>}
 
-          <div className="form-grid">
-            {gameMode==='player'&&<SelectField label="NACIONALIDAD" value={nationality} onChange={setNationality}>
-              {[...new Set(['Argentina',...countries])].map(item=><option key={item}>{item}</option>)}
-            </SelectField>}
-            <SelectField label="PAÍS DE LA LIGA" value={country} onChange={changeCountry}>
-              {countries.map(item=><option key={item}>{item}</option>)}
-            </SelectField>
-            <SelectField label="DIVISIÓN" value={activeLeague} onChange={changeLeague}>
-              {availableLeagues.map(l=><option key={l.id} value={l.id}>{l.tier}ª División</option>)}
-            </SelectField>
-            {country!=='Argentina'&&<SelectField label="EQUIPO" value={activeClub} onChange={setClubId}>
-              {availableClubs.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}
-            </SelectField>}
-          </div>
-
-          <div className="club-preview club-preview--media" style={(selectedMedia.stadiumImage??selectedMedia.image)?{backgroundImage:'linear-gradient(90deg,var(--surface) 18%,rgba(5,10,18,.72)),url("'+(selectedMedia.stadiumImage??selectedMedia.image)+'")'}:undefined}>
+          {selectedClub?<div className="club-preview club-preview--media club-preview--selected" style={(selectedMedia.stadiumImage??selectedMedia.image)?{backgroundImage:'linear-gradient(90deg,var(--surface) 18%,rgba(5,10,18,.7)),url("'+(selectedMedia.stadiumImage??selectedMedia.image)+'")'}:undefined}>
             <ClubCrest name={selectedClub.name} size="lg"/>
-            <div><span>{leagueById(selectedClub.leagueId).name}</span><strong>{selectedClub.name}</strong><small>{selectedMedia.logo?'Escudo cargado desde Wikimedia':'Identidad visual de respaldo LEYENDA'}</small></div>
-          </div>
+            <div><span>{leagueById(selectedClub.leagueId).name}</span><strong>{selectedClub.name}</strong><small>Este será tu primer club.</small></div>
+            <b>✓</b>
+          </div>:<div className="club-empty-prompt"><b>◈</b><span><strong>Elegí un club para continuar.</strong><small>La carrera no arranca hasta que vos decidas el destino.</small></span></div>}
 
           <label className="name-field">
             <span>{gameMode==='player'?'NOMBRE O APODO':'NOMBRE DEL ENTRENADOR'}</span>
-            <input value={name} onChange={e=>setName(e.target.value)} maxLength={24} placeholder={gameMode==='player'?'Ej: El Zurdo':'Ej: Míster A.'}/>
+            <input value={name} onChange={event=>setName(event.target.value)} maxLength={24} placeholder={gameMode==='player'?'Ej: El Zurdo':'Ej: Míster A.'}/>
           </label>
 
-          {gameMode==='player'&&<div className="positions">
-            {positions.map(p=><button key={p.id} className={position===p.id?'active':''} onClick={()=>setPosition(p.id)}>
-              <b>{p.id}</b><strong>{p.title.split('·')[1]}</strong><span>{p.subtitle}</span>
-            </button>)}
+          {gameMode==='player'&&<div className="position-choice">
+            <div className="position-choice__head"><span className="eyebrow">POSICIÓN</span><strong>Elegí por identidad, no por números.</strong></div>
+            <div className="positions">
+              {positions.map(item=><button key={item.id} className={position===item.id?'active':''} onClick={()=>setPosition(item.id)}>
+                <b>{item.id}</b><strong>{item.title.split('·')[1]}</strong><span>{item.subtitle}</span>
+              </button>)}
+            </div>
           </div>}
 
           {gameMode==='coach'&&<div className="coach-features">
             <span>◈ Mercado</span><span>◈ Juveniles</span><span>◈ Vestuario</span><span>◈ Táctica</span>
           </div>}
 
-          <button className="play-button" onClick={()=>{
+          <button className="play-button start-career-button" disabled={!canStart} onClick={()=>{
+            if(!activeClub)return
             if(gameMode==='player') startPlayer(name,position,playerMode,activeClub,nationality)
             else startCoach(name,activeClub)
           }}>
-            <span>▶</span>{gameMode==='player'?'EMPEZAR CARRERA':'ASUMIR COMO ENTRENADOR'}
+            <span>▶</span>{canStart?(gameMode==='player'?'EMPEZAR CARRERA':'ASUMIR COMO ENTRENADOR'):'ELEGÍ PAÍS, DIVISIÓN Y CLUB'}
           </button>
         </section>
 
-        <section className="feature-grid">
-          <article><span>⌁</span><div><strong>RANKING</strong><small>Compará runs y récords</small></div></article>
-          <article><span>◎</span><div><strong>10 MINIJUEGOS</strong><small>5 jugador · 5 entrenador</small></div></article>
-          <article><span>↗</span><div><strong>MERCADO</strong><small>Decisiones de carrera</small></div></article>
-          <article><span>◇</span><div><strong>MODO DT</strong><small>8 temporadas de presión</small></div></article>
+        <section className="daily-card daily-card--compact">
+          <div className="section-head"><div><span className="eyebrow">DESAFÍO DEL DÍA</span><h2>Una carrera corta. Una semilla compartida.</h2></div><span className="pill">HOY</span></div>
+          <div className="daily-goals daily-goals--horizontal"><div><b>01</b><span>Terminá</span><strong>+500</strong></div><div><b>02</b><span>Ganate un título</span><strong>+250</strong></div><div><b>03</b><span>Superá tu score</span><strong>+150</strong></div></div>
+          {gameMode==='player'&&<button className="ghost-action" onClick={()=>setPlayerMode(playerMode==='daily'?'classic':'daily')}>{playerMode==='daily'?'✓ Desafío diario activado':'Activar desafío diario'}</button>}
         </section>
 
-        {clubPickerOpen&&country==='Argentina'&&<ClubPickerModal clubsList={availableClubs} selectedId={activeClub} onSelect={setClubId} onClose={()=>setClubPickerOpen(false)}/>}
+        <section className="feature-grid feature-grid--compact">
+          <article><span>◎</span><div><strong>MINIJUEGOS</strong><small>Finales y partidos decisivos</small></div></article>
+          <article><span>↗</span><div><strong>MERCADO</strong><small>Ofertas desde tu primera temporada</small></div></article>
+          <article><span>♛</span><div><strong>PALMARÉS</strong><small>Copas, ascensos y gloria</small></div></article>
+          <article><span>⌁</span><div><strong>RANKING</strong><small>Compará carreras completas</small></div></article>
+        </section>
 
-        <footer className="legal-note">
-          LEYENDA no incluye jugadores reales, marcas ni escudos oficiales. Los nombres de clubes provienen de fuentes abiertas; la identidad visual de los clubes dentro del juego es generada.
-        </footer>
+        {clubPickerOpen&&activeLeague&&<ClubPickerModal clubsList={availableClubs} selectedId={activeClub} onSelect={setClubId} onClose={()=>setClubPickerOpen(false)}/>}
+
+        <footer className="legal-note">LEYENDA usa nombres de clubes reales y referencias públicas de Wikipedia/Wikimedia para sus escudos durante esta prueba. No incluye futbolistas reales.</footer>
       </main>
     </div>
   </div>
