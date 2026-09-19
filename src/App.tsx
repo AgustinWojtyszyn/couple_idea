@@ -118,6 +118,25 @@ function MatchdayScene({clubName,media,mode,season,age}:{clubName:string;media:C
   </section>
 }
 
+function DecisionScene({category,title,media,clubName}:{category:string;title:string;media:ClubMedia;clubName:string}){
+  const visuals:Record<string,{icon:string;label:string}>={
+    football:{icon:'⚽',label:'CANCHA'},
+    life:{icon:'◌',label:'FUERA DEL FÚTBOL'},
+    media:{icon:'◉',label:'PRENSA'},
+    health:{icon:'✚',label:'PARTE MÉDICO'},
+    contract:{icon:'↗',label:'CONTRATO'},
+    locker:{icon:'▦',label:'VESTUARIO'},
+    coach:{icon:'⌁',label:'DECISIÓN DEL DT'},
+  }
+  const visual=visuals[category]??visuals.football
+  const background=category==='football'?(media.stadiumImage??media.image):(media.image??media.stadiumImage)
+  return <div className={'decision-scene decision-scene--'+category} style={background?{backgroundImage:'linear-gradient(90deg,rgba(3,9,18,.82),rgba(3,9,18,.28)),url("'+background+'")'}:undefined}>
+    <div className="decision-scene__icon">{visual.icon}</div>
+    <div className="decision-scene__copy"><span>{visual.label}</span><strong>{title}</strong><small>{clubName}</small></div>
+    <div className="decision-scene__graphic"><i/><i/><i/></div>
+  </div>
+}
+
 function ThemeToggle({theme,onToggle}:{theme:Theme;onToggle:()=>void}){
   return <button className="theme-toggle" onClick={onToggle} aria-label="Cambiar tema">
     <span className="theme-toggle__icon">{theme==='dark'?'☾':'☀'}</span>
@@ -786,7 +805,7 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
         <section className="panel event-panel">
           {lastEffects&&<div className="decision-feedback"><div><span className="eyebrow">DECISIÓN TOMADA</span><strong>Tu jugador cambió</strong><EffectChips effects={lastEffects}/></div><button onClick={()=>setLastEffects(null)}>×</button></div>}
           {state.retired?<><span className="eyebrow">FINAL DE CARRERA</span><h2>Tu historia ya está escrita.</h2><p>Terminaste {state.history.length} temporadas con {state.matches} partidos y {state.titles} títulos.</p><div className="final-score"><span>SCORE FINAL</span><strong>{careerScore(state).toLocaleString('es-AR')}</strong></div></>:
-          state.activeEvent?<><span className="eyebrow">{state.activeEvent.eyebrow}</span><h2>{state.activeEvent.title}</h2><p>{state.activeEvent.body}</p><div className="decision-list">{state.activeEvent.options.map(o=><button key={o.id} onClick={()=>{setLastEffects(o.effects);setState(choosePlayerEvent(state,o as EventOption))}}><div><strong>{o.label}</strong><span>{o.description}</span><EffectChips effects={o.effects}/></div><b>→</b></button>)}</div></>:
+          state.activeEvent?<><DecisionScene category={state.activeEvent.category} title={state.activeEvent.title} media={playerMedia} clubName={club.name}/><span className="eyebrow">{state.activeEvent.eyebrow}</span><h2>{state.activeEvent.title}</h2><p>{state.activeEvent.body}</p><div className="decision-list">{state.activeEvent.options.map(o=><button key={o.id} onClick={()=>{setLastEffects(o.effects);setState(choosePlayerEvent(state,o as EventOption))}}><div><strong>{o.label}</strong><span>{o.description}</span><EffectChips effects={o.effects}/></div><b>→</b></button>)}</div></>:
           <><span className="eyebrow">TEMPORADA {state.season} DE {state.maxSeasons}</span><h2>Todo listo para competir.</h2><p>Tu estado físico, la confianza, el vestuario y las decisiones ya están en juego.</p><button className="play-button" onClick={playSeason}>▶ JUGAR TEMPORADA</button></>}
         </section>
 
@@ -858,7 +877,7 @@ function CoachGame({state,setState,theme,onTheme,onExit}:{state:CoachState;setSt
       {tab==='career'&&<div className="dashboard-grid">
         <section className="panel event-panel">
           {state.retired?<><span className="eyebrow">FIN DEL CICLO</span><h2>Tu proyecto terminó.</h2><p>Ocho temporadas de decisiones, mercado y vestuario.</p><div className="final-score"><span>SCORE DT</span><strong>{coachScore(state).toLocaleString('es-AR')}</strong></div></>:
-          state.activeEvent?<><span className="eyebrow">DECISIÓN DEL ENTRENADOR</span><h2>{state.activeEvent.title}</h2><p>{state.activeEvent.body}</p><div className="decision-list">{state.activeEvent.options.map(o=><button key={o.id} onClick={()=>setState(chooseCoachEvent(state,o))}><div><strong>{o.label}</strong><span>Impacta en tu proyecto.</span></div><b>→</b></button>)}</div></>:
+          state.activeEvent?<><DecisionScene category="coach" title={state.activeEvent.title} media={coachMedia} clubName={club.name}/><span className="eyebrow">DECISIÓN DEL ENTRENADOR</span><h2>{state.activeEvent.title}</h2><p>{state.activeEvent.body}</p><div className="decision-list">{state.activeEvent.options.map(o=><button key={o.id} onClick={()=>setState(chooseCoachEvent(state,o))}><div><strong>{o.label}</strong><span>Impacta en tu proyecto.</span></div><b>→</b></button>)}</div></>:
           <><span className="eyebrow">TEMPORADA {state.season}</span><h2>El equipo está listo.</h2><p>La táctica, la moral, los juveniles y la confianza de la directiva definen el año.</p><button className="play-button" onClick={()=>setState(simulateCoachSeason(state))}>▶ DIRIGIR TEMPORADA</button></>}
         </section>
         <aside className="panel condition-panel"><span className="eyebrow">PROYECTO</span><h3>Estado del club</h3><Meter label="Directiva" value={state.boardTrust}/><Meter label="Hinchas" value={state.fanTrust}/><Meter label="Moral" value={state.morale}/><Meter label="Táctica" value={state.tacticalRating}/><Meter label="Juveniles" value={state.youthRating}/></aside>
