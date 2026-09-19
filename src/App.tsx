@@ -736,6 +736,103 @@ function MiniGamesPanel({
   </section>
 }
 
+function FinalStyleChoice({onChoose}:{onChoose:(style:FinalStyle)=>void}){
+  const styles:Array<{id:FinalStyle;icon:string;title:string;kicker:string;body:string;accent:string}>=[
+    {id:'cabulero',icon:'⚄',title:'CABULERO',kicker:'QUE DECIDA EL DESTINO',body:'Las finales se resuelven con rituales, intuición y suerte. Elegís tu cábala y bancás el resultado.',accent:'luck'},
+    {id:'mixto',icon:'⇄',title:'MIXTO',kicker:'CABEZA + INSTINTO',body:'En cada final decidís: jugar un minijuego o confiar en la cábala. Más libertad, más decisiones.',accent:'mix'},
+    {id:'habilidoso',icon:'◎',title:'HABILIDOSO',kicker:'TODO EN TUS MANOS',body:'Todas las finales se juegan. Timing, puntería, reflejos o duelo según tu posición.',accent:'skill'},
+  ]
+  return <div className="final-style-choice">
+    <div className="final-style-choice__head"><span className="eyebrow">REGLA DE TU CARRERA · NO SE PUEDE CAMBIAR</span><h2>¿Qué clase de jugador sos?</h2><p>Esto define cómo se juegan todas las finales de tu carrera.</p></div>
+    <div className="final-style-grid">{styles.map(style=><button key={style.id} className={'final-style-card final-style-card--'+style.accent} onClick={()=>onChoose(style.id)}>
+      <b>{style.icon}</b>
+      <div><small>{style.kicker}</small><strong>{style.title}</strong><span>{style.body}</span></div>
+      <em>ELEGIR →</em>
+    </button>)}</div>
+  </div>
+}
+
+function CareerFinalPanel({
+  state,onResolved
+}:{state:CareerState;onResolved:(next:CareerState)=>void}){
+  const pending=state.pendingFinal
+  const [mixedMode,setMixedMode]=useState<'skill'|'luck'|null>(null)
+  if(!pending)return null
+  const opponent=clubById(pending.opponentClubId)
+  const style=state.finalStyle??'mixto'
+  const skillMode=style==='habilidoso'||(style==='mixto'&&mixedMode==='skill')
+  const luckMode=style==='cabulero'||(style==='mixto'&&mixedMode==='luck')
+
+  return <div className="career-final">
+    <div className="career-final__hero">
+      <div><span className="eyebrow">FINAL · {pending.competition.toUpperCase()}</span><h2>Noventa minutos para cambiar tu carrera.</h2></div>
+      <div className="career-final__versus"><ClubCrest name={clubById(state.clubId).name} size="lg"/><b>VS</b><ClubCrest name={opponent.name} size="lg"/></div>
+      <div className="career-final__clubs"><strong>{clubById(state.clubId).name}</strong><span>{opponent.name}</span></div>
+      <p>Tu estilo permanente es <b>{style.toUpperCase()}</b>. Esta final no se simula por detrás.</p>
+    </div>
+
+    {style==='mixto'&&!mixedMode&&<div className="mixed-final-choice">
+      <button onClick={()=>setMixedMode('skill')}><b>◎</b><strong>JUGARLA</strong><span>Resolver la final con un minijuego de habilidad.</span></button>
+      <button onClick={()=>setMixedMode('luck')}><b>⚄</b><strong>IR CON LA CÁBALA</strong><span>Elegir un ritual y aceptar lo que salga.</span></button>
+    </div>}
+
+    {luckMode&&<div className="cabala-game">
+      <div className="cabala-game__head"><span>⚄ CABULERO</span><strong>Elegí tu ritual. Una sola vez.</strong><small>No hay botón correcto: tu estado mental y la suerte pesan.</small></div>
+      <div className="cabala-options">
+        <button onClick={()=>onResolved(resolveCabalFinal(state,0))}><b>01</b><strong>LA CINTA</strong><span>La usaste en juveniles. Hoy vuelve.</span></button>
+        <button onClick={()=>onResolved(resolveCabalFinal(state,1))}><b>02</b><strong>TODO IGUAL</strong><span>Misma comida, mismo camino, misma música.</span></button>
+        <button onClick={()=>onResolved(resolveCabalFinal(state,2))}><b>03</b><strong>ÚLTIMO EN SALIR</strong><span>Esperás a todos y pisás la cancha al final.</span></button>
+      </div>
+    </div>}
+
+    {skillMode&&<div className="final-skill-game">
+      <div className="final-skill-game__intro"><span>◎ HABILIDOSO</span><strong>{miniGames.find(game=>game.id===pending.miniGame)?.name??'Desafío final'}</strong><small>5 rondas. Un solo intento. Tu puntaje decide el título.</small></div>
+      <MiniGamesPanel mode="player" forcedGame={pending.miniGame} onScore={()=>{}} onComplete={score=>onResolved(resolveSkillFinal(state,score))}/>
+    </div>}
+  </div>
+}
+
+function MarketPanel({
+  state,onState,onDone
+}:{state:CareerState;onState:(next:CareerState)=>void;onDone:()=>void}){
+  const club=clubById(state.clubId)
+  const offers=state.transferOffers??[]
+  const salary=state.currentSalary??club.salary
+  const yearsLeft=state.contractYearsLeft??0
+  const choose=(next:CareerState)=>{onState(next);onDone()}
+
+  return <section className="market-core">
+    <div className="market-core__head">
+      <div><span className="eyebrow">{state.marketDecisionRequired?'MERCADO ABIERTO · DECISIÓN OBLIGATORIA':'CONTRATO Y MERCADO'}</span><h2>¿Dónde jugás la próxima temporada?</h2><p>La carrera también se construye eligiendo cuándo quedarte y cuándo irte.</p></div>
+      <span className="market-window">↗ PASES</span>
+    </div>
+
+    <article className="current-contract-card">
+      <ClubCrest name={club.name} size="lg"/>
+      <div><small>CLUB ACTUAL</small><strong>{club.name}</strong><span>{leagueById(club.leagueId).name}</span></div>
+      <aside><b>$ {formatMoney(salary)}</b><span>/ mes</span><em>{yearsLeft>0?yearsLeft+' año'+(yearsLeft===1?'':'s')+' restante'+(yearsLeft===1?'':'s'):'CONTRATO VENCIDO'}</em></aside>
+    </article>
+
+    <div className="market-actions">
+      {yearsLeft>0&&<button className="stay-button" onClick={()=>choose(stayAtClub(state))}><b>⌂</b><span><strong>SEGUIR EN {club.short}</strong><small>Respetar el contrato actual por otra temporada.</small></span></button>}
+      <button className="renew-button" onClick={()=>choose(renewCurrentClub(state,3))}><b>✎</b><span><strong>RENOVAR 3 AÑOS</strong><small>Nuevo sueldo y continuidad. Conservás toda tu huella en el club.</small></span></button>
+    </div>
+
+    <div className="transfer-offers-head"><span>OFERTAS SOBRE LA MESA</span><strong>{offers.length}</strong></div>
+    {offers.length===0?<div className="empty-state"><b>↗</b><strong>No llegaron propuestas externas.</strong><span>Podés seguir o renovar con tu club.</span></div>:
+    <div className="transfer-offer-list">{offers.map((offer:TransferOffer)=>{
+      const destination=clubById(offer.clubId)
+      const prestigeDelta=destination.prestige-club.prestige
+      return <article key={offer.clubId} className="transfer-offer-card">
+        <div className="transfer-offer-card__top"><ClubCrest name={destination.name} size="lg"/><div><span>{leagueById(destination.leagueId).name}</span><strong>{destination.name}</strong><small>{offer.role} · prestigio {destination.prestige}</small></div><em>{prestigeDelta>0?'▲ '+prestigeDelta:prestigeDelta<0?'▼ '+Math.abs(prestigeDelta):'='}</em></div>
+        <div className="transfer-offer-card__terms"><div><span>SUELDO</span><b>$ {formatMoney(offer.salary)}</b></div><div><span>CONTRATO</span><b>{offer.years} AÑOS</b></div><div><span>PRIMA</span><b>$ {formatMoney(offer.signingBonus)}</b></div></div>
+        <div className="transfer-offer-card__warning">Al irte, la huella construida en {club.name} queda atrás. Tu reputación viaja con vos; la idolatría no.</div>
+        <button onClick={()=>choose(acceptTransferOffer(state,offer))}>FIRMAR CON {destination.short} →</button>
+      </article>
+    })}</div>}
+  </section>
+}
+
 function trainingOptionsFor(position:Position){
   const common={
     physical:['physical','Potencia física','Físico · velocidad · energía'],
