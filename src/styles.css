@@ -7507,3 +7507,560 @@ button.gesture-pitch{
     font-size:7px!important;
   }
 }
+
+
+/* =========================================================
+   V11 · visible cabalas, swipe market and richer match scenes
+   ========================================================= */
+
+/* Cabulero typography: never collapse kicker/title/status together */
+.cabala-minigame{
+  display:grid;
+  gap:14px;
+}
+.cabala-minigame__top{
+  position:relative;
+  display:grid!important;
+  grid-template-columns:1fr auto;
+  grid-template-areas:
+    "kicker status"
+    "title title";
+  align-items:end;
+  gap:5px 12px;
+  padding:12px 13px 11px;
+  overflow:hidden;
+  border:1px solid rgba(244,204,91,.2);
+  border-radius:14px;
+  background:
+    radial-gradient(circle at 100% 0,rgba(245,204,84,.11),transparent 35%),
+    linear-gradient(145deg,rgba(42,31,9,.38),rgba(7,16,27,.82));
+}
+.cabala-minigame__top:before{
+  content:'';
+  position:absolute;
+  left:0;top:0;bottom:0;
+  width:3px;
+  background:linear-gradient(#ffe27c,#b27a1d);
+}
+.cabala-minigame__top>span{
+  grid-area:kicker;
+  min-width:0;
+  color:#f0c95d;
+  font-size:9px!important;
+  line-height:1.15;
+  font-weight:950;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+.cabala-minigame__top>strong{
+  grid-area:title;
+  display:block;
+  margin:0!important;
+  color:#fff;
+  font:900 clamp(29px,7.8vw,42px)/.92 var(--font-display)!important;
+  letter-spacing:-.018em;
+  text-wrap:balance;
+  text-shadow:0 8px 22px rgba(0,0,0,.3);
+}
+.cabala-minigame__top>small{
+  grid-area:status;
+  align-self:start;
+  padding:6px 8px;
+  border:1px solid rgba(244,204,91,.2);
+  border-radius:999px;
+  background:rgba(244,204,91,.07);
+  color:#f6dfa1!important;
+  font-size:8px!important;
+  line-height:1;
+  font-weight:900;
+  white-space:nowrap;
+}
+.cabala-question{
+  position:relative;
+  z-index:5;
+  color:#e6edf7!important;
+  font-size:14px!important;
+  line-height:1.38!important;
+  font-weight:650;
+}
+.minigame-feedback{
+  min-height:44px!important;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:9px 12px!important;
+  border-radius:11px!important;
+  color:#aebfd3!important;
+  font-size:9px!important;
+  font-weight:850;
+  letter-spacing:.03em;
+}
+
+/* Higher / lower: visible starting number and clear three-beat progression */
+.palpito-stage{
+  position:relative;
+  min-height:390px;
+  display:grid;
+  align-content:center;
+  gap:14px;
+  padding:20px 14px 14px;
+  overflow:hidden;
+  border:1px solid rgba(240,201,93,.17);
+  border-radius:16px;
+  background:#10261d;
+}
+.palpito-stage .cabala-table-art{
+  opacity:.88;
+}
+.palpito-progress{
+  position:relative;
+  z-index:3;
+  display:flex;
+  justify-content:center;
+  gap:8px;
+}
+.palpito-progress span{
+  width:36px;height:28px;
+  display:grid;
+  place-items:center;
+  border:1px solid rgba(255,255,255,.11);
+  border-radius:8px;
+  background:rgba(3,10,14,.5);
+  color:#708173;
+  font:900 12px/1 var(--font-display);
+}
+.palpito-progress span.active{
+  border-color:rgba(240,201,93,.58);
+  color:#f0cf6e;
+  box-shadow:0 0 18px rgba(240,201,93,.13);
+}
+.palpito-progress span.done{
+  border-color:rgba(93,221,157,.32);
+  color:#69dfa7;
+}
+.palpito-card{
+  position:relative;
+  z-index:3;
+  width:min(210px,58vw);
+  aspect-ratio:.72;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  margin:0 auto;
+  border:2px solid rgba(250,236,197,.72);
+  border-radius:20px;
+  background:
+    radial-gradient(circle at 50% 42%,rgba(255,221,121,.14),transparent 36%),
+    linear-gradient(155deg,#fff9e8,#d9d0ba);
+  color:#17231d;
+  box-shadow:0 24px 42px rgba(0,0,0,.34),inset 0 0 0 6px rgba(80,51,16,.055);
+  animation:palpito-card-in .28s cubic-bezier(.2,.8,.2,1);
+}
+.palpito-card:before,
+.palpito-card:after{
+  content:'♠';
+  position:absolute;
+  color:#7b243a;
+  font-size:25px;
+}
+.palpito-card:before{left:12px;top:8px}
+.palpito-card:after{right:12px;bottom:8px;transform:rotate(180deg)}
+.palpito-card small{
+  color:#8e6c2a!important;
+  font-size:8px!important;
+  font-weight:950;
+  letter-spacing:.12em;
+}
+.palpito-card strong{
+  margin:8px 0 4px;
+  font:950 78px/.78 var(--font-display);
+  letter-spacing:-.05em;
+}
+.palpito-card span{
+  color:#665f52;
+  font-size:9px;
+  font-weight:950;
+  letter-spacing:.08em;
+}
+@keyframes palpito-card-in{
+  from{transform:translateY(-14px) rotate(-2deg) scale(.94);opacity:.25}
+  to{transform:none;opacity:1}
+}
+.palpito-stage .two-actions{
+  position:relative;
+  z-index:4;
+  gap:8px;
+}
+.palpito-stage .two-actions button{
+  min-height:52px!important;
+  border-color:rgba(240,201,93,.24)!important;
+  background:rgba(5,14,18,.82)!important;
+  color:#fff!important;
+  font-size:11px!important;
+  font-weight:950!important;
+}
+
+/* Real cup shuffle: reveal -> shuffle -> choose */
+.cabala-cups-stage{
+  display:grid;
+  gap:12px;
+}
+.cups-phase{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:9px 11px;
+  border:1px solid rgba(87,169,255,.18);
+  border-radius:11px;
+  background:rgba(14,32,51,.62);
+}
+.cups-phase b{
+  color:#74c8ff;
+  font-size:9px;
+  letter-spacing:.06em;
+}
+.cups-phase span{
+  color:#afbed0;
+  font-size:8px;
+  text-align:right;
+}
+.real-cups-row{
+  position:relative;
+  min-height:255px;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:17px;
+  background:
+    radial-gradient(ellipse at 50% 83%,rgba(82,221,154,.14),transparent 34%),
+    linear-gradient(180deg,#0f1b28 0 45%,#143429 45% 100%);
+  box-shadow:inset 0 -44px 70px rgba(0,0,0,.2);
+}
+.real-cups-row:before{
+  content:'';
+  position:absolute;
+  left:5%;right:5%;bottom:43px;
+  height:2px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.16),transparent);
+}
+.real-cups-row button{
+  position:absolute;
+  top:38px;
+  width:33.333%;
+  height:175px;
+  border:0;
+  background:transparent;
+  color:#fff;
+  transition:left .28s cubic-bezier(.2,.8,.2,1),transform .22s ease;
+  touch-action:manipulation;
+}
+.real-cups-row button.show-ball{
+  transform:translateY(-22px);
+}
+.real-cups-row button:disabled{
+  opacity:1;
+}
+.hidden-ball{
+  position:absolute;
+  z-index:1;
+  left:50%;
+  bottom:16px;
+  transform:translateX(-50%) scale(.68);
+  font-size:27px;
+  filter:drop-shadow(0 6px 5px rgba(0,0,0,.5));
+  transition:opacity .15s ease;
+}
+.real-cups-row button:not(.show-ball) .hidden-ball{
+  opacity:0;
+}
+.real-cup{
+  position:absolute;
+  z-index:3;
+  left:50%;
+  bottom:18px;
+  width:86px;
+  height:118px;
+  transform:translateX(-50%);
+  clip-path:polygon(10% 2%,90% 2%,78% 100%,22% 100%);
+  border-radius:10px 10px 18px 18px;
+  background:
+    linear-gradient(90deg,rgba(255,255,255,.9),rgba(219,228,238,.92) 20%,rgba(132,151,174,.98) 52%,rgba(237,243,248,.96) 82%,rgba(178,193,210,.96));
+  box-shadow:
+    0 18px 18px rgba(0,0,0,.34),
+    inset 12px 0 15px rgba(255,255,255,.38),
+    inset -9px 0 14px rgba(65,82,101,.18);
+}
+.real-cup:before{
+  content:'';
+  position:absolute;
+  left:4px;right:4px;top:0;
+  height:13px;
+  border-radius:50%;
+  background:linear-gradient(#738396,#d8e1e9 45%,#6e7d8d);
+  box-shadow:inset 0 2px 3px rgba(0,0,0,.38);
+}
+.real-cup:after{
+  content:'';
+  position:absolute;
+  left:16%;right:16%;bottom:4px;
+  height:6px;
+  border-radius:50%;
+  background:rgba(51,67,83,.32);
+}
+.real-cup b{
+  position:absolute;
+  left:20%;right:20%;top:31%;
+  height:20%;
+  border-top:1px solid rgba(255,255,255,.55);
+  border-bottom:1px solid rgba(71,89,109,.16);
+  transform:skewY(-4deg);
+}
+.real-cup em{
+  position:absolute;
+  left:18%;top:10%;bottom:10%;
+  width:8%;
+  border-radius:99px;
+  background:rgba(255,255,255,.55);
+  filter:blur(.5px);
+}
+.real-cups-row.is-shuffling button{
+  filter:drop-shadow(0 4px 7px rgba(71,161,255,.1));
+}
+.real-cups-row button.winner .real-cup{
+  box-shadow:0 0 0 3px rgba(239,204,92,.4),0 18px 25px rgba(0,0,0,.38);
+}
+
+/* Wheel and luck games should feel like a game show, not plain text */
+.cabala-minigame--wheel{
+  background:
+    radial-gradient(circle at 50% 22%,rgba(248,201,63,.08),transparent 34%);
+}
+.cabala-minigame--wheel .wheel-wrap{
+  width:min(270px,72vw)!important;
+}
+.cabala-minigame--wheel .destiny-wheel{
+  width:min(255px,68vw)!important;
+  height:min(255px,68vw)!important;
+  border-width:9px!important;
+  box-shadow:0 25px 50px rgba(0,0,0,.42),0 0 0 3px rgba(244,213,116,.28)!important;
+}
+.cabala-minigame--wheel .wheel-pointer{
+  top:-15px!important;
+  font-size:28px!important;
+  color:#ffe27f!important;
+  text-shadow:0 4px 12px #000;
+}
+.cabala-minigame--wheel .luck-action{
+  min-height:54px!important;
+  border-radius:12px!important;
+  font-size:13px!important;
+  letter-spacing:.04em;
+  box-shadow:0 12px 28px rgba(183,126,22,.2);
+}
+
+/* Horizontal offers: native swipe, full cards, no next/prev UI */
+.transfer-offer-list--swipe{
+  display:flex!important;
+  gap:10px!important;
+  width:100%;
+  overflow-x:auto!important;
+  overscroll-behavior-x:contain;
+  scroll-snap-type:x mandatory;
+  scrollbar-width:none;
+  -webkit-overflow-scrolling:touch;
+  padding:2px 4px 10px 0;
+}
+.transfer-offer-list--swipe::-webkit-scrollbar{display:none}
+.transfer-offer-list--swipe .transfer-offer-card{
+  flex:0 0 min(88%,560px)!important;
+  scroll-snap-align:start;
+  scroll-snap-stop:always;
+}
+.transfer-offers-head>strong{
+  width:auto!important;
+  height:auto!important;
+  padding:6px 8px;
+  border-radius:999px!important;
+  color:#7fc6ff!important;
+  font-size:8px!important;
+  white-space:nowrap;
+}
+.offer-counter,
+.market-offer-carousel,
+.offer-dots{
+  display:none!important;
+}
+
+/* Habilidoso: visually read as an actual decisive moment */
+.modern-match-ribbon{
+  position:absolute;
+  z-index:9;
+  left:11px;right:11px;top:10px;
+  min-height:38px;
+  display:grid;
+  grid-template-columns:1fr auto auto;
+  align-items:center;
+  gap:9px;
+  padding:6px 9px;
+  border:1px solid rgba(255,255,255,.11);
+  border-radius:10px;
+  background:rgba(2,8,16,.76);
+  color:#eaf4ff;
+  backdrop-filter:blur(10px);
+}
+.modern-match-ribbon span{
+  color:#6fc8ff;
+  font-size:7px;
+  font-weight:950;
+  letter-spacing:.08em;
+}
+.modern-match-ribbon strong{
+  color:#fff;
+  font:900 14px/1 var(--font-display);
+}
+.modern-match-ribbon b{
+  padding:4px 7px;
+  border-radius:7px;
+  background:rgba(255,255,255,.06);
+  color:#ffdd7e;
+  font:900 12px/1 var(--font-display);
+}
+.modern-game__crowd{
+  height:92px!important;
+  background-size:23px 16px,26px 18px,22px 17px,28px 19px,21px 16px,auto!important;
+}
+.modern-game__lights{
+  top:67px!important;
+}
+.gesture-pitch{
+  top:93px!important;
+  background:
+    linear-gradient(90deg,transparent 49.7%,rgba(255,255,255,.19) 50%,transparent 50.3%),
+    linear-gradient(180deg,transparent 49.7%,rgba(255,255,255,.08) 50%,transparent 50.3%),
+    repeating-linear-gradient(90deg,#0f6245 0 52px,#0c533b 52px 104px)!important;
+  box-shadow:inset 0 0 80px rgba(0,0,0,.11);
+}
+.modern-keeper{
+  position:absolute;
+  z-index:4;
+  top:22%;
+  width:42px;height:64px;
+  transform:translateX(-50%);
+  transition:left .08s linear;
+}
+.modern-keeper i{
+  position:absolute;
+  left:50%;top:0;
+  width:17px;height:17px;
+  transform:translateX(-50%);
+  border-radius:50%;
+  background:#e4b590;
+}
+.modern-keeper b{
+  position:absolute;
+  left:50%;top:14px;
+  width:29px;height:34px;
+  transform:translateX(-50%);
+  border-radius:9px 9px 5px 5px;
+  background:linear-gradient(145deg,#ffbe3d,#d56c24);
+  box-shadow:0 5px 9px rgba(0,0,0,.22);
+}
+.modern-keeper span:before,
+.modern-keeper span:after{
+  content:'';
+  position:absolute;
+  top:20px;
+  width:25px;height:6px;
+  border-radius:99px;
+  background:#e7a437;
+}
+.modern-keeper span:before{right:27px;transform:rotate(-24deg)}
+.modern-keeper span:after{left:27px;transform:rotate(24deg)}
+.modern-game__intro>span{
+  font-size:9px!important;
+}
+.modern-game__intro h2{
+  margin-top:5px!important;
+  font-size:34px!important;
+}
+.modern-game__intro p{
+  font-size:10px!important;
+  line-height:1.45!important;
+}
+.gesture-pitch>strong{
+  min-height:36px;
+  display:grid;
+  place-items:center;
+  font-size:9px!important;
+}
+.modern-game__result>span{
+  font-size:8px!important;
+}
+.modern-game__result>b{
+  font-size:9px!important;
+}
+
+/* Make tiny game UI readable without bloating the page */
+.game-shell .eyebrow{
+  font-size:9px!important;
+  line-height:1.2;
+}
+.game-shell .market-core__head p,
+.game-shell .market-blocker p,
+.game-shell .current-contract-card span,
+.game-shell .current-contract-card small,
+.game-shell .market-actions small,
+.game-shell .transfer-offer-card__warning,
+.game-shell .transfer-offer-card__top span,
+.game-shell .transfer-offer-card__top small,
+.game-shell .final-style-choice__head p,
+.game-shell .final-style-card span,
+.game-shell .career-final__hero>p,
+.game-shell .final-skill-game__intro small,
+.game-shell .games-style-intro,
+.game-shell .minigame-hub__intro{
+  font-size:9.5px!important;
+  line-height:1.42!important;
+}
+.game-shell .market-actions strong,
+.game-shell .transfer-offer-card__terms span,
+.game-shell .career-details>summary span,
+.game-shell .career-details>summary b{
+  font-size:8.5px!important;
+}
+.game-topbar__nav button{
+  font-size:8.5px!important;
+}
+.game-topbar__more button{
+  font-size:10px!important;
+}
+
+/* Season recap stays focused on performance, not hidden glory arithmetic */
+.season-result__score{
+  margin-top:9px;
+}
+.season-result>em{
+  margin-top:9px!important;
+  font-size:9px!important;
+  line-height:1.4;
+}
+
+@media(max-width:560px){
+  .cabala-minigame__top{
+    padding:10px 11px;
+  }
+  .cabala-minigame__top>span{font-size:8px!important}
+  .cabala-minigame__top>small{font-size:7.5px!important}
+  .palpito-stage{min-height:360px}
+  .palpito-card{width:min(190px,56vw)}
+  .palpito-card strong{font-size:68px}
+  .real-cups-row{min-height:235px}
+  .real-cups-row button{height:158px}
+  .real-cup{width:76px;height:105px}
+  .cups-phase span{font-size:7.5px}
+  .transfer-offer-list--swipe .transfer-offer-card{
+    flex-basis:91%!important;
+  }
+  .modern-game__stadium{min-height:350px!important}
+}
