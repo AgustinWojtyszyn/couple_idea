@@ -1,0 +1,1 @@
+Validate role-specific stats, training, media preload and visible minigames.
