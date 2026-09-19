@@ -544,7 +544,7 @@ function Home({
 function GameSideNav({tab,setTab,coach}:{tab:Tab;setTab:(t:Tab)=>void;coach:boolean}){
   const items:Array<[Tab,string,string]> = coach
     ? [['career','⌂','Inicio'],['squad','▦','Equipo'],['minigames','◎','Desafíos'],['history','≡','Historia'],['ranking','⌁','Ranking']]
-    : [['career','⌂','Carrera'],['market','↗','Mercado'],['training','◇','Entreno'],['shop','▣','Tienda'],['minigames','◎','Juegos'],['ranking','⌁','Ranking']]
+    : [['career','⌂','Carrera'],['market','↗','Mercado'],['training','◇','Entreno'],['shop','▣','Tienda'],['minigames','◎','Juegos'],['history','≡','Historia'],['ranking','⌁','Ranking']]
   const go=(next:Tab)=>{setTab(next);window.scrollTo({top:0,behavior:'smooth'})}
   return <nav className="game-side-nav" aria-label="Secciones del juego">
     <div className="game-side-nav__mark"><LeyendaLogo size="sm"/></div>
