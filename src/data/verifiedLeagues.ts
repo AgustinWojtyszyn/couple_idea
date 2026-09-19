@@ -87,4 +87,4 @@ export const verifiedLeagueSeeds: LeagueSeed[] = [
   }
 ]
 
-export const sourceNotice = 'Los clubes argentinos usan referencias explícitas a sus páginas de Wikipedia/Wikimedia para resolver escudos. LEYENDA no usa nombres de futbolistas reales.'
+export const sourceNotice = 'Los datos de ligas y clubes ampliados usan OpenFootball (CC0/public domain). Los escudos generados por LEYENDA son propios; los activos externos sólo se usan cuando existe una fuente separada y compatible.'
