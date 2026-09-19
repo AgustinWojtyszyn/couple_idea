@@ -192,6 +192,29 @@ function StoryModes({start}:{start:(name:string,position:Position,clubId:string)
   </section>
 }
 
+function ClubPickerModal({clubsList,selectedId,onSelect,onClose}:{clubsList:typeof clubs;selectedId:string;onSelect:(id:string)=>void;onClose:()=>void}){
+  const [query,setQuery]=useState('')
+  const filtered=clubsList.filter(club=>club.name.toLowerCase().includes(query.trim().toLowerCase()))
+  return <div className="club-picker-overlay" onClick={onClose}>
+    <section className="club-picker-modal" onClick={event=>event.stopPropagation()}>
+      <div className="club-picker-grab"/>
+      <div className="club-picker-modal__head">
+        <div><span className="eyebrow">ARGENTINA · 1ª DIVISIÓN</span><h2>Elegí tu club</h2></div>
+        <button onClick={onClose} aria-label="Cerrar">×</button>
+      </div>
+      <label className="club-picker-search"><span>⌕</span><input autoFocus value={query} onChange={event=>setQuery(event.target.value)} placeholder="Buscar equipo..."/></label>
+      <div className="club-picker-results">
+        {filtered.map(club=><button key={club.id} className={club.id===selectedId?'active':''} onClick={()=>{onSelect(club.id);onClose()}}>
+          <ClubCrest name={club.name}/>
+          <span><strong>{club.name}</strong><small>Prestigio {club.prestige} · OVR base {club.minOverall}</small></span>
+          <b>{club.id===selectedId?'✓':'›'}</b>
+        </button>)}
+        {!filtered.length&&<div className="club-picker-empty">No encontré clubes con ese nombre.</div>}
+      </div>
+    </section>
+  </div>
+}
+
 function Home({
   theme,onTheme,startPlayer,startCoach
 }:{
@@ -214,6 +237,7 @@ function Home({
   const [clubId,setClubId]=useState(availableClubs[0]?.id??clubs[0]?.id??'')
   const activeClub=availableClubs.some(c=>c.id===clubId)?clubId:(availableClubs[0]?.id??'')
   const [position,setPosition]=useState<Position>('9')
+  const [clubPickerOpen,setClubPickerOpen]=useState(false)
 
   const changeCountry=(value:string)=>{
     setCountry(value)
@@ -299,7 +323,7 @@ function Home({
           </div>
 
           {country==='Argentina'&&<section className="argentina-lab-panel">
-            <div className="argentina-lab-head"><div><span>🇦🇷 PRUEBA ARGENTINA</span><strong>Primera División</strong></div><b>{availableClubs.length} CLUBES</b></div>
+            <div className="argentina-lab-head"><div><span>🇦🇷 PRUEBA ARGENTINA</span><strong>Primera División</strong></div><button className="club-picker-open" onClick={()=>setClubPickerOpen(true)}>{availableClubs.length} CLUBES ↗</button></div>
             <div className="club-strip">
               {availableClubs.map(club=><button key={club.id} className={club.id===activeClub?'active':''} onClick={()=>setClubId(club.id)}>
                 <ClubCrest name={club.name}/>
@@ -318,9 +342,9 @@ function Home({
             <SelectField label="DIVISIÓN" value={activeLeague} onChange={changeLeague}>
               {availableLeagues.map(l=><option key={l.id} value={l.id}>{l.tier}ª División</option>)}
             </SelectField>
-            <SelectField label="EQUIPO" value={activeClub} onChange={setClubId}>
+            {country!=='Argentina'&&<SelectField label="EQUIPO" value={activeClub} onChange={setClubId}>
               {availableClubs.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}
-            </SelectField>
+            </SelectField>}
           </div>
 
           <div className="club-preview club-preview--media" style={selectedMedia.image?{backgroundImage:'linear-gradient(90deg,var(--surface) 18%,rgba(5,10,18,.72)),url("'+selectedMedia.image+'")'}:undefined}>
@@ -358,6 +382,8 @@ function Home({
           <article><span>↗</span><div><strong>MERCADO</strong><small>Decisiones de carrera</small></div></article>
           <article><span>◇</span><div><strong>MODO DT</strong><small>8 temporadas de presión</small></div></article>
         </section>
+
+        {clubPickerOpen&&country==='Argentina'&&<ClubPickerModal clubsList={availableClubs} selectedId={activeClub} onSelect={setClubId} onClose={()=>setClubPickerOpen(false)}/>}
 
         <footer className="legal-note">
           LEYENDA no incluye jugadores reales, marcas ni escudos oficiales. Los nombres de clubes provienen de fuentes abiertas; la identidad visual de los clubes dentro del juego es generada.
