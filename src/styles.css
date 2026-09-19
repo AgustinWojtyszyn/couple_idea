@@ -2808,3 +2808,595 @@ button:focus-visible,input:focus-visible,select:focus-visible{box-shadow:0 0 0 3
 .decision-scene--contract{background-color:#152a27}
 .decision-scene--life{background-color:#241d25}
 .decision-scene--coach{background-color:#12272d}
+
+
+/* V5 · career identity: cabulero / mixto / habilidoso */
+.final-style-choice{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+.final-style-choice__head h2{
+  margin:5px 0 6px;
+  font:700 30px/.95 var(--font-display);
+}
+.final-style-choice__head p{
+  margin:0;
+  color:var(--muted);
+  font-size:10px;
+  line-height:1.5;
+}
+.final-style-grid{
+  display:grid;
+  gap:9px;
+}
+.final-style-card{
+  position:relative;
+  overflow:hidden;
+  min-height:116px;
+  display:grid;
+  grid-template-columns:46px minmax(0,1fr) auto;
+  align-items:center;
+  gap:11px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:linear-gradient(135deg,var(--surface-2),var(--surface));
+  color:var(--text);
+  padding:13px;
+  text-align:left;
+}
+.final-style-card:before{
+  content:'';
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  opacity:.55;
+  background:radial-gradient(circle at 0 50%,rgba(72,145,255,.18),transparent 36%);
+}
+.final-style-card>b{
+  position:relative;
+  z-index:2;
+  display:grid;
+  place-items:center;
+  width:44px;height:44px;
+  border-radius:13px;
+  font-size:21px;
+  background:rgba(47,124,255,.12);
+}
+.final-style-card>div{
+  position:relative;
+  z-index:2;
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+}
+.final-style-card small{
+  color:var(--blue-2);
+  font-size:7px;
+  font-weight:900;
+  letter-spacing:.08em;
+}
+.final-style-card strong{
+  margin-top:3px;
+  font:700 20px/.95 var(--font-display);
+}
+.final-style-card span{
+  margin-top:6px;
+  color:var(--muted);
+  font-size:8px;
+  line-height:1.45;
+}
+.final-style-card>em{
+  position:relative;
+  z-index:2;
+  color:var(--blue-2);
+  font-size:7px;
+  font-style:normal;
+  font-weight:900;
+  white-space:nowrap;
+}
+.final-style-card--luck{
+  border-color:rgba(255,201,87,.28);
+}
+.final-style-card--luck>b,
+.final-style-card--luck small,
+.final-style-card--luck>em{
+  color:#ffd35b;
+}
+.final-style-card--mix{
+  border-color:rgba(175,127,255,.28);
+}
+.final-style-card--mix>b,
+.final-style-card--mix small,
+.final-style-card--mix>em{
+  color:#c29bff;
+}
+.final-style-card--skill{
+  border-color:rgba(82,225,157,.28);
+}
+.final-style-card--skill>b,
+.final-style-card--skill small,
+.final-style-card--skill>em{
+  color:#65e4aa;
+}
+.career-style-badge{
+  display:inline-flex;
+  width:max-content;
+  margin-top:6px;
+  padding:4px 7px;
+  border:1px solid var(--line-strong);
+  border-radius:999px;
+  color:var(--blue-2);
+  font-size:7px;
+  font-weight:900;
+  letter-spacing:.06em;
+}
+.career-style-badge--cabulero{color:#ffd35b;border-color:rgba(255,211,91,.28)}
+.career-style-badge--mixto{color:#c29bff;border-color:rgba(194,155,255,.28)}
+.career-style-badge--habilidoso{color:#65e4aa;border-color:rgba(101,228,170,.28)}
+
+/* V5 · finals are gameplay */
+.career-final{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.career-final__hero{
+  position:relative;
+  overflow:hidden;
+  border:1px solid rgba(255,211,91,.25);
+  border-radius:16px;
+  background:
+    radial-gradient(circle at 50% 0,rgba(255,211,91,.12),transparent 36%),
+    linear-gradient(145deg,#14191f,#090f17);
+  padding:15px;
+}
+.career-final__hero h2{
+  margin:5px 0 0;
+  font:700 26px/.95 var(--font-display);
+}
+.career-final__hero>p{
+  margin:12px 0 0;
+  color:var(--muted);
+  font-size:9px;
+  line-height:1.5;
+}
+.career-final__versus{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:18px;
+  margin-top:17px;
+}
+.career-final__versus>b{
+  display:grid;
+  place-items:center;
+  width:42px;height:42px;
+  border-radius:50%;
+  border:1px solid var(--line);
+  background:var(--surface-2);
+  color:#fff;
+  font:700 14px/1 var(--font-display);
+}
+.career-final__clubs{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:62px;
+  margin-top:8px;
+  color:#dce8f6;
+  font-size:8px;
+  text-align:center;
+}
+.career-final__clubs span{
+  color:#dce8f6;
+}
+.mixed-final-choice{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+.mixed-final-choice button{
+  min-height:112px;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  border:1px solid var(--line);
+  border-radius:13px;
+  background:var(--surface-2);
+  color:var(--text);
+  padding:12px;
+  text-align:left;
+}
+.mixed-final-choice b{
+  font-size:22px;
+  color:var(--blue-2);
+}
+.mixed-final-choice strong{
+  margin-top:7px;
+  font:700 16px/1 var(--font-display);
+}
+.mixed-final-choice span{
+  margin-top:6px;
+  color:var(--muted);
+  font-size:8px;
+  line-height:1.4;
+}
+.cabala-game{
+  border:1px solid rgba(255,211,91,.24);
+  border-radius:15px;
+  background:linear-gradient(145deg,rgba(255,211,91,.07),var(--surface));
+  padding:13px;
+}
+.cabala-game__head{
+  display:flex;
+  flex-direction:column;
+}
+.cabala-game__head>span{
+  color:#ffd35b;
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:.1em;
+}
+.cabala-game__head strong{
+  margin-top:4px;
+  font:700 20px/1 var(--font-display);
+}
+.cabala-game__head small{
+  margin-top:5px;
+  color:var(--muted);
+  font-size:8px;
+}
+.cabala-options{
+  display:grid;
+  gap:7px;
+  margin-top:12px;
+}
+.cabala-options button{
+  min-height:72px;
+  display:grid;
+  grid-template-columns:35px 1fr;
+  gap:9px;
+  align-items:center;
+  border:1px solid var(--line);
+  border-radius:11px;
+  background:var(--surface-2);
+  color:var(--text);
+  padding:9px;
+  text-align:left;
+}
+.cabala-options b{
+  grid-row:1/3;
+  display:grid;
+  place-items:center;
+  width:32px;height:32px;
+  border-radius:50%;
+  background:rgba(255,211,91,.1);
+  color:#ffd35b;
+  font-size:9px;
+}
+.cabala-options strong{
+  align-self:end;
+  font-size:10px;
+}
+.cabala-options span{
+  align-self:start;
+  color:var(--muted);
+  font-size:7px;
+  line-height:1.3;
+}
+.final-skill-game{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.final-skill-game__intro{
+  display:flex;
+  flex-direction:column;
+  padding:11px 12px;
+  border:1px solid rgba(101,228,170,.25);
+  border-radius:12px;
+  background:rgba(101,228,170,.06);
+}
+.final-skill-game__intro>span{
+  color:#65e4aa;
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:.09em;
+}
+.final-skill-game__intro strong{
+  margin-top:4px;
+  font:700 19px/1 var(--font-display);
+}
+.final-skill-game__intro small{
+  margin-top:5px;
+  color:var(--muted);
+  font-size:8px;
+}
+.final-game-badge{
+  color:#ffdc7b;
+  font-size:7px;
+  font-weight:900;
+  letter-spacing:.08em;
+}
+
+/* V5 · transfer market is mandatory */
+.market-blocker{
+  padding:7px 0;
+}
+.market-blocker h2{
+  margin:5px 0 7px;
+  font:700 26px/.95 var(--font-display);
+}
+.market-blocker p{
+  color:var(--muted);
+  font-size:9px;
+  line-height:1.5;
+}
+.market-core{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.market-core__head{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:flex-start;
+  padding:16px;
+  border:1px solid var(--line);
+  border-radius:17px;
+  background:
+    radial-gradient(circle at 100% 0,rgba(47,124,255,.14),transparent 34%),
+    var(--surface);
+}
+.market-core__head h2{
+  margin:5px 0 5px;
+  font:700 28px/.95 var(--font-display);
+}
+.market-core__head p{
+  max-width:420px;
+  margin:0;
+  color:var(--muted);
+  font-size:9px;
+  line-height:1.45;
+}
+.market-window{
+  flex:none;
+  padding:7px 9px;
+  border:1px solid rgba(85,164,255,.26);
+  border-radius:999px;
+  color:var(--blue-2);
+  font-size:7px;
+  font-weight:900;
+}
+.current-contract-card{
+  display:grid;
+  grid-template-columns:66px minmax(0,1fr) auto;
+  align-items:center;
+  gap:12px;
+  border:1px solid var(--line);
+  border-radius:16px;
+  background:linear-gradient(135deg,var(--surface-2),var(--surface));
+  padding:13px;
+}
+.current-contract-card>div{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+}
+.current-contract-card small{
+  color:var(--muted);
+  font-size:7px;
+  font-weight:900;
+}
+.current-contract-card strong{
+  margin-top:3px;
+  font:700 19px/1 var(--font-display);
+}
+.current-contract-card span{
+  margin-top:4px;
+  color:var(--muted);
+  font-size:7px;
+}
+.current-contract-card>aside{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  text-align:right;
+}
+.current-contract-card>aside b{
+  color:#65e4aa;
+  font:700 18px/1 var(--font-display);
+}
+.current-contract-card>aside span{
+  color:var(--muted);
+  font-size:7px;
+}
+.current-contract-card>aside em{
+  margin-top:6px;
+  color:#ffdc7b;
+  font-size:7px;
+  font-style:normal;
+  font-weight:900;
+}
+.market-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+.market-actions button{
+  min-height:74px;
+  display:flex;
+  align-items:center;
+  gap:9px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:var(--surface-2);
+  color:var(--text);
+  padding:10px;
+  text-align:left;
+}
+.market-actions button>b{
+  display:grid;
+  place-items:center;
+  width:35px;height:35px;
+  flex:none;
+  border-radius:10px;
+  background:rgba(47,124,255,.1);
+  color:var(--blue-2);
+}
+.market-actions button>span{
+  display:flex;
+  flex-direction:column;
+}
+.market-actions strong{
+  font-size:9px;
+}
+.market-actions small{
+  margin-top:4px;
+  color:var(--muted);
+  font-size:7px;
+  line-height:1.35;
+}
+.renew-button{
+  border-color:rgba(101,228,170,.24)!important;
+}
+.transfer-offers-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-top:3px;
+  color:var(--muted);
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:.08em;
+}
+.transfer-offers-head strong{
+  display:grid;
+  place-items:center;
+  min-width:25px;
+  height:25px;
+  border-radius:50%;
+  background:rgba(47,124,255,.12);
+  color:var(--blue-2);
+}
+.transfer-offer-list{
+  display:grid;
+  gap:9px;
+}
+.transfer-offer-card{
+  overflow:hidden;
+  border:1px solid var(--line);
+  border-radius:15px;
+  background:
+    linear-gradient(140deg,rgba(47,124,255,.07),transparent 45%),
+    var(--surface);
+  padding:12px;
+}
+.transfer-offer-card__top{
+  display:grid;
+  grid-template-columns:66px minmax(0,1fr) auto;
+  align-items:center;
+  gap:11px;
+}
+.transfer-offer-card__top>div{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+}
+.transfer-offer-card__top span{
+  color:var(--blue-2);
+  font-size:7px;
+  font-weight:800;
+}
+.transfer-offer-card__top strong{
+  margin-top:3px;
+  font:700 20px/1 var(--font-display);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.transfer-offer-card__top small{
+  margin-top:5px;
+  color:var(--muted);
+  font-size:7px;
+}
+.transfer-offer-card__top>em{
+  color:#65e4aa;
+  font-size:8px;
+  font-style:normal;
+  font-weight:900;
+}
+.transfer-offer-card__terms{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:6px;
+  margin-top:11px;
+}
+.transfer-offer-card__terms>div{
+  padding:9px 7px;
+  border:1px solid var(--line);
+  border-radius:9px;
+  background:var(--surface-2);
+}
+.transfer-offer-card__terms span{
+  display:block;
+  color:var(--muted);
+  font-size:6px;
+  font-weight:900;
+}
+.transfer-offer-card__terms b{
+  display:block;
+  margin-top:3px;
+  font-size:9px;
+}
+.transfer-offer-card__warning{
+  margin-top:10px;
+  padding:8px 9px;
+  border-radius:8px;
+  background:rgba(255,119,135,.06);
+  color:#d0a1aa;
+  font-size:7px;
+  line-height:1.4;
+}
+.transfer-offer-card>button{
+  width:100%;
+  min-height:45px;
+  margin-top:10px;
+  border:0;
+  border-radius:10px;
+  background:linear-gradient(180deg,#3f8cff,#286bd9);
+  color:#fff;
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:.035em;
+}
+
+@media(max-width:520px){
+  .final-style-card{
+    grid-template-columns:42px minmax(0,1fr);
+  }
+  .final-style-card>em{
+    grid-column:2;
+    margin-top:-5px;
+  }
+  .mixed-final-choice{
+    grid-template-columns:1fr;
+  }
+  .market-actions{
+    grid-template-columns:1fr;
+  }
+  .current-contract-card,
+  .transfer-offer-card__top{
+    grid-template-columns:54px minmax(0,1fr);
+  }
+  .current-contract-card>aside,
+  .transfer-offer-card__top>em{
+    grid-column:2;
+    align-items:flex-start;
+    text-align:left;
+  }
+  .transfer-offer-card__terms{
+    grid-template-columns:1fr 1fr 1fr;
+  }
+}
