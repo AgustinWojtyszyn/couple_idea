@@ -1,0 +1,1 @@
+Validate V4 quality pass with visual decisions.
