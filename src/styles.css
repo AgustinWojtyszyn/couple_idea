@@ -5638,3 +5638,98 @@ html,body,#root{max-width:100%;overflow-x:hidden}
     font-size:10px!important;
   }
 }
+
+
+/* V9 · Generala as a real one-session cabulero game */
+.generala-stage{display:grid;gap:14px}
+.generala-scoreline{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:10px 12px;
+  border:1px solid rgba(238,202,96,.25);
+  border-radius:12px;
+  background:rgba(45,34,12,.55);
+}
+.generala-scoreline span{
+  color:#ffe17f;
+  font:900 18px/1 var(--font-display);
+}
+.generala-scoreline strong{
+  color:#d4bd7c;
+  font-size:9px;
+  letter-spacing:.09em;
+}
+.generala-table{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:8px;
+  padding:18px 10px;
+  border-radius:18px;
+  background:
+    radial-gradient(circle at 50% 20%,rgba(81,180,122,.25),transparent 34%),
+    linear-gradient(180deg,#164934,#0a2e21);
+  border:1px solid rgba(108,218,156,.18);
+  box-shadow:inset 0 0 50px rgba(0,0,0,.22);
+}
+.generala-table button{
+  min-width:0;
+  padding:7px 3px 5px;
+  border:1px solid transparent;
+  border-radius:12px;
+  background:transparent;
+  color:#fff;
+  transition:transform .18s ease,border-color .18s ease,background .18s ease;
+}
+.generala-table button b{
+  display:grid;
+  place-items:center;
+  aspect-ratio:1;
+  border-radius:12px;
+  background:linear-gradient(145deg,#fffdf4,#dcd7c9);
+  color:#152118;
+  font-size:44px;
+  line-height:1;
+  box-shadow:0 10px 20px rgba(0,0,0,.28),inset -3px -4px 8px rgba(0,0,0,.08);
+}
+.generala-table button small{
+  display:block;
+  min-height:20px;
+  margin-top:6px;
+  color:#9eb9aa;
+  font-size:6px;
+  line-height:1.15;
+  font-weight:900;
+}
+.generala-table button.held{
+  border-color:#ffd65d;
+  background:rgba(255,205,67,.1);
+  transform:translateY(-7px);
+}
+.generala-table button.held b{
+  box-shadow:0 0 0 3px rgba(255,211,88,.28),0 13px 24px rgba(0,0,0,.35);
+}
+.generala-table button.held small{color:#ffd65d}
+.generala-table--rolling button:not(.held) b{animation:generala-die .16s linear infinite}
+@keyframes generala-die{
+  0%{transform:rotate(0deg) translateY(0)}
+  50%{transform:rotate(13deg) translateY(-7px) scale(1.05)}
+  100%{transform:rotate(-10deg) translateY(1px)}
+}
+.generala-actions{display:grid;gap:8px}
+.generala-stand{
+  min-height:46px;
+  border:1px solid rgba(255,214,93,.3);
+  border-radius:12px;
+  background:rgba(67,49,13,.52);
+  color:#ffe287;
+  font-size:10px;
+  font-weight:900;
+}
+
+@media(max-width:560px){
+  .generala-table{gap:4px;padding:14px 6px}
+  .generala-table button b{font-size:34px;border-radius:9px}
+  .generala-table button small{font-size:5.5px}
+}
