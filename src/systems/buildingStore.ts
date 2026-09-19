@@ -440,6 +440,9 @@ const completeFinal=(s:CareerState,won:boolean,source:'skill'|'luck',score=0):Ca
     titles:wonTitle?1:0,
     score:record.score+glory,
     glory,
+    competition:pending.competition,
+    outcomeKind:pending.kind,
+    outcomeWon:won,
     note:titleText+' Se definió por '+(source==='skill'?'habilidad':'cábala')+'.',
   }
 
@@ -494,6 +497,11 @@ export function resolveSkillFinal(s:CareerState,score:number):CareerState{
   const opponent=clubById(pending.opponentClubId)
   const current=clubById(s.clubId)
   const maxScores:Partial<Record<MiniGameId,number>>={
+    'penalties':500,
+    'freekicks':100,
+    'dribble':300,
+    'keeper':500,
+    'duel':300,
     'memory-board':300,
     'personal-run':400,
     'timing-run':300,
