@@ -2279,3 +2279,199 @@ button:focus-visible,input:focus-visible,select:focus-visible{box-shadow:0 0 0 3
   .coach-options{grid-template-columns:repeat(3,1fr)}
   .coach-options button{text-align:center}
 }
+
+
+/* V3 · matchday / stadium visual */
+.matchday-scene{
+  position:relative;
+  min-height:210px;
+  margin-top:10px;
+  overflow:hidden;
+  border:1px solid var(--line);
+  border-radius:18px;
+  background:
+    radial-gradient(circle at 50% -10%,rgba(92,165,255,.2),transparent 35%),
+    linear-gradient(180deg,#101c2c 0 42%,#0d3e2d 43% 100%);
+  background-size:cover;
+  background-position:center;
+  box-shadow:var(--shadow-soft);
+}
+.matchday-scene:before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px),
+    linear-gradient(rgba(255,255,255,.012) 1px,transparent 1px);
+  background-size:28px 28px;
+  pointer-events:none;
+}
+.matchday-scene__lights{
+  position:absolute;
+  left:8%;right:8%;top:10px;
+  display:flex;
+  justify-content:space-between;
+  opacity:.92;
+}
+.matchday-scene__lights i{
+  width:44px;height:6px;
+  border-radius:99px;
+  background:#d9f1ff;
+  box-shadow:
+    0 0 14px #b8e7ff,
+    0 0 34px rgba(121,202,255,.48);
+}
+.matchday-scene__pitch{
+  position:absolute;
+  left:-12%;right:-12%;bottom:-76px;
+  height:150px;
+  border:1px solid rgba(255,255,255,.34);
+  border-radius:50% 50% 0 0;
+  transform:perspective(190px) rotateX(54deg);
+  background:
+    repeating-linear-gradient(90deg,rgba(42,122,78,.86) 0 54px,rgba(33,105,67,.86) 54px 108px);
+}
+.matchday-scene__pitch:before{
+  content:'';
+  position:absolute;
+  left:50%;top:0;bottom:0;
+  width:1px;
+  background:rgba(255,255,255,.42);
+}
+.matchday-scene__pitch:after{
+  content:'';
+  position:absolute;
+  left:50%;top:32%;
+  width:74px;height:74px;
+  border:2px solid rgba(255,255,255,.38);
+  border-radius:50%;
+  transform:translate(-50%,-50%);
+}
+.matchday-scene__pitch span{
+  position:absolute;
+  width:5px;height:5px;
+  border-radius:50%;
+  background:rgba(255,255,255,.7);
+}
+.matchday-scene__pitch span:nth-child(1){left:18%;top:42%}
+.matchday-scene__pitch span:nth-child(2){left:50%;top:24%}
+.matchday-scene__pitch span:nth-child(3){left:80%;top:46%}
+.matchday-scene__content{
+  position:relative;
+  z-index:3;
+  min-height:210px;
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:12px;
+  padding:20px 16px 16px;
+}
+.matchday-scene__meta{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  padding:11px 12px;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:12px;
+  background:rgba(2,8,16,.54);
+  backdrop-filter:blur(9px);
+}
+.matchday-scene__meta strong{
+  margin-top:4px;
+  color:#fff;
+  font:700 22px/1 var(--font-display);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.matchday-scene__meta small{
+  margin-top:5px;
+  color:#b8c9de;
+  font-size:8px;
+}
+.matchday-scene__identity{
+  position:absolute;
+  right:12px;
+  top:31px;
+  width:132px;
+  height:154px;
+}
+.matchday-scene__identity>.real-crest,
+.matchday-scene__identity>.crest{
+  position:absolute;
+  right:0;
+  top:0;
+  z-index:3;
+  transform:scale(.72);
+  transform-origin:top right;
+}
+.human-silhouette,
+.coach-silhouette{
+  position:absolute;
+  right:24px;
+  bottom:0;
+  width:74px;
+  height:122px;
+}
+.human-silhouette i,
+.coach-silhouette i{
+  position:absolute;
+  left:50%;top:0;
+  width:28px;height:28px;
+  border-radius:50%;
+  transform:translateX(-50%);
+  background:linear-gradient(#d5def0,#6e7f98);
+  box-shadow:0 5px 14px rgba(0,0,0,.36);
+}
+.human-silhouette b,
+.coach-silhouette b{
+  position:absolute;
+  left:50%;top:24px;
+  width:48px;height:64px;
+  transform:translateX(-50%);
+  clip-path:polygon(20% 0,80% 0,100% 28%,79% 38%,72% 100%,28% 100%,21% 38%,0 28%);
+  background:linear-gradient(160deg,#4f99ff,#1d4f9b);
+}
+.human-silhouette span,
+.coach-silhouette span{
+  position:absolute;
+  left:50%;bottom:0;
+  width:54px;height:47px;
+  transform:translateX(-50%);
+  clip-path:polygon(17% 0,43% 0,50% 100%,38% 100%,30% 28%,23% 100%,10% 100%,0 0,100% 0,90% 100%,77% 100%,70% 28%,62% 100%,50% 100%,57% 0,83% 0);
+  background:#162338;
+}
+.coach-silhouette b{
+  width:52px;
+  background:linear-gradient(160deg,#27384d,#101925);
+}
+.coach-silhouette:after{
+  content:'';
+  position:absolute;
+  left:8px;right:8px;top:52px;
+  height:3px;
+  background:#55a4ff;
+  transform:rotate(-7deg);
+}
+.matchday-scene__name{
+  position:absolute;
+  right:-8px;
+  bottom:-7px;
+  max-width:80%;
+  overflow:hidden;
+  color:rgba(255,255,255,.055);
+  font:700 62px/.8 var(--font-display);
+  white-space:nowrap;
+  text-transform:uppercase;
+  letter-spacing:-.03em;
+  pointer-events:none;
+}
+:root[data-theme='light'] .matchday-scene__meta{
+  background:rgba(8,18,31,.68);
+}
+@media(min-width:620px){
+  .matchday-scene{min-height:260px}
+  .matchday-scene__content{min-height:260px;padding:24px}
+  .matchday-scene__identity{right:36px;top:43px;transform:scale(1.18)}
+  .matchday-scene__name{font-size:84px}
+}
