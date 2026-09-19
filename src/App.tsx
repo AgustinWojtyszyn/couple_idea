@@ -1106,8 +1106,8 @@ function CabalaMiniGame({game,onComplete}:{game:CabalaGameId;onComplete:(won:boo
   const [weather,setWeather]=useState(()=>Math.floor(Math.random()*3))
   const [animating,setAnimating]=useState(false)
   const [diceFaces,setDiceFaces]=useState<[number,number]>([3,5])
-  const loopPhase=useLoopPhase(!finished&&!animating,2200)
   const finished=round>=maxRounds
+  const loopPhase=useLoopPhase(!finished&&!animating,2200)
 
   useEffect(()=>{
     if(!['three-cups','grid-reveal'].includes(game))return
