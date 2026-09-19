@@ -866,6 +866,22 @@ function MiniGamesPanel({
   const [motion,setMotion]=useState<{ball:number;keeper:number;kind:'shot'|'save'|'dribble'|'duel'}|null>(null)
   const [freeKickFlight,setFreeKickFlight]=useState<'idle'|'goal'|'wide'>('idle')
   const livePhase=useGamePhase(Boolean(active)&&!completed,1800)
+  const roundsForMiniGame=(id:MiniGameId|null)=>{
+    if(!id)return 1
+    const rounds:Partial<Record<MiniGameId,number>>={
+      penalties:5,
+      freekicks:1,
+      dribble:3,
+      keeper:5,
+      duel:3,
+      tactics:3,
+      scouting:3,
+      locker:3,
+      lineup:3,
+      negotiation:3,
+    }
+    return rounds[id]??3
+  }
 
   useEffect(()=>{
     if(!forcedGame)return
@@ -895,7 +911,7 @@ function MiniGamesPanel({
     setRound(nextRound)
     setScore(nextScore)
     setFeedback(message+' · +'+earned)
-    if(nextRound>=5){
+    if(nextRound>=roundsForMiniGame(active)){
       setCompleted(true)
       onScore(active,nextScore)
       onComplete?.(nextScore)
@@ -978,7 +994,8 @@ function MiniGamesPanel({
 
   if(active){
     const game=miniGames.find(item=>item.id===active)!
-    const roundLabel=Math.min(round+1,5)
+    const maxRounds=roundsForMiniGame(active)
+    const roundLabel=Math.min(round+1,maxRounds)
     const duelCue=['RECORTE','PIQUE LARGO','CUERPO A CUERPO'][round%3]
     const dribbleCue=(round+score)%2===0?'← CAMBIO A IZQUIERDA':'CAMBIO A DERECHA →'
     const tacticalScenarios=[
@@ -999,7 +1016,7 @@ function MiniGamesPanel({
     return <section className="panel minigame-arena minigame-arena--v2">
       <div className="minigame-topline">
         {!forcedGame?<button className="back-link" onClick={()=>setActive(null)}>← Volver</button>:<span className="final-game-badge">FINAL · SIN REINTENTO</span>}
-        <span>RONDA {roundLabel}/5</span>
+        <span>{maxRounds===1?'JUGADA DECISIVA':'RONDA '+roundLabel+'/'+maxRounds}</span>
       </div>
       <div className="minigame-title"><b>{game.icon}</b><div><span className="eyebrow">{mode==='player'?'HABILIDAD':'DESPACHO DEL DT'}</span><h2>{game.name}</h2><p>{game.description}</p></div></div>
       <div className="arena-score"><span>PUNTOS</span><strong>{score}</strong></div>
