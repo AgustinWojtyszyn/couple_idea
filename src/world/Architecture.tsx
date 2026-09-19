@@ -4,7 +4,7 @@ export type PlayerMode = 'classic' | 'daily'
 export type GameMode = 'player' | 'coach'
 export type Theme = 'dark' | 'light'
 export type Tab = 'career' | 'market' | 'training' | 'history' | 'minigames' | 'ranking' | 'squad' | 'shop'
-export type MiniGameId = 'penalties' | 'freekicks' | 'passing' | 'keeper' | 'duel' | 'scouting'
+export type MiniGameId = 'penalties' | 'freekicks' | 'dribble' | 'keeper' | 'duel' | 'tactics' | 'scouting' | 'locker' | 'lineup' | 'negotiation'
 export type PlayerStatKey = 'pace' | 'finishing' | 'passing' | 'dribbling' | 'defending' | 'physical' | 'reflexes'
 export type PlayerStats = Record<PlayerStatKey, number>
 
@@ -182,12 +182,16 @@ export const positions:Array<{id:Position;title:string;subtitle:string;boost:num
 ]
 
 export const miniGames:MiniGame[] = [
-  {id:'penalties',name:'Penales',description:'Clavá el timing y elegí esquina.',icon:'◎'},
-  {id:'freekicks',name:'Tiros libres',description:'Potencia y precisión en una sola ventana.',icon:'↗'},
-  {id:'passing',name:'Pase imposible',description:'Encontrá la línea antes de que cierre.',icon:'⇢'},
-  {id:'keeper',name:'Reflejos',description:'Leé el disparo y reaccioná rápido.',icon:'◇'},
-  {id:'duel',name:'Duelo defensivo',description:'Ideal para el 2: timing, riesgo y tarjeta.',icon:'◆'},
-  {id:'scouting',name:'Ojo de scout',description:'Detectá valor antes que el mercado.',icon:'◉'},
+  {id:'penalties',name:'Penales',description:'Engañá al arquero y elegí esquina.',icon:'◎',playerOnly:true},
+  {id:'freekicks',name:'Tiro libre',description:'Clavá potencia y precisión en el momento justo.',icon:'↗',playerOnly:true},
+  {id:'dribble',name:'Slalom',description:'Leé el cambio de dirección y superá conos.',icon:'⇄',playerOnly:true},
+  {id:'keeper',name:'Reflejos',description:'Atajá leyendo el disparo antes del impacto.',icon:'◇',playerOnly:true},
+  {id:'duel',name:'Duelo defensivo',description:'Anticipá, acompañá o barré según la jugada.',icon:'◆',playerOnly:true},
+  {id:'tactics',name:'Pizarra táctica',description:'Respondé al planteo rival con la mejor variante.',icon:'⌁',coachOnly:true},
+  {id:'scouting',name:'Ojo de scout',description:'Detectá potencial real detrás de datos incompletos.',icon:'◉',coachOnly:true},
+  {id:'locker',name:'Vestuario',description:'Elegí el mensaje correcto en situaciones calientes.',icon:'☰',coachOnly:true},
+  {id:'lineup',name:'Once ideal',description:'Elegí estructura y roles para neutralizar al rival.',icon:'▦',coachOnly:true},
+  {id:'negotiation',name:'Negociación',description:'Leé el mercado y cerrá acuerdos sin romper la caja.',icon:'↔',coachOnly:true},
 ]
 
 export const playerEvents:CareerEvent[] = [
