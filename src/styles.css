@@ -1649,3 +1649,35 @@ button:focus-visible,input:focus-visible,select:focus-visible{box-shadow:0 0 0 3
     padding:14px;
   }
 }
+
+
+.decision-feedback{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:14px;
+  padding:12px;
+  border:1px solid rgba(88,223,166,.24);
+  border-radius:12px;
+  background:linear-gradient(135deg,rgba(88,223,166,.08),rgba(47,124,255,.05));
+}
+.decision-feedback>div{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+}
+.decision-feedback>div>strong{
+  margin-top:4px;
+  font:700 17px/1 var(--font-display);
+}
+.decision-feedback>button{
+  flex:none;
+  width:30px;height:30px;
+  border:1px solid var(--line);
+  border-radius:9px;
+  background:var(--surface);
+  color:var(--muted);
+  font-size:18px;
+  line-height:1;
+}
