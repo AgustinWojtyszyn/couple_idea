@@ -35,6 +35,40 @@ const hash=(s:string)=>{
   return h>>>0
 }
 
+const openingEvent=(position:Position)=>{
+  const base={category:'football' as const,eyebrow:'TU IDENTIDAD',body:'Elegí una identidad. Esta primera decisión define cómo arrancás y qué fortalezas llevás desde el día uno.'}
+  if(position==='9')return {...base,id:'origin-9',title:'¿Qué clase de delantero sos?',options:[
+    {id:'hunter',label:'CAZADOR DEL ÁREA',description:'Vivís del gol. Adentro del área no perdonás.',effects:{overall:2,reputation:4,form:3}},
+    {id:'vertical',label:'VERTICAL',description:'Atacás el espacio y ganás por velocidad.',effects:{energy:7,form:5,injuryRisk:2}},
+    {id:'complete',label:'REFERENCIA TOTAL',description:'Gol, juego aéreo y liderazgo.',effects:{overall:1,leadership:6,coachTrust:4}},
+  ]}
+  if(position==='2')return {...base,id:'origin-2',title:'¿Qué clase de 2 sos?',options:[
+    {id:'wall',label:'MURALLA',description:'Primero pasa la pelota. Después vemos.',effects:{overall:2,discipline:5,leadership:4}},
+    {id:'anticipate',label:'ANTICIPO',description:'Leés antes que el delantero y salís jugando.',effects:{form:5,coachTrust:5,energy:3}},
+    {id:'boss',label:'CAUDILLO',description:'Ordenás el fondo y te hacés escuchar.',effects:{leadership:9,reputation:3,discipline:-2}},
+  ]}
+  if(position==='1')return {...base,id:'origin-1',title:'¿Qué clase de arquero sos?',options:[
+    {id:'reflex',label:'REFLEJOS',description:'Vivís de la reacción pura.',effects:{form:7,overall:1}},
+    {id:'sweeper',label:'ARQUERO LIBERO',description:'Jugás lejos del arco y ayudás a salir.',effects:{coachTrust:6,energy:4,injuryRisk:2}},
+    {id:'leader',label:'JEFE DEL ÁREA',description:'Mandás en cada pelota parada.',effects:{leadership:8,reputation:3}},
+  ]}
+  if(position==='10')return {...base,id:'origin-10',title:'¿Qué clase de enganche sos?',options:[
+    {id:'vision',label:'CEREBRO',description:'Ves pases que otros no ven.',effects:{overall:2,coachTrust:5}},
+    {id:'artist',label:'ARTISTA',description:'Jugás para romper líneas y levantar a la gente.',effects:{fans:8,reputation:5,discipline:-2}},
+    {id:'runner',label:'ENGANCHE MODERNO',description:'Técnica y despliegue.',effects:{energy:6,form:5}},
+  ]}
+  if(position==='7')return {...base,id:'origin-7',title:'¿Qué clase de extremo sos?',options:[
+    {id:'dribble',label:'DESEQUILIBRIO',description:'Uno contra uno y sin pedir permiso.',effects:{form:7,fans:5}},
+    {id:'speed',label:'RAYO',description:'Te tiran larga y no te alcanzan.',effects:{energy:8,injuryRisk:2}},
+    {id:'inside',label:'EXTREMO INTERIOR',description:'Entrás por dentro y pensás como un 10.',effects:{overall:2,coachTrust:4}},
+  ]}
+  return {...base,id:'origin-5',title:'¿Qué clase de volante sos?',options:[
+    {id:'anchor',label:'ANCLA',description:'Equilibrás todo y no regalás una transición.',effects:{discipline:7,coachTrust:6}},
+    {id:'box',label:'BOX TO BOX',description:'Llegás a las dos áreas.',effects:{energy:8,form:4}},
+    {id:'captain',label:'CAPITÁN SILENCIOSO',description:'Orden, pase y liderazgo.',effects:{leadership:8,overall:1}},
+  ]}
+}
+
 const nextPlayerEvent=(s:CareerState)=>{
   const eligible=playerEvents.filter(e=>(!e.positions||e.positions.includes(s.position))&&(!e.minSeason||s.season>=e.minSeason))
   const r=rngFrom(s.seed+s.season*971+s.age*37+s.matches)
@@ -72,7 +106,7 @@ export function createCareer(name:string,position:Position,mode:PlayerMode,clubI
     assists:0,titles:0,caps:0,nationalGoals:0,trainingCredits:2,history:[],achievements:[],offers:[],
     activeEvent:null,retired:false
   }
-  return {...s,activeEvent:nextPlayerEvent(s)}
+  return {...s,activeEvent:openingEvent(position)}
 }
 
 export function applyEffects(s:CareerState,e:Effects):CareerState{
