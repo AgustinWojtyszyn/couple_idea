@@ -6444,3 +6444,66 @@ html,body,#root{max-width:100%;overflow-x:hidden}
     padding:12px!important;
   }
 }
+
+
+/* V9 · secondary career data stays one tap away */
+.career-details{
+  margin-top:9px;
+  border:1px solid var(--line);
+  border-radius:15px;
+  background:var(--surface);
+  overflow:hidden;
+}
+.career-details>summary{
+  min-height:54px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:0 14px;
+  cursor:pointer;
+  list-style:none;
+}
+.career-details>summary::-webkit-details-marker{display:none}
+.career-details>summary:after{
+  content:'＋';
+  color:#63b8ff;
+  font-size:17px;
+  font-weight:600;
+}
+.career-details[open]>summary:after{content:'－'}
+.career-details>summary span{
+  color:#7cc3ff;
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:.12em;
+}
+.career-details>summary b{
+  margin-left:auto;
+  color:#9fb0c2;
+  font-size:8px;
+  font-weight:800;
+}
+.career-details__body{
+  display:grid;
+  gap:8px;
+  padding:0 10px 10px;
+}
+.career-details__body>.attributes-card,
+.career-details__body>.idol-progress,
+.career-details__body>.trophy-cabinet{
+  margin:0!important;
+}
+@media(max-width:560px){
+  .career-details>summary{
+    min-height:48px;
+    padding:0 10px;
+  }
+  .career-details>summary b{
+    max-width:58%;
+    overflow:hidden;
+    font-size:7px;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+}
