@@ -181,7 +181,7 @@ function Home({
             <span className="eyebrow">NUEVA GENERACIÓN · V2</span>
             <span className="status-dot">● EN DESARROLLO</span>
           </div>
-          <div className="hero-card__brand"><span>LEYENDA</span><small>Tu carrera. Tus decisiones.</small></div>
+          <div className="hero-card__brand"><span>LEYENDA</span><small>Argentina Lab · club, rol, decisiones y stats</small></div>
           <div className="mode-tabs">
             <button className={gameMode==='player'?'active':''} onClick={()=>setGameMode('player')}>MODO JUGADOR</button>
             <button className={gameMode==='coach'?'active':''} onClick={()=>setGameMode('coach')}>MODO ENTRENADOR</button>
@@ -219,6 +219,16 @@ function Home({
             }}>⤨ AL AZAR</button>
           </div>
 
+          {country==='Argentina'&&<section className="argentina-lab-panel">
+            <div className="argentina-lab-head"><div><span>🇦🇷 PRUEBA ARGENTINA</span><strong>Primera División</strong></div><b>{availableClubs.length} CLUBES</b></div>
+            <div className="club-strip">
+              {availableClubs.map(club=><button key={club.id} className={club.id===activeClub?'active':''} onClick={()=>setClubId(club.id)}>
+                <ClubCrest name={club.name}/>
+                <span>{club.name}</span>
+              </button>)}
+            </div>
+          </section>}
+
           <div className="form-grid">
             {gameMode==='player'&&<SelectField label="NACIONALIDAD" value={nationality} onChange={setNationality}>
               {[...new Set(['Argentina',...countries])].map(item=><option key={item}>{item}</option>)}
@@ -236,7 +246,7 @@ function Home({
 
           <div className="club-preview club-preview--media" style={selectedMedia.image?{backgroundImage:'linear-gradient(90deg,var(--surface) 18%,rgba(5,10,18,.72)),url("'+selectedMedia.image+'")'}:undefined}>
             <ClubCrest name={selectedClub.name} size="lg"/>
-            <div><span>{leagueById(selectedClub.leagueId).name}</span><strong>{selectedClub.name}</strong><small>Escudo original generado por LEYENDA</small></div>
+            <div><span>{leagueById(selectedClub.leagueId).name}</span><strong>{selectedClub.name}</strong><small>{selectedMedia.logo?'Escudo cargado desde Wikimedia':'Identidad visual de respaldo LEYENDA'}</small></div>
           </div>
 
           <label className="name-field">
