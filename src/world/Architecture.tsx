@@ -5,6 +5,8 @@ export type GameMode = 'player' | 'coach'
 export type Theme = 'dark' | 'light'
 export type Tab = 'career' | 'market' | 'training' | 'history' | 'minigames' | 'ranking' | 'squad' | 'shop'
 export type MiniGameId = 'penalties' | 'freekicks' | 'passing' | 'keeper' | 'duel' | 'scouting'
+export type PlayerStatKey = 'pace' | 'finishing' | 'passing' | 'dribbling' | 'defending' | 'physical' | 'reflexes'
+export type PlayerStats = Record<PlayerStatKey, number>
 
 export type League = { id:string; name:string; country:string; tier:number; color:string }
 export type Club = {
@@ -19,7 +21,8 @@ export type SeasonRecord = {
 
 export type Effects = Partial<Record<
   'overall'|'form'|'energy'|'reputation'|'fans'|'coachTrust'|'money'|
-  'discipline'|'leadership'|'morale'|'injuryRisk',
+  'discipline'|'leadership'|'morale'|'injuryRisk'|
+  'pace'|'finishing'|'passing'|'dribbling'|'defending'|'physical'|'reflexes',
   number
 >>
 
@@ -48,6 +51,7 @@ export type CareerState = {
   maxSeasons:number
   clubId:string
   overall:number
+  stats?:PlayerStats
   form:number
   energy:number
   reputation:number
@@ -145,6 +149,25 @@ export const clubs:Club[] = verifiedLeagueSeeds.flatMap(seed=>seed.teams.map((na
     secondary:colors.secondary,
   }
 }))
+
+export const statLabels:Record<PlayerStatKey,string> = {
+  pace:'Velocidad',
+  finishing:'Definición',
+  passing:'Pase',
+  dribbling:'Regate',
+  defending:'Defensa',
+  physical:'Físico',
+  reflexes:'Reflejos',
+}
+
+export const baseStatsByPosition:Record<Position,PlayerStats> = {
+  '9':{pace:68,finishing:76,passing:58,dribbling:67,defending:34,physical:65,reflexes:25},
+  '10':{pace:64,finishing:66,passing:78,dribbling:77,defending:42,physical:55,reflexes:25},
+  '7':{pace:78,finishing:66,passing:64,dribbling:76,defending:38,physical:57,reflexes:25},
+  '5':{pace:61,finishing:52,passing:72,dribbling:64,defending:70,physical:68,reflexes:25},
+  '2':{pace:58,finishing:38,passing:57,dribbling:45,defending:78,physical:79,reflexes:25},
+  '1':{pace:43,finishing:24,passing:56,dribbling:35,defending:46,physical:68,reflexes:80},
+}
 
 export const positions:Array<{id:Position;title:string;subtitle:string;boost:number}> = [
   {id:'9',title:'9 · DELANTERO',subtitle:'Goles, presencia y sangre fría.',boost:2},
