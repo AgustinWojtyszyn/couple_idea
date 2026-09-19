@@ -97,6 +97,26 @@ function ClubCrest({name,size='md'}:{name:string;size?:'sm'|'md'|'lg'}){
   return <Crest name={name} size={size}/>
 }
 
+function MatchdayScene({clubName,media,mode,season,age}:{clubName:string;media:ClubMedia;mode:'player'|'coach';season:number;age?:number}){
+  const background=media.stadiumImage??media.image
+  return <section className="matchday-scene" style={background?{backgroundImage:'linear-gradient(180deg,rgba(3,8,17,.18),rgba(3,8,17,.9)),url("'+background+'")'}:undefined}>
+    <div className="matchday-scene__lights"><i/><i/><i/><i/></div>
+    <div className="matchday-scene__pitch"><span/><span/><span/></div>
+    <div className="matchday-scene__content">
+      <div className="matchday-scene__meta">
+        <span className="eyebrow">{mode==='player'?'JORNADA DE CARRERA':'DÍA DE PARTIDO'}</span>
+        <strong>{media.stadiumName??'Estadio del club'}</strong>
+        <small>Temporada {season}{typeof age==='number'?' · '+age+' años':''}</small>
+      </div>
+      <div className="matchday-scene__identity">
+        <ClubCrest name={clubName} size="lg"/>
+        <div className={mode==='player'?'human-silhouette':'coach-silhouette'}><i/><b/><span/></div>
+      </div>
+    </div>
+    <div className="matchday-scene__name">{clubName}</div>
+  </section>
+}
+
 function ThemeToggle({theme,onToggle}:{theme:Theme;onToggle:()=>void}){
   return <button className="theme-toggle" onClick={onToggle} aria-label="Cambiar tema">
     <span className="theme-toggle__icon">{theme==='dark'?'☾':'☀'}</span>
@@ -374,7 +394,7 @@ function Home({
             </SelectField>}
           </div>
 
-          <div className="club-preview club-preview--media" style={selectedMedia.image?{backgroundImage:'linear-gradient(90deg,var(--surface) 18%,rgba(5,10,18,.72)),url("'+selectedMedia.image+'")'}:undefined}>
+          <div className="club-preview club-preview--media" style={(selectedMedia.stadiumImage??selectedMedia.image)?{backgroundImage:'linear-gradient(90deg,var(--surface) 18%,rgba(5,10,18,.72)),url("'+(selectedMedia.stadiumImage??selectedMedia.image)+'")'}:undefined}>
             <ClubCrest name={selectedClub.name} size="lg"/>
             <div><span>{leagueById(selectedClub.leagueId).name}</span><strong>{selectedClub.name}</strong><small>{selectedMedia.logo?'Escudo cargado desde Wikimedia':'Identidad visual de respaldo LEYENDA'}</small></div>
           </div>
@@ -707,11 +727,12 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
           <button className="play-button" onClick={()=>setSeasonSummary(null)}>CONTINUAR →</button>
         </section>
       </div>}
-      <section className="identity-card identity-card--media" style={playerMedia.image?{backgroundImage:'linear-gradient(90deg,var(--surface) 35%,rgba(5,10,18,.58)),url("'+playerMedia.image+'")'}:undefined}>
+      <section className="identity-card identity-card--media" style={(playerMedia.stadiumImage??playerMedia.image)?{backgroundImage:'linear-gradient(90deg,var(--surface) 35%,rgba(5,10,18,.58)),url("'+(playerMedia.stadiumImage??playerMedia.image)+'")'}:undefined}>
         <ClubCrest name={club.name} size="lg"/>
         <div className="identity-card__copy"><span className="eyebrow">{league.name}</span><h1>{state.playerName}</h1><p>{state.position} · {state.age} años · {club.name}</p></div>
         <div className="overall"><strong>{state.overall}</strong><span>OVR</span></div>
       </section>
+      <MatchdayScene clubName={club.name} media={playerMedia} mode="player" season={state.season} age={state.age}/>
 
       <div className="quick-stats">
         <Stat value={state.matches} label="PJ"/><Stat value={state.goals} label="GOLES"/><Stat value={state.assists} label="ASIST."/><Stat value={state.titles} label="TÍTULOS"/>
@@ -790,11 +811,12 @@ function CoachGame({state,setState,theme,onTheme,onExit}:{state:CoachState;setSt
     </header>
 
     <main className="game-main">
-      <section className="identity-card coach-identity identity-card--media" style={coachMedia.image?{backgroundImage:'linear-gradient(90deg,var(--surface) 35%,rgba(5,10,18,.58)),url("'+coachMedia.image+'")'}:undefined}>
+      <section className="identity-card coach-identity identity-card--media" style={(coachMedia.stadiumImage??coachMedia.image)?{backgroundImage:'linear-gradient(90deg,var(--surface) 35%,rgba(5,10,18,.58)),url("'+(coachMedia.stadiumImage??coachMedia.image)+'")'}:undefined}>
         <ClubCrest name={club.name} size="lg"/>
         <div className="identity-card__copy"><span className="eyebrow">MODO ENTRENADOR · {leagueById(club.leagueId).name}</span><h1>{state.coachName}</h1><p>{club.name} · Temporada {state.season}/{state.maxSeasons}</p></div>
         <div className="overall"><strong>{state.tacticalRating}</strong><span>TÁCTICA</span></div>
       </section>
+      <MatchdayScene clubName={club.name} media={coachMedia} mode="coach" season={state.season}/>
 
       <div className="quick-stats"><Stat value={state.titles} label="TÍTULOS"/><Stat value={state.boardTrust} label="DIRECTIVA"/><Stat value={state.fanTrust} label="HINCHADA"/><Stat value={'$ '+formatMoney(state.budget)} label="CAJA"/></div>
 
