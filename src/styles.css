@@ -1787,3 +1787,495 @@ button:focus-visible,input:focus-visible,select:focus-visible{box-shadow:0 0 0 3
 @media(min-width:680px){
   .season-result-overlay{place-items:center}
 }
+
+
+/* V3 · playable minigames */
+.minigame-hub__intro{
+  margin:10px 0 0;
+  color:var(--muted);
+  font-size:9px;
+  line-height:1.55;
+}
+.minigame-grid--v2{
+  grid-template-columns:1fr;
+}
+.minigame-grid--v2 button{
+  min-height:76px;
+  display:grid;
+  grid-template-columns:44px minmax(0,1fr) auto;
+  align-items:center;
+  gap:10px;
+  border:1px solid var(--line);
+  border-radius:13px;
+  background:
+    linear-gradient(120deg,rgba(47,124,255,.06),transparent 40%),
+    var(--surface-2);
+  color:var(--text);
+  padding:10px;
+  text-align:left;
+}
+.minigame-grid--v2 button>b{
+  display:grid;
+  place-items:center;
+  width:42px;height:42px;
+  border-radius:12px;
+  background:linear-gradient(145deg,rgba(47,124,255,.18),rgba(98,216,255,.06));
+  color:var(--blue-2);
+  font-size:21px;
+}
+.minigame-grid--v2 button>div{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+}
+.minigame-grid--v2 strong{font-size:11px}
+.minigame-grid--v2 span{
+  margin-top:4px;
+  color:var(--muted);
+  font-size:8px;
+  line-height:1.35;
+}
+.minigame-grid--v2 em{
+  color:var(--blue-2);
+  font-size:7px;
+  font-style:normal;
+  font-weight:900;
+  white-space:nowrap;
+}
+.minigame-arena--v2{
+  min-height:540px;
+  background:
+    radial-gradient(circle at 50% -10%,rgba(47,124,255,.13),transparent 35%),
+    var(--surface);
+}
+.minigame-topline{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+.minigame-topline>span{
+  color:var(--muted);
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:.08em;
+}
+.minigame-title{
+  display:flex;
+  align-items:center;
+  gap:11px;
+  margin-top:13px;
+}
+.minigame-title>b{
+  flex:none;
+  display:grid;
+  place-items:center;
+  width:48px;height:48px;
+  border-radius:14px;
+  background:rgba(47,124,255,.12);
+  color:var(--blue-2);
+  font-size:24px;
+}
+.minigame-title h2{
+  margin:3px 0 0;
+  font:700 26px/.95 var(--font-display);
+}
+.minigame-title p{
+  margin:5px 0 0;
+  color:var(--muted);
+  font-size:8px;
+  line-height:1.35;
+}
+.minigame-arena--v2 .arena-score{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  margin:14px 0 10px;
+  padding:10px 12px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:var(--surface-2);
+}
+.minigame-arena--v2 .arena-score span{
+  color:var(--muted);
+  font-size:8px;
+  font-weight:900;
+}
+.minigame-arena--v2 .arena-score strong{
+  font:700 30px/.85 var(--font-display);
+  color:var(--blue-2);
+}
+.skill-stage{
+  position:relative;
+  overflow:hidden;
+  min-height:310px;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
+  border:1px solid var(--line);
+  border-radius:16px;
+  background:
+    linear-gradient(180deg,rgba(8,34,48,.35),rgba(5,17,25,.92)),
+    repeating-linear-gradient(90deg,#0b4b38 0 34px,#0d553f 34px 68px);
+  padding:14px;
+}
+.skill-stage:after{
+  content:'';
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  box-shadow:inset 0 0 70px rgba(0,0,0,.35);
+}
+.skill-prompt,
+.big-cue,
+.scenario-title{
+  position:relative;
+  z-index:3;
+  margin:10px 0;
+  color:#eef7ff;
+  text-align:center;
+  font-weight:900;
+}
+.skill-prompt{font-size:9px;letter-spacing:.05em}
+.big-cue{
+  font:700 23px/1 var(--font-display);
+  letter-spacing:.04em;
+}
+.three-actions,
+.two-actions,
+.coach-options{
+  position:relative;
+  z-index:4;
+  display:grid;
+  gap:7px;
+}
+.three-actions{grid-template-columns:repeat(3,1fr)}
+.two-actions{grid-template-columns:1fr 1fr}
+.three-actions button,
+.two-actions button,
+.coach-options button,
+.skill-main-action{
+  min-height:47px;
+  border:1px solid rgba(138,190,255,.28);
+  border-radius:11px;
+  background:rgba(6,18,30,.88);
+  color:#fff;
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:.035em;
+}
+.three-actions button:active,
+.two-actions button:active,
+.coach-options button:active,
+.skill-main-action:active{
+  transform:scale(.98);
+  background:rgba(47,124,255,.28);
+}
+.goal-frame{
+  position:absolute;
+  left:11%;
+  right:11%;
+  top:34px;
+  height:128px;
+  border:5px solid rgba(240,248,255,.88);
+  border-bottom-width:4px;
+  perspective:400px;
+}
+.goal-frame .net{
+  position:absolute;
+  inset:0;
+  opacity:.36;
+  background-image:
+    linear-gradient(rgba(255,255,255,.65) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.65) 1px,transparent 1px);
+  background-size:18px 18px;
+}
+.goal-frame:before{
+  content:'';
+  position:absolute;
+  left:-22%;right:-22%;bottom:-70px;
+  height:90px;
+  border:2px solid rgba(255,255,255,.35);
+  transform:perspective(150px) rotateX(58deg);
+}
+.keeper{
+  position:absolute;
+  z-index:3;
+  left:50%;bottom:10px;
+  transform:translateX(-50%);
+  color:#ffd36a;
+  font-size:34px;
+  text-shadow:0 6px 12px #000;
+}
+.keeper--you{font-size:28px}
+.freekick-scene{
+  position:absolute;
+  inset:18px 12px 116px;
+}
+.wall{
+  position:absolute;
+  left:36%;
+  bottom:32px;
+  display:flex;
+  gap:3px;
+}
+.wall i{
+  width:15px;height:53px;
+  border-radius:9px 9px 4px 4px;
+  background:linear-gradient(#d8e7ff,#7696be);
+}
+.mini-goal{
+  position:absolute;
+  right:5%;
+  top:8%;
+  width:38%;
+  height:58%;
+  border:4px solid rgba(255,255,255,.82);
+  background:
+    linear-gradient(rgba(255,255,255,.18) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.18) 1px,transparent 1px);
+  background-size:12px 12px;
+}
+.mini-ball{
+  position:absolute;
+  left:15%;bottom:18px;
+  color:#fff;
+  font-size:21px;
+}
+.timing-bar{
+  position:relative;
+  z-index:4;
+  height:18px;
+  margin-bottom:10px;
+  border:1px solid rgba(255,255,255,.15);
+  border-radius:999px;
+  background:
+    linear-gradient(90deg,#ff7187 0 48%,#63d9ff 58% 80%,#ff7187 90%),
+    #132233;
+  overflow:hidden;
+}
+.timing-bar:before{
+  content:'';
+  position:absolute;
+  left:58%;
+  width:22%;
+  top:0;bottom:0;
+  background:rgba(98,216,255,.2);
+}
+.timing-bar>b{
+  position:absolute;
+  top:-3px;
+  width:4px;height:24px;
+  border-radius:3px;
+  background:#fff;
+  box-shadow:0 0 10px #fff;
+  animation:timing-sweep 1.8s linear infinite alternate;
+}
+@keyframes timing-sweep{from{left:1%}to{left:98%}}
+.skill-main-action{
+  position:relative;
+  z-index:4;
+  width:100%;
+  background:linear-gradient(180deg,#3e8cff,#276bdc);
+  font:700 15px/1 var(--font-display);
+}
+.slalom-field{
+  position:absolute;
+  inset:20px 12px 110px;
+  border:2px solid rgba(255,255,255,.22);
+  background:
+    linear-gradient(90deg,transparent 49.5%,rgba(255,255,255,.18) 50%,transparent 50.5%);
+}
+.slalom-field i{
+  position:absolute;
+  width:12px;height:18px;
+  clip-path:polygon(50% 0,100% 100%,0 100%);
+  background:#ffb647;
+}
+.slalom-field i:nth-child(1){left:25%;top:10%}
+.slalom-field i:nth-child(2){left:65%;top:26%}
+.slalom-field i:nth-child(3){left:32%;top:44%}
+.slalom-field i:nth-child(4){left:68%;top:63%}
+.slalom-field i:nth-child(5){left:42%;top:80%}
+.slalom-field span{
+  position:absolute;
+  left:50%;bottom:5%;
+  color:white;
+  font-size:18px;
+  animation:ball-pulse 1s ease-in-out infinite alternate;
+}
+@keyframes ball-pulse{to{transform:translateY(-8px);text-shadow:0 0 12px white}}
+.duel-visual{
+  position:absolute;
+  inset:32px 20px 125px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:26px;
+}
+.duel-visual span{
+  display:grid;
+  place-items:center;
+  width:62px;height:86px;
+  border-radius:40% 40% 25% 25%;
+  font-size:26px;
+}
+.defender-silhouette{background:linear-gradient(#3f91ff,#173f83);color:#bfe1ff}
+.attacker-silhouette{background:linear-gradient(#ff9f6b,#933c33);color:#fff0dc}
+.duel-visual>b{color:rgba(255,255,255,.55);font:700 19px/1 var(--font-display)}
+.coach-game-stage{
+  justify-content:flex-end;
+  background:
+    linear-gradient(180deg,rgba(6,19,29,.3),rgba(5,13,23,.95)),
+    repeating-linear-gradient(90deg,#133627 0 36px,#173e2c 36px 72px);
+}
+.coach-options{grid-template-columns:1fr}
+.coach-options button{min-height:45px;text-align:left;padding:0 12px}
+.tactical-board,
+.formation-board{
+  position:absolute;
+  left:7%;right:7%;top:18px;
+  height:170px;
+  border:2px solid rgba(255,255,255,.28);
+  border-radius:8px;
+  background:
+    linear-gradient(90deg,transparent 49.5%,rgba(255,255,255,.22) 50%,transparent 50.5%),
+    radial-gradient(circle at 50% 50%,transparent 0 20px,rgba(255,255,255,.22) 21px 22px,transparent 23px),
+    #174d35;
+}
+.tactical-board .half{
+  position:absolute;
+  left:50%;top:0;bottom:0;
+  width:1px;
+  background:rgba(255,255,255,.2);
+}
+.tactical-board span{
+  position:absolute;
+  width:16px;height:16px;
+  border-radius:50%;
+  background:#58a8ff;
+  border:2px solid #dbeaff;
+  box-shadow:0 4px 9px #0007;
+}
+.formation-board{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  grid-template-rows:repeat(3,1fr);
+  place-items:center;
+  padding:12px;
+}
+.formation-board span{
+  width:17px;height:17px;
+  border-radius:50%;
+  background:#58a8ff;
+  border:2px solid #dbeaff;
+}
+.formation-board b{
+  grid-column:3;
+  width:22px;height:22px;
+  display:grid;place-items:center;
+  border-radius:50%;
+  background:#ffd36a;
+  color:#16202b;
+  font-size:7px;
+}
+.locker-art{
+  position:absolute;
+  inset:18px 7% 138px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  border-radius:10px;
+  background:
+    linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px),
+    #252d35;
+  background-size:42px 100%;
+}
+.locker-art>span{
+  position:absolute;
+  top:16px;
+  color:#d4e5ff;
+  font-size:38px;
+}
+.locker-art i{
+  width:40px;height:70px;
+  border-radius:20px 20px 10px 10px;
+  background:linear-gradient(#3f91ff,#152c4d);
+}
+.prospect-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:6px;
+  margin-bottom:12px;
+}
+.prospect-grid button{
+  min-height:135px;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:5px;
+  border:1px solid rgba(255,255,255,.16);
+  border-radius:10px;
+  background:rgba(7,17,28,.88);
+  color:#fff;
+  padding:9px;
+  text-align:left;
+}
+.prospect-grid b{color:var(--blue-2);font:700 15px/1 var(--font-display)}
+.prospect-grid span{font-size:8px;color:#dce8f7}
+.prospect-grid em{margin-top:auto;color:var(--warn);font-size:7px;font-style:normal;font-weight:800}
+.negotiation-visual{
+  position:absolute;
+  left:9%;right:9%;top:26px;
+  height:145px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:18px;
+}
+.negotiation-visual>span{
+  display:grid;
+  place-items:center;
+  width:78px;height:78px;
+  border-radius:50%;
+  background:linear-gradient(145deg,#58dfa6,#17714e);
+  color:#061b12;
+  font:800 38px/1 var(--font-display);
+  box-shadow:0 15px 30px #0007;
+}
+.negotiation-visual>div{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.negotiation-visual i{
+  display:block;
+  width:92px;height:12px;
+  border-radius:999px;
+  background:linear-gradient(90deg,#3d77b6,#18283a);
+}
+.minigame-feedback{
+  min-height:42px;
+  display:grid;
+  place-items:center;
+  margin-top:9px;
+  border:1px solid var(--line);
+  border-radius:11px;
+  background:var(--surface-2);
+  color:var(--muted);
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:.06em;
+}
+.minigame-feedback.complete{
+  color:var(--good);
+  border-color:rgba(88,223,166,.28);
+  background:rgba(88,223,166,.07);
+}
+@media(min-width:620px){
+  .minigame-grid--v2{grid-template-columns:1fr 1fr}
+  .minigame-grid--v2 button:last-child{grid-column:1/-1}
+  .coach-options{grid-template-columns:repeat(3,1fr)}
+  .coach-options button{text-align:center}
+}
