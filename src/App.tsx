@@ -1378,12 +1378,17 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
   }
 
   const playMini=(game:MiniGameId,value:number)=>{
-    const bonus=Math.max(1,Math.round(value/110))
+    const bonus=value>=360?2:1
     const effects:EventOption['effects']=
-      game==='penalties'||game==='freekicks'?{finishing:bonus,form:2}:
-      game==='dribble'?{dribbling:bonus,pace:Math.max(1,bonus-1)}:
-      game==='keeper'?{reflexes:bonus,form:2}:
-      game==='duel'?{defending:bonus,physical:Math.max(1,bonus-1)}:
+      game==='penalties'||game==='freekicks'?{finishing:bonus,form:1}:
+      game==='dribble'||game==='personal-run'?{dribbling:bonus,pace:1}:
+      game==='timing-run'?{pace:bonus,physical:1}:
+      game==='keeper'?{reflexes:bonus,form:1}:
+      game==='duel'?{defending:bonus,physical:1}:
+      game==='memory-board'||game==='code-call'?{passing:bonus,discipline:1}:
+      game==='ball-track'||game==='grid-gap'?{dribbling:1,passing:1}:
+      game==='hold-up'?{physical:bonus,dribbling:1}:
+      game==='through-pass'||game==='long-kick'||game==='pressure-exit'?{passing:bonus,coachTrust:1}:
       {form:1}
     const next=applyEffects(state,effects)
     setState({...next,activeEvent:state.activeEvent})
