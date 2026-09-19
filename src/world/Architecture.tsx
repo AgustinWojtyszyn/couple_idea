@@ -5,8 +5,8 @@ export type FinalStyle = 'cabulero' | 'mixto' | 'habilidoso'
 export type GameMode = 'player' | 'coach'
 export type Theme = 'dark' | 'light'
 export type Tab = 'career' | 'market' | 'training' | 'history' | 'minigames' | 'ranking' | 'squad' | 'shop'
-export type MiniGameId = 'penalties' | 'freekicks' | 'dribble' | 'keeper' | 'duel' | 'tactics' | 'scouting' | 'locker' | 'lineup' | 'negotiation'
-export type CabalaGameId = 'higher-lower' | 'dice-seven' | 'coin-run' | 'lucky-number' | 'lucky-shirt'
+export type MiniGameId = 'penalties' | 'freekicks' | 'dribble' | 'keeper' | 'duel' | 'memory-board' | 'personal-run' | 'timing-run' | 'ball-track' | 'code-call' | 'hold-up' | 'through-pass' | 'grid-gap' | 'long-kick' | 'pressure-exit' | 'tactics' | 'scouting' | 'locker' | 'lineup' | 'negotiation'
+export type CabalaGameId = 'higher-lower' | 'dice-seven' | 'coin-run' | 'lucky-number' | 'lucky-shirt' | 'three-cups' | 'wheel' | 'tower' | 'grid-reveal' | 'boots'
 export type CareerOutcomeKind = 'title' | 'survival' | 'promotion'
 export type PlayerStatKey = 'pace' | 'finishing' | 'passing' | 'dribbling' | 'defending' | 'physical' | 'reflexes'
 export type PlayerStats = Record<PlayerStatKey, number>
@@ -220,11 +220,21 @@ export const positions:Array<{id:Position;title:string;subtitle:string;boost:num
 ]
 
 export const miniGames:MiniGame[] = [
-  {id:'penalties',name:'Penales',description:'Engañá al arquero y elegí esquina.',icon:'◎',playerOnly:true},
-  {id:'freekicks',name:'Tiro libre',description:'Clavá potencia y precisión en el momento justo.',icon:'↗',playerOnly:true},
-  {id:'dribble',name:'Slalom',description:'Leé el cambio de dirección y superá conos.',icon:'⇄',playerOnly:true},
-  {id:'keeper',name:'Reflejos',description:'Atajá leyendo el disparo antes del impacto.',icon:'◇',playerOnly:true},
+  {id:'penalties',name:'Penales',description:'Leé al arquero y definí bajo presión.',icon:'◎',playerOnly:true},
+  {id:'freekicks',name:'Tiro libre',description:'Timing y precisión para superar barrera y arquero.',icon:'↗',playerOnly:true},
+  {id:'dribble',name:'Slalom',description:'Cambios de dirección para romper marcas.',icon:'⇄',playerOnly:true},
+  {id:'keeper',name:'Reflejos',description:'Reaccioná al disparo antes de que cruce la línea.',icon:'◇',playerOnly:true},
   {id:'duel',name:'Duelo defensivo',description:'Anticipá, acompañá o barré según la jugada.',icon:'◆',playerOnly:true},
+  {id:'memory-board',name:'Pizarra relámpago',description:'Memorizá una secuencia táctica y repetila sin error.',icon:'▦',playerOnly:true},
+  {id:'personal-run',name:'La diagonal',description:'Elegí carriles y esquivá cierres hasta entrar al área.',icon:'➜',playerOnly:true},
+  {id:'timing-run',name:'La corrida',description:'Frená el impulso exactamente en la zona óptima.',icon:'⚡',playerOnly:true},
+  {id:'ball-track',name:'Ojo en la pelota',description:'Seguí la pelota entre cruces y tocá dónde terminó.',icon:'◉',playerOnly:true},
+  {id:'code-call',name:'La señal',description:'Recordá la clave del banco y marcala bajo presión.',icon:'⌘',playerOnly:true},
+  {id:'hold-up',name:'El aguante',description:'Protegé la pelota mientras la presión se cierra.',icon:'⬢',playerOnly:true},
+  {id:'through-pass',name:'Pase al hueco',description:'Soltá el pase cuando la ventana se abre.',icon:'⇢',playerOnly:true},
+  {id:'grid-gap',name:'El hueco',description:'Memorizá qué zona queda libre antes de que desaparezca.',icon:'▧',playerOnly:true},
+  {id:'long-kick',name:'Saque largo',description:'Potencia y dirección para romper la primera presión.',icon:'↑',playerOnly:true},
+  {id:'pressure-exit',name:'Salida bajo presión',description:'Conectá la secuencia correcta antes del robo.',icon:'✦',playerOnly:true},
   {id:'tactics',name:'Pizarra táctica',description:'Respondé al planteo rival con la mejor variante.',icon:'⌁',coachOnly:true},
   {id:'scouting',name:'Ojo de scout',description:'Detectá potencial real detrás de datos incompletos.',icon:'◉',coachOnly:true},
   {id:'locker',name:'Vestuario',description:'Elegí el mensaje correcto en situaciones calientes.',icon:'☰',coachOnly:true},
