@@ -124,6 +124,15 @@ function LeyendaLogo({size='md'}:{size?:'sm'|'md'|'lg'}){
   </span>
 }
 
+function AssetBootScreen(){
+  return <div className="asset-boot">
+    <div className="asset-boot__mark"><LeyendaLogo size="lg"/></div>
+    <strong>LEYENDA</strong>
+    <span>Preparando clubes, escudos y cancha…</span>
+    <div className="asset-boot__track"><i/></div>
+  </div>
+}
+
 function MockLogin({onEnter}:{onEnter:(name:string)=>void}){
   const [name,setName]=useState('')
   const [password,setPassword]=useState('')
@@ -1819,6 +1828,7 @@ function CoachGame({state,setState,theme,onTheme,onExit}:{state:CoachState;setSt
 
 export function App(){
   const [theme,setTheme]=useState<Theme>(()=>(localStorage.getItem(THEME_KEY) as Theme)||'dark')
+  const [assetsReady,setAssetsReady]=useState(false)
   const [demoUser,setDemoUser]=useState(()=>sessionStorage.getItem(AUTH_KEY)||'')
   const [save,setSave]=useState<SaveState>(()=>{
     try{
@@ -1833,8 +1843,11 @@ export function App(){
   },[theme])
 
   useEffect(()=>{
+    let alive=true
     const argentinaCrestNames=clubs.filter(club=>club.country==='Argentina').map(club=>club.name)
     void preloadClubMedia(argentinaCrestNames,Math.min(16,argentinaCrestNames.length),false)
+      .finally(()=>{if(alive)setAssetsReady(true)})
+    return()=>{alive=false}
   },[])
 
   useEffect(()=>{
@@ -1845,6 +1858,7 @@ export function App(){
   const enterDemo=(name:string)=>{sessionStorage.setItem(AUTH_KEY,name);setDemoUser(name);window.scrollTo({top:0,behavior:'auto'})}
   const exit=()=>{setSave(null);sessionStorage.removeItem(SAVE_KEY)}
 
+  if(!assetsReady)return <AssetBootScreen/>
   if(!demoUser)return <MockLogin onEnter={enterDemo}/>
 
   if(!save){
