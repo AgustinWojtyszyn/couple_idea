@@ -1115,8 +1115,8 @@ function FinalStyleChoice({onChoose}:{onChoose:(style:FinalStyle)=>void}){
 
 function CabalaMiniGame({game,onComplete}:{game:CabalaGameId;onComplete:(won:boolean,score:number)=>void}){
   const roundsByGame:Record<CabalaGameId,number>={
-    'higher-lower':3,'dice-seven':3,'coin-run':4,'lucky-number':2,'lucky-shirt':1,
-    'three-cups':3,'wheel':3,'tower':4,'grid-reveal':3,'boots':1,
+    'higher-lower':3,'dice-seven':1,'coin-run':1,'lucky-number':1,'lucky-shirt':1,
+    'three-cups':1,'wheel':1,'tower':3,'grid-reveal':1,'boots':1,
   }
   const maxRounds=roundsByGame[game]
   const [round,setRound]=useState(0)
@@ -1131,6 +1131,10 @@ function CabalaMiniGame({game,onComplete}:{game:CabalaGameId;onComplete:(won:boo
   const [weather,setWeather]=useState(()=>Math.floor(Math.random()*3))
   const [animating,setAnimating]=useState(false)
   const [diceFaces,setDiceFaces]=useState<[number,number]>([3,5])
+  const [generalaDice,setGeneralaDice]=useState<number[]>([1,1,1,1,1])
+  const [generalaHeld,setGeneralaHeld]=useState<boolean[]>([false,false,false,false,false])
+  const [generalaRolls,setGeneralaRolls]=useState(0)
+  const [generalaLabel,setGeneralaLabel]=useState('TIRÁ PARA EMPEZAR')
   const finished=round>=maxRounds
   const loopPhase=useLoopPhase(!finished&&!animating,2200)
 
@@ -1161,21 +1165,51 @@ function CabalaMiniGame({game,onComplete}:{game:CabalaGameId;onComplete:(won:boo
     commit(success,'Salió '+next+' · '+(success?'TE ACOMPAÑA':'MALA SEÑAL'))
   }
 
-  const dicePick=(pick:'under'|'seven'|'over')=>{
-    if(animating)return
+  const scoreGenerala=(dice:number[])=>{
+    const counts=Object.values(dice.reduce<Record<number,number>>((acc,value)=>{acc[value]=(acc[value]??0)+1;return acc},{})).sort((a,b)=>b-a)
+    const unique=[...new Set(dice)].sort((a,b)=>a-b).join('')
+    if(counts[0]===5)return {label:'GENERALA',score:100,won:true}
+    if(counts[0]===4)return {label:'PÓKER',score:92,won:true}
+    if(counts[0]===3&&counts[1]===2)return {label:'FULL',score:88,won:true}
+    if(unique==='12345'||unique==='23456')return {label:'ESCALERA',score:86,won:true}
+    if(counts[0]===3)return {label:'TRÍO',score:68,won:false}
+    if(counts[0]===2&&counts[1]===2)return {label:'DOBLE PAR',score:58,won:false}
+    if(counts[0]===2)return {label:'PAR',score:44,won:false}
+    return {label:'SIN JUEGO',score:26,won:false}
+  }
+
+  const closeGenerala=(dice=generalaDice)=>{
+    if(finished||animating||generalaRolls===0)return
+    const result=scoreGenerala(dice)
+    setGeneralaLabel(result.label)
+    setRound(1)
+    setHits(result.won?1:0)
+    setFeedback(result.won?result.label+' · LA CÁBALA APARECIÓ':result.label+' · NO ALCANZÓ')
+    window.setTimeout(()=>onComplete(result.won,result.score),650)
+  }
+
+  const rollGenerala=()=>{
+    if(finished||animating||generalaRolls>=3)return
     setAnimating(true)
-    const id=window.setInterval(()=>setDiceFaces([1+Math.floor(Math.random()*6),1+Math.floor(Math.random()*6)]),70)
+    const interval=window.setInterval(()=>{
+      setGeneralaDice(current=>current.map((value,index)=>generalaHeld[index]?value:1+Math.floor(Math.random()*6)))
+    },70)
     window.setTimeout(()=>{
-      window.clearInterval(id)
-      const a=1+Math.floor(Math.random()*6)
-      const b=1+Math.floor(Math.random()*6)
-      setDiceFaces([a,b])
-      const sum=a+b
-      setLastRoll(sum)
-      const success=pick==='under'?sum<7:pick==='over'?sum>7:sum===7
+      window.clearInterval(interval)
+      const next=generalaDice.map((value,index)=>generalaHeld[index]?value:1+Math.floor(Math.random()*6))
+      const nextRoll=generalaRolls+1
+      setGeneralaDice(next)
+      setGeneralaRolls(nextRoll)
+      const preview=scoreGenerala(next)
+      setGeneralaLabel(preview.label)
       setAnimating(false)
-      commit(success,'🎲 '+a+' + '+b+' = '+sum+' · '+(success?'CÁBALA VIVA':'NO ERA'))
+      if(nextRoll>=3)window.setTimeout(()=>closeGenerala(next),260)
     },620)
+  }
+
+  const toggleGeneralaHold=(index:number)=>{
+    if(generalaRolls===0||finished||animating)return
+    setGeneralaHeld(current=>current.map((value,i)=>i===index?!value:value))
   }
 
   const coinPick=(pick:'CARA'|'CECA')=>{
@@ -1237,7 +1271,7 @@ function CabalaMiniGame({game,onComplete}:{game:CabalaGameId;onComplete:(won:boo
 
   const title:Record<CabalaGameId,string>={
     'higher-lower':'El pálpito',
-    'dice-seven':'Los dados del 7',
+    'dice-seven':'La Generala',
     'coin-run':'Moneda de vestuario',
     'lucky-number':'Número marcado',
     'lucky-shirt':'La camiseta',
@@ -1249,7 +1283,7 @@ function CabalaMiniGame({game,onComplete}:{game:CabalaGameId;onComplete:(won:boo
   }
 
   const kicker:Record<CabalaGameId,string>={
-    'higher-lower':'CARTAS','dice-seven':'DADOS','coin-run':'RACHA','lucky-number':'INTUICIÓN','lucky-shirt':'RITUAL',
+    'higher-lower':'CARTAS','dice-seven':'CINCO DADOS','coin-run':'RACHA','lucky-number':'INTUICIÓN','lucky-shirt':'RITUAL',
     'three-cups':'MEMORIA + SUERTE','wheel':'TIMING + AZAR','tower':'LECTURA','grid-reveal':'PÁLPITO','boots':'CLIMA',
   }
 
@@ -1269,11 +1303,19 @@ function CabalaMiniGame({game,onComplete}:{game:CabalaGameId;onComplete:(won:boo
       <div className="two-actions"><button disabled={finished} onClick={()=>higherLower(false)}>↓ MENOR</button><button disabled={finished} onClick={()=>higherLower(true)}>MAYOR ↑</button></div>
     </div>}
 
-    {game==='dice-seven'&&<div className="cabala-dice-stage">
-      <div className={'dice-table '+(animating?'dice-table--rolling':'')}><b>{['⚀','⚁','⚂','⚃','⚄','⚅'][diceFaces[0]-1]}</b><b>{['⚀','⚁','⚂','⚃','⚄','⚅'][diceFaces[1]-1]}</b><span/></div>
-      <div className="cabala-question">¿La suma queda abajo, justo o arriba de 7?</div>
-      {lastRoll!==null&&<div className="cabala-last">ÚLTIMA SUMA · {lastRoll}</div>}
-      <div className="three-actions"><button disabled={finished||animating} onClick={()=>dicePick('under')}>MENOS DE 7</button><button disabled={finished||animating} onClick={()=>dicePick('seven')}>JUSTO 7</button><button disabled={finished||animating} onClick={()=>dicePick('over')}>MÁS DE 7</button></div>
+    {game==='dice-seven'&&<div className="cabala-dice-stage generala-stage">
+      <div className="generala-scoreline"><span>{generalaLabel}</span><strong>{generalaRolls}/3 TIRADAS</strong></div>
+      <div className={'generala-table '+(animating?'generala-table--rolling':'')}>
+        {generalaDice.map((value,index)=><button key={index} className={generalaHeld[index]?'held':''} disabled={generalaRolls===0||finished||animating} onClick={()=>toggleGeneralaHold(index)}>
+          <b>{['⚀','⚁','⚂','⚃','⚄','⚅'][value-1]}</b>
+          <small>{generalaHeld[index]?'GUARDADO':generalaRolls?'TOCÁ PARA GUARDAR':'DADO'}</small>
+        </button>)}
+      </div>
+      <div className="cabala-question">Buscá escalera, full, póker o generala. Guardá los dados que te sirvan y volvé a tirar.</div>
+      <div className="generala-actions">
+        <button className="skill-main-action luck-action" disabled={finished||animating||generalaRolls>=3} onClick={rollGenerala}>{animating?'TIRANDO…':generalaRolls===0?'TIRAR LOS DADOS':'VOLVER A TIRAR'}</button>
+        {generalaRolls>0&&!finished&&<button className="generala-stand" disabled={animating} onClick={()=>closeGenerala()}>PLANTARSE CON {generalaLabel}</button>}
+      </div>
     </div>}
 
     {game==='coin-run'&&<div className="cabala-coin-stage">
@@ -1415,7 +1457,7 @@ function TrophyCabinet({state}:{state:CareerState}){
 function CabalaPracticePanel(){
   const games:Array<{id:CabalaGameId;icon:string;name:string;description:string}>=[
     {id:'higher-lower',icon:'♠',name:'El pálpito',description:'Mayor o menor. Tres cartas para sostener la fe.'},
-    {id:'dice-seven',icon:'⚄',name:'Los dados del 7',description:'Abajo, siete exacto o arriba.'},
+    {id:'dice-seven',icon:'⚄',name:'La Generala',description:'Cinco dados, tres tiradas y podés guardar los que te sirvan.'},
     {id:'coin-run',icon:'◐',name:'Moneda de vestuario',description:'Leé una racha de cara o ceca.'},
     {id:'lucky-number',icon:'17',name:'Número marcado',description:'Encontrá el casillero con la pelota.'},
     {id:'lucky-shirt',icon:'▾',name:'La camiseta',description:'Una sola elección antes de salir.'},
