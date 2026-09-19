@@ -593,20 +593,38 @@ function shopEffectsFor(position:Position,id:string,base:EventOption['effects'])
 
 function ShopPanel({state,setState}:{state:CareerState;setState:(next:CareerState)=>void}){
   const owned=new Set(state.purchases??[])
-  return <section className="panel shop-panel">
+  const buy=(item:(typeof shopItems)[number])=>{
+    if(owned.has(item.id)||state.money<item.cost)return
+    const effects=shopEffectsFor(state.position,item.id,item.effects)
+    const next=applyEffects(state,effects)
+    setState({...next,activeEvent:state.activeEvent,money:next.money-item.cost,purchases:[...(state.purchases??[]),item.id]})
+  }
+  const staff=shopItems.filter(item=>item.kind==='staff')
+  const assets=shopItems.filter(item=>item.kind==='asset')
+
+  return <section className="panel shop-panel shop-panel--career">
     <div className="panel-head"><div><span className="eyebrow">TU CARRERA · STAFF + BIENES</span><h2>Lo que construís afuera también queda.</h2></div><span className="wallet">$ {formatMoney(state.money)}</span></div>
-    <p className="shop-intro">Profesionales para rendir mejor y bienes sin marcas que quedan guardados como parte de tu trayectoria.</p>
-    <div className="shop-list">{shopItems.map(item=>{
+    <p className="shop-intro">Sin marcas. Mejorás tu entorno profesional y, cuando la carrera despega, empezás a convertir contratos en patrimonio.</p>
+
+    <div className="shop-section-head"><span>STAFF · CAMBIA TU RENDIMIENTO</span><b>{staff.filter(item=>owned.has(item.id)).length}/{staff.length}</b></div>
+    <div className="shop-list">{staff.map(item=>{
       const bought=owned.has(item.id)
-      const disabled=bought||state.money<item.cost
       const effects=shopEffectsFor(state.position,item.id,item.effects)
-      return <button key={item.id} disabled={disabled} onClick={()=>{
-        const next=applyEffects(state,effects)
-        setState({...next,activeEvent:state.activeEvent,money:next.money-item.cost,purchases:[...(state.purchases??[]),item.id]})
-      }}>
+      return <button key={item.id} disabled={bought||state.money<item.cost} onClick={()=>buy(item)}>
         <b>{item.icon}</b>
         <span><strong>{item.name}</strong><small>{item.description}</small><EffectChips effects={effects}/></span>
         <em>{bought?'CONTRATADO':'$ '+formatMoney(item.cost)}</em>
+      </button>
+    })}</div>
+
+    <div className="shop-section-head shop-section-head--assets"><span>BIENES · QUEDAN EN TU HISTORIA</span><b>{assets.filter(item=>owned.has(item.id)).length}/{assets.length}</b></div>
+    <div className="asset-shop-grid">{assets.map(item=>{
+      const bought=owned.has(item.id)
+      return <button key={item.id} className={bought?'owned':''} disabled={bought||state.money<item.cost} onClick={()=>buy(item)}>
+        <span className="asset-shop-art"><b>{item.icon}</b><i/><i/></span>
+        <strong>{item.name}</strong>
+        <small>{item.description}</small>
+        <em>{bought?'✓ TUYO':'$ '+formatMoney(item.cost)}</em>
       </button>
     })}</div>
   </section>
