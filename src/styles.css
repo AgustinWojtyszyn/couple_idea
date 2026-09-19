@@ -1250,3 +1250,31 @@ button:focus-visible,input:focus-visible,select:focus-visible{box-shadow:0 0 0 3
     width:100%;
   }
 }
+
+
+.position-stat-preview{
+  grid-column:1/-1;
+  display:flex;
+  flex-wrap:wrap;
+  gap:4px;
+  margin-top:8px;
+}
+.position-stat-preview em{
+  display:inline-flex;
+  align-items:center;
+  min-height:20px;
+  padding:0 6px;
+  border-radius:6px;
+  border:1px solid var(--line);
+  background:rgba(47,124,255,.07);
+  color:var(--muted);
+  font-style:normal;
+  font-size:7px;
+  font-weight:900;
+  letter-spacing:.045em;
+}
+.positions button.active .position-stat-preview em{
+  color:var(--blue-2);
+  border-color:rgba(85,164,255,.28);
+  background:rgba(47,124,255,.11);
+}
