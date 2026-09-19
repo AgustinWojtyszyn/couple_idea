@@ -489,6 +489,7 @@ function MiniGamesPanel({onScore}:{onScore:(game:MiniGameId,score:number)=>void}
 function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;setState:(s:CareerState)=>void;theme:Theme;onTheme:()=>void;onExit:()=>void}){
   const [tab,setTab]=useState<Tab>('career')
   const [scores,setScores]=useState<RunScore[]>(()=>getRunScores())
+  const [lastEffects,setLastEffects]=useState<EventOption['effects']|null>(null)
   const club=clubById(state.clubId)
   const playerStats=statsFor(state)
   const playerMedia=useClubMedia(club.name)
@@ -541,8 +542,9 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
 
       {tab==='career'&&<div className="dashboard-grid">
         <section className="panel event-panel">
+          {lastEffects&&<div className="decision-feedback"><div><span className="eyebrow">DECISIÓN TOMADA</span><strong>Tu jugador cambió</strong><EffectChips effects={lastEffects}/></div><button onClick={()=>setLastEffects(null)}>×</button></div>}
           {state.retired?<><span className="eyebrow">FINAL DE CARRERA</span><h2>Tu historia ya está escrita.</h2><p>Terminaste {state.history.length} temporadas con {state.matches} partidos y {state.titles} títulos.</p><div className="final-score"><span>SCORE FINAL</span><strong>{careerScore(state).toLocaleString('es-AR')}</strong></div></>:
-          state.activeEvent?<><span className="eyebrow">{state.activeEvent.eyebrow}</span><h2>{state.activeEvent.title}</h2><p>{state.activeEvent.body}</p><div className="decision-list">{state.activeEvent.options.map(o=><button key={o.id} onClick={()=>setState(choosePlayerEvent(state,o as EventOption))}><div><strong>{o.label}</strong><span>{o.description}</span><EffectChips effects={o.effects}/></div><b>→</b></button>)}</div></>:
+          state.activeEvent?<><span className="eyebrow">{state.activeEvent.eyebrow}</span><h2>{state.activeEvent.title}</h2><p>{state.activeEvent.body}</p><div className="decision-list">{state.activeEvent.options.map(o=><button key={o.id} onClick={()=>{setLastEffects(o.effects);setState(choosePlayerEvent(state,o as EventOption))}}><div><strong>{o.label}</strong><span>{o.description}</span><EffectChips effects={o.effects}/></div><b>→</b></button>)}</div></>:
           <><span className="eyebrow">TEMPORADA {state.season} DE {state.maxSeasons}</span><h2>Todo listo para competir.</h2><p>Tu estado físico, la confianza, el vestuario y las decisiones ya están en juego.</p><button className="play-button" onClick={()=>setState(simulateSeason(state))}>▶ JUGAR TEMPORADA</button></>}
         </section>
 
