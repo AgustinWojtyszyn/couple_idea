@@ -56,6 +56,8 @@ export type CareerState = {
   energy:number
   reputation:number
   fans:number
+  clubLegacy?:number
+  retirementAge?:number
   coachTrust:number
   discipline:number
   leadership:number
