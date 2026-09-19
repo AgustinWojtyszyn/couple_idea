@@ -44,7 +44,6 @@ import {
   statsFor,
   stayAtClub,
   trainCareer,
-  transferTo,
 } from './systems/buildingStore'
 import { globalRankingEnabled, loadLeaderboard, submitLeaderboardScore } from './systems/rankingService'
 import { getClubMedia, preloadClubMedia, type ClubMedia } from './systems/clubMediaService'
@@ -875,11 +874,34 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
     }
   },[state.retired,state.finalScore])
 
+  useEffect(()=>{
+    if(state.pendingFinal&&tab!=='career'){
+      setTab('career')
+      return
+    }
+    if(state.marketDecisionRequired&&!seasonSummary&&tab!=='market'){
+      setTab('market')
+    }
+  },[state.pendingFinal,state.marketDecisionRequired,seasonSummary,tab])
+
+
   const playSeason=()=>{
     const next=simulateSeason(state)
+    if(next===state)return
     setSeasonSummary(next.history[next.history.length-1]??null)
     setLastEffects(null)
     setState(next)
+  }
+
+  const resolveFinal=(next:CareerState)=>{
+    setState(next)
+    setSeasonSummary(next.history[next.history.length-1]??null)
+    setLastEffects(null)
+  }
+
+  const closeSeasonSummary=()=>{
+    setSeasonSummary(null)
+    if(state.marketDecisionRequired)setTab('market')
   }
 
   const playMini=(game:MiniGameId,value:number)=>{
@@ -915,12 +937,12 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
           </div>
           <div className="season-result__score"><span>SCORE DE TEMPORADA</span><strong>{seasonSummary.score.toLocaleString('es-AR')}</strong></div>
           <em>{seasonSummary.note}</em>
-          <button className="play-button" onClick={()=>setSeasonSummary(null)}>CONTINUAR →</button>
+          <button className="play-button" onClick={closeSeasonSummary}>CONTINUAR →</button>
         </section>
       </div>}
       <section className="identity-card identity-card--media" style={(playerMedia.stadiumImage??playerMedia.image)?{backgroundImage:'linear-gradient(90deg,var(--surface) 35%,rgba(5,10,18,.58)),url("'+(playerMedia.stadiumImage??playerMedia.image)+'")'}:undefined}>
         <ClubCrest name={club.name} size="lg"/>
-        <div className="identity-card__copy"><span className="eyebrow">{league.name}</span><h1>{state.playerName}</h1><p>{state.position} · {state.age} años · {club.name}</p></div>
+        <div className="identity-card__copy"><span className="eyebrow">{league.name}</span><h1>{state.playerName}</h1><p>{state.position} · {state.age} años · {club.name}</p>{state.finalStyle&&<small className={'career-style-badge career-style-badge--'+state.finalStyle}>{state.finalStyle.toUpperCase()}</small>}</div>
         <div className="overall"><strong>{state.overall}</strong><span>OVR</span></div>
       </section>
       <MatchdayScene clubName={club.name} media={playerMedia} mode="player" season={state.season} age={state.age}/>
@@ -936,6 +958,9 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
         <section className="panel event-panel">
           {lastEffects&&<div className="decision-feedback"><div><span className="eyebrow">DECISIÓN TOMADA</span><strong>Tu jugador cambió</strong><EffectChips effects={lastEffects}/></div><button onClick={()=>setLastEffects(null)}>×</button></div>}
           {state.retired?<><span className="eyebrow">FINAL DE CARRERA</span><h2>Tu historia ya está escrita.</h2><p>Terminaste {state.history.length} temporadas con {state.matches} partidos y {state.titles} títulos.</p><div className="final-score"><span>SCORE FINAL</span><strong>{careerScore(state).toLocaleString('es-AR')}</strong></div></>:
+          !state.finalStyle&&!state.activeEvent?<FinalStyleChoice onChoose={style=>setState(chooseFinalStyle(state,style))}/>:
+          state.pendingFinal?<CareerFinalPanel state={state} onResolved={resolveFinal}/>:
+          state.marketDecisionRequired?<div className="market-blocker"><span className="eyebrow">MERCADO DE PASES</span><h2>Antes de seguir, decidí tu futuro.</h2><p>Tenés que elegir si continuás, renovás o aceptás una de las ofertas que llegaron.</p><button className="play-button" onClick={()=>setTab('market')}>VER OFERTAS →</button></div>:
           state.activeEvent?<><DecisionScene category={state.activeEvent.category} title={state.activeEvent.title} media={playerMedia} clubName={club.name}/><span className="eyebrow">{state.activeEvent.eyebrow}</span><h2>{state.activeEvent.title}</h2><p>{state.activeEvent.body}</p><div className="decision-list">{state.activeEvent.options.map(o=><button key={o.id} onClick={()=>{setLastEffects(o.effects);setState(choosePlayerEvent(state,o as EventOption))}}><div><strong>{o.label}</strong><span>{o.description}</span><EffectChips effects={o.effects}/></div><b>→</b></button>)}</div></>:
           <><span className="eyebrow">TEMPORADA {state.season} DE {state.maxSeasons}</span><h2>Todo listo para competir.</h2><p>Tu estado físico, la confianza, el vestuario y las decisiones ya están en juego.</p><button className="play-button" onClick={playSeason}>▶ JUGAR TEMPORADA</button></>}
         </section>
@@ -946,11 +971,7 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
         </aside>
       </div>}
 
-      {tab==='market'&&<section className="panel">
-        <div className="panel-head"><div><span className="eyebrow">MERCADO</span><h2>Tu próximo paso</h2></div><span className="pill">$ {formatMoney(club.salary)}/mes</span></div>
-        {state.offers.length===0?<div className="empty-state"><b>↗</b><strong>No hay ofertas formales.</strong><span>Terminá otra temporada para mover el mercado.</span></div>:
-        <div className="offer-grid">{state.offers.map(id=>{const next=clubById(id);return <button key={id} onClick={()=>{setState(transferTo(state,id));setTab('career')}}><ClubCrest name={next.name}/><div><span>{leagueById(next.leagueId).name}</span><strong>{next.name}</strong><small>$ {formatMoney(next.salary)}/mes</small></div><b>FIRMAR</b></button>})}</div>}
-      </section>}
+      {tab==='market'&&<MarketPanel state={state} onState={setState} onDone={()=>setTab('career')}/>} 
 
       {tab==='training'&&<section className="panel">
         <div className="panel-head"><div><span className="eyebrow">ENTRENAMIENTO</span><h2>{state.trainingCredits} sesiones disponibles</h2></div></div>
