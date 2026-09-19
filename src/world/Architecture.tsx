@@ -3,7 +3,7 @@ export type Position = '9' | '10' | '7' | '5' | '2' | '1'
 export type PlayerMode = 'classic' | 'daily'
 export type GameMode = 'player' | 'coach'
 export type Theme = 'dark' | 'light'
-export type Tab = 'career' | 'market' | 'training' | 'history' | 'minigames' | 'ranking' | 'squad'
+export type Tab = 'career' | 'market' | 'training' | 'history' | 'minigames' | 'ranking' | 'squad' | 'shop'
 export type MiniGameId = 'penalties' | 'freekicks' | 'passing' | 'keeper' | 'duel' | 'scouting'
 
 export type League = { id:string; name:string; country:string; tier:number; color:string }
@@ -65,6 +65,7 @@ export type CareerState = {
   caps:number
   nationalGoals:number
   trainingCredits:number
+  purchases?:string[]
   history:SeasonRecord[]
   achievements:string[]
   offers:string[]
