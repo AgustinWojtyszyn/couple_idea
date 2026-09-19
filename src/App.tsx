@@ -44,6 +44,26 @@ import { getClubMedia, type ClubMedia } from './systems/clubMediaService'
 
 type SaveState = CareerState | CoachState | null
 
+function normalizeSaveState(value:SaveState):SaveState{
+  if(!value)return null
+  if(value.gameMode==='coach')return value
+  const retirementAge=value.retirementAge??(39+(value.seed%4))
+  const seasonsHere=value.history.filter(item=>item.clubId===value.clubId)
+  const inferredLegacy=Math.min(
+    42,
+    seasonsHere.reduce((sum,item)=>sum+Math.max(1,Math.min(5,Math.round((item.rating-6.2)*1.1)+(item.titles?2:0))),0)
+  )
+  return {
+    ...value,
+    retirementAge,
+    maxSeasons:retirementAge-17,
+    clubLegacy:value.clubLegacy??inferredLegacy,
+    caps:0,
+    nationalGoals:0,
+    activeEvent:value.activeEvent?.id==='selection'?null:value.activeEvent,
+  }
+}
+
 const SAVE_KEY='leyenda-save-v2'
 const THEME_KEY='leyenda-theme-v1'
 
@@ -806,7 +826,7 @@ export function App(){
   const [save,setSave]=useState<SaveState>(()=>{
     try{
       const raw=localStorage.getItem(SAVE_KEY)
-      return raw?JSON.parse(raw) as SaveState:null
+      return raw?normalizeSaveState(JSON.parse(raw) as SaveState):null
     }catch{return null}
   })
 
