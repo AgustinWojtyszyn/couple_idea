@@ -5585,3 +5585,56 @@ html,body,#root{max-width:100%;overflow-x:hidden}
 @keyframes duel-step-left{50%{transform:translateX(-28px) scale(1.08)}}
 @keyframes duel-hold{50%{transform:scale(1.14)}}
 @keyframes duel-slide{50%{transform:translate(26px,18px) rotate(-18deg) scale(1.12)}}
+
+
+/* V8 · reduce vertical scroll without shrinking readability */
+@media(max-width:700px){
+  .condition-panel{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:10px!important;
+  }
+  .condition-panel>.panel-head,
+  .condition-panel>h3,
+  .condition-panel>.eyebrow{
+    grid-column:1/-1;
+  }
+  .condition-panel .meter{
+    margin:0!important;
+    padding:9px 10px;
+    border:1px solid var(--line);
+    border-radius:11px;
+    background:var(--surface-2);
+  }
+  .condition-panel .meter__row span{font-size:9px!important}
+  .condition-panel .meter__row strong{font-size:15px!important}
+  .condition-panel .meter__track{margin-top:6px!important}
+
+  .transfer-offer-list{
+    display:flex!important;
+    gap:10px!important;
+    overflow-x:auto!important;
+    scroll-snap-type:x mandatory;
+    overscroll-behavior-x:contain;
+    padding-bottom:6px;
+    scrollbar-width:none;
+  }
+  .transfer-offer-list::-webkit-scrollbar{display:none}
+  .transfer-offer-card{
+    flex:0 0 min(88%,390px)!important;
+    scroll-snap-align:start;
+  }
+
+  .trophy-cabinet--empty{
+    min-height:92px!important;
+    padding:12px!important;
+  }
+  .trophy-cabinet--empty h3{
+    margin:3px 0!important;
+    font-size:21px!important;
+  }
+  .trophy-cabinet--empty p{
+    margin:4px 0 0!important;
+    font-size:10px!important;
+  }
+}
