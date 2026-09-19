@@ -959,7 +959,7 @@ function MiniGamesPanel({
     />
     const featured=games.filter(game=>['freekicks','through-pass','personal-run','duel','keeper','memory-board'].includes(game.id))
     return <section className="panel modern-games-hub">
-      <div className="panel-head"><div><span className="eyebrow">PARTIDOS DECISIVOS</span><h2>Seis formas de jugarte la historia.</h2></div><span className="pill">SIN RONDAS</span></div>
+      <div className="panel-head"><div><span className="eyebrow">PARTIDOS DECISIVOS</span><h2>Seis formas de jugarte la historia.</h2></div><span className="pill">UNA JUGADA</span></div>
       <p className="minigame-hub__intro">Cada desafío es una escena completa: gesto, timing, lectura o memoria. Entrás, jugás una acción y salís con un resultado.</p>
       <div className="modern-games-grid">{featured.map(game=><button key={game.id} onClick={()=>setActive(game.id)}>
         <SkillGameThumb id={game.id}/>
@@ -1186,9 +1186,9 @@ function CabalaMiniGame({game,onComplete}:{game:CabalaGameId;onComplete:(won:boo
 
   return <section className={'cabala-minigame cabala-minigame--'+game}>
     <div className="cabala-minigame__top">
-      <span>⚄ {kicker[game]} · {finished?'TERMINADO':game==='dice-seven'?'HASTA 3 TIRADAS':maxRounds===1?'JUGADA ÚNICA':'RONDA '+(round+1)+'/'+maxRounds}</span>
+      <span>⚄ {kicker[game]} · {finished?'TERMINADO':game==='dice-seven'?'HASTA 3 TIRADAS':'JUGADA ÚNICA'}</span>
       <strong>{title[game]}</strong>
-      <small>{game==='dice-seven'?generalaRolls+' tiradas':maxRounds===1?'una decisión':hits+' aciertos'}</small>
+      <small>{game==='dice-seven'?generalaRolls+' tiradas':'una decisión'}</small>
     </div>
 
     {game==='higher-lower'&&<div className="cabala-cards-stage">
@@ -1296,7 +1296,7 @@ function CareerFinalPanel({
     </div>}
 
     {skillMode&&<div className="final-skill-game">
-      <div className="final-skill-game__intro"><span>◎ HABILIDOSO</span><strong>{miniGames.find(game=>game.id===pending.miniGame)?.name??'Desafío final'}</strong><small>Un solo intento. La mecánica define la duración y el resultado decide {pending.kind==='title'?'el título':pending.kind==='promotion'?'el ascenso':'la permanencia'}.</small></div>
+      <div className="final-skill-game__intro"><span>◎ HABILIDOSO</span><strong>{miniGames.find(game=>game.id===pending.miniGame)?.name??'Desafío final'}</strong><small>Una sola jugada. Tu gesto decide {pending.kind==='title'?'el título':pending.kind==='promotion'?'el ascenso':'la permanencia'}.</small></div>
       <MiniGamesPanel mode="player" forcedGame={pending.miniGame} onScore={()=>{}} onComplete={score=>onResolved(resolveSkillFinal(state,score))}/>
     </div>}
   </div>
