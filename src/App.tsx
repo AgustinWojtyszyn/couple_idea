@@ -326,7 +326,7 @@ function Home({
           {country==='Argentina'&&<section className="argentina-lab-panel">
             <div className="argentina-lab-head"><div><span>🇦🇷 PRUEBA ARGENTINA</span><strong>Primera División</strong></div><button className="club-picker-open" onClick={()=>setClubPickerOpen(true)}>{availableClubs.length} CLUBES ↗</button></div>
             <div className="club-strip">
-              {availableClubs.map(club=><button key={club.id} className={club.id===activeClub?'active':''} onClick={()=>setClubId(club.id)}>
+              {availableClubs.slice(0,10).map(club=><button key={club.id} className={club.id===activeClub?'active':''} onClick={()=>setClubId(club.id)}>
                 <ClubCrest name={club.name}/>
                 <span>{club.name}</span>
               </button>)}
