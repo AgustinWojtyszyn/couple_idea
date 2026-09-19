@@ -127,6 +127,32 @@ const nextPlayerEvent=(s:CareerState)=>{
   return eligible[Math.floor(r()*eligible.length)]??playerEvents[0]
 }
 
+const maybePlayerEvent=(s:CareerState,context:'stay'|'renew'|'transfer'):CareerState['activeEvent']=>{
+  const unseen=new Set(s.seenEvents??[])
+  const specializationId='spec-'+s.position
+  const specialization=playerEvents.find(event=>event.id===specializationId)
+
+  // La especialización es un hito puntual de carrera, no una historia anual.
+  if(s.season===4&&specialization&&!unseen.has(specialization.id)) return specialization
+
+  const last=s.lastStorySeason??0
+  const cooldownReady=s.season-last>=2
+  if(!cooldownReady||s.season<3)return null
+
+  const r=rngFrom(s.seed+s.season*1543+s.age*89+s.matches+(context==='transfer'?997:context==='renew'?463:211))
+  const chance=context==='transfer'?.34:context==='renew'?.24:.18
+  if(r()>chance)return null
+
+  const candidates=playerEvents.filter(event=>
+    !event.id.startsWith('spec-')&&
+    !unseen.has(event.id)&&
+    (!event.positions||event.positions.includes(s.position))&&
+    (!event.minSeason||s.season>=event.minSeason)
+  )
+  if(!candidates.length)return null
+  return candidates[Math.floor(r()*candidates.length)]??null
+}
+
 const nextCoachEvent=(s:CoachState)=>{
   const r=rngFrom(hash(s.coachName+s.clubId)+s.season*739)
   return coachEvents[Math.floor(r()*coachEvents.length)]??coachEvents[0]
@@ -228,7 +254,7 @@ export function createCareer(name:string,position:Position,mode:PlayerMode,clubI
     version:2,gameMode:'player',mode,seed,playerName:name.trim()||'El Pibe',nationality,position,
     age:17,season:1,maxSeasons,clubId,overall:Math.round(roleOverall(baseStatsByPosition[position],position)),stats:{...baseStatsByPosition[position]},form:68,energy:92,reputation:8,fans:12,clubLegacy:0,retirementAge,
     coachTrust:55,discipline:62,leadership:42,morale:72,injuryRisk:8,money:12000,matches:0,goals:0,
-    assists:0,titles:0,caps:0,nationalGoals:0,trainingCredits:2,seenEvents:[],history:[],achievements:[],offers:[],transferOffers:[],
+    assists:0,titles:0,caps:0,nationalGoals:0,trainingCredits:2,seenEvents:[],lastStorySeason:0,history:[],achievements:[],offers:[],transferOffers:[],
     marketDecisionRequired:false,currentSalary:club.salary,contractYearsLeft:contractYears,contractYearsTotal:contractYears,
     finalStyle:null,pendingFinal:null,retirementPending:false,trophies:[],glory:0,lastSeasonGlory:0,activeEvent:null,retired:false
   }
@@ -281,10 +307,12 @@ export function careerDecisionEffects(eventId:string|undefined,e:Effects):Effect
 
 export function choosePlayerEvent(s:CareerState,o:EventOption){
   const eventId=s.activeEvent?.id
+  const opening=eventId?.startsWith('origin-')??false
   const next=applyEffects(s,careerDecisionEffects(eventId,o.effects))
   return {
     ...next,
     seenEvents:eventId?[...new Set([...(s.seenEvents??[]),eventId])]:s.seenEvents,
+    lastStorySeason:opening?(s.lastStorySeason??0):s.season,
   }
 }
 
@@ -478,7 +506,7 @@ export function stayAtClub(s:CareerState):CareerState{
   if(!s.marketDecisionRequired)return s
   if((s.contractYearsLeft??0)<=0)return renewCurrentClub(s,2)
   const next={...s,marketDecisionRequired:false,offers:[],transferOffers:[]}
-  return {...next,activeEvent:nextPlayerEvent(next)}
+  return {...next,activeEvent:maybePlayerEvent(next,'stay')}
 }
 
 export function renewCurrentClub(s:CareerState,years=3):CareerState{
@@ -497,7 +525,7 @@ export function renewCurrentClub(s:CareerState,years=3):CareerState{
     transferOffers:[],
     morale:clamp(s.morale+3),
   }
-  return {...next,activeEvent:nextPlayerEvent(next)}
+  return {...next,activeEvent:maybePlayerEvent(next,'renew')}
 }
 
 export function acceptTransferOffer(s:CareerState,offer:TransferOffer):CareerState{
@@ -519,7 +547,7 @@ export function acceptTransferOffer(s:CareerState,offer:TransferOffer):CareerSta
     coachTrust:offer.role==='FIGURA'?68:offer.role==='TITULAR'?58:48,
     morale:clamp(s.morale+5),
   }
-  return {...next,activeEvent:nextPlayerEvent({...next,clubId:destination.id})}
+  return {...next,activeEvent:maybePlayerEvent({...next,clubId:destination.id},'transfer')}
 }
 
 
