@@ -12,6 +12,7 @@ import {
   type CareerState,
   type CoachState,
   type EventOption,
+  type FinalStyle,
   type GameMode,
   type MiniGameId,
   type PlayerMode,
@@ -19,22 +20,29 @@ import {
   type Position,
   type RunScore,
   type SeasonRecord,
+  type TransferOffer,
   type Tab,
   type Theme,
 } from './world/Architecture'
 import {
   applyEffects,
   careerScore,
+  acceptTransferOffer,
   chooseCoachEvent,
+  chooseFinalStyle,
   choosePlayerEvent,
   coachScore,
   createCareer,
   createCoach,
   getRunScores,
+  renewCurrentClub,
+  resolveCabalFinal,
+  resolveSkillFinal,
   saveRunScore,
   simulateCoachSeason,
   simulateSeason,
   statsFor,
+  stayAtClub,
   trainCareer,
   transferTo,
 } from './systems/buildingStore'
@@ -52,6 +60,7 @@ function normalizeSaveState(value:SaveState):SaveState{
     42,
     seasonsHere.reduce((sum,item)=>sum+Math.max(1,Math.min(5,Math.round((item.rating-6.2)*1.1)+(item.titles?2:0))),0)
   )
+  const current=clubById(value.clubId)
   return {
     ...value,
     retirementAge,
@@ -59,6 +68,14 @@ function normalizeSaveState(value:SaveState):SaveState{
     clubLegacy:value.clubLegacy??inferredLegacy,
     caps:0,
     nationalGoals:0,
+    finalStyle:value.finalStyle??null,
+    pendingFinal:value.pendingFinal??null,
+    retirementPending:value.retirementPending??false,
+    marketDecisionRequired:value.marketDecisionRequired??false,
+    transferOffers:value.transferOffers??[],
+    currentSalary:value.currentSalary??current.salary,
+    contractYearsLeft:value.contractYearsLeft??2,
+    contractYearsTotal:value.contractYearsTotal??2,
     activeEvent:value.activeEvent?.id==='selection'?null:value.activeEvent,
   }
 }
