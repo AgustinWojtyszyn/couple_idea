@@ -128,18 +128,70 @@ const nextCoachEvent=(s:CoachState)=>{
   return coachEvents[Math.floor(r()*coachEvents.length)]??coachEvents[0]
 }
 
-const offersFor=(s:CareerState)=>{
-  const current=clubById(s.clubId)
-  return clubs
-    .filter(c=>c.id!==s.clubId&&s.overall+6>=c.minOverall)
-    .sort((a,b)=>{
-      const aFit=Math.abs(a.minOverall-s.overall)+(a.prestige<current.prestige?2:0)
-      const bFit=Math.abs(b.minOverall-s.overall)+(b.prestige<current.prestige?2:0)
-      return aFit-bFit
-    })
-    .slice(0,4)
-    .map(c=>c.id)
+const finalMiniGameFor=(position:Position,r:()=>number):MiniGameId=>{
+  const pools:Record<Position,MiniGameId[]>={
+    '9':['penalties','freekicks','dribble'],
+    '10':['freekicks','dribble','penalties'],
+    '7':['dribble','freekicks','penalties'],
+    '5':['duel','freekicks','dribble'],
+    '2':['duel','penalties'],
+    '1':['keeper'],
+  }
+  const pool=pools[position]
+  return pool[Math.floor(r()*pool.length)]??pool[0]
 }
+
+const transferOffersFor=(s:CareerState):TransferOffer[]=>{
+  const current=clubById(s.clubId)
+  const r=rngFrom(s.seed+s.season*1709+s.overall*13+s.reputation*7)
+  const localOnly=s.reputation<42
+  const candidates=clubs
+    .filter(c=>c.id!==s.clubId&&s.overall+7>=c.minOverall&&(!localOnly||c.country===current.country))
+    .map(c=>{
+      const prestigeDelta=c.prestige-current.prestige
+      const fit=Math.abs(c.minOverall-s.overall)+(prestigeDelta<0?2:0)-r()*2.5
+      return {club:c,fit}
+    })
+    .sort((a,b)=>a.fit-b.fit)
+    .slice(0,8)
+
+  const picked:TransferOffer[]=[]
+  for(const entry of candidates){
+    if(picked.length>=4)break
+    const c=entry.club
+    const diff=s.overall-c.minOverall
+    const role:TransferOffer['role']=diff>=9?'FIGURA':diff>=3?'TITULAR':diff>=-2?'PROYECTO':'ROTACIÓN'
+    const years=1+Math.floor(r()*4)
+    const salaryBase=Math.max(c.salary,(s.currentSalary??current.salary)*(.94+r()*.24))
+    const reputationBoost=1+s.reputation/420
+    const salary=Math.round(salaryBase*reputationBoost/1000)*1000
+    const signingBonus=Math.round(salary*(1.2+r()*2.3)/1000)*1000
+    picked.push({clubId:c.id,salary,years,role,signingBonus})
+  }
+  return picked
+}
+
+const withMarket=(s:CareerState):CareerState=>{
+  const transferOffers=transferOffersFor(s)
+  return {
+    ...s,
+    offers:transferOffers.map(offer=>offer.clubId),
+    transferOffers,
+    marketDecisionRequired:true,
+    activeEvent:null,
+  }
+}
+
+const finalizeRetirement=(s:CareerState):CareerState=>{
+  const next={...s,retired:true,retirementPending:false,marketDecisionRequired:false,transferOffers:[],offers:[],activeEvent:null}
+  return {...next,finalScore:careerScore(next)}
+}
+
+export function chooseFinalStyle(s:CareerState,style:FinalStyle):CareerState{
+  return {...s,finalStyle:style}
+}
+
+
 
 export function createCareer(name:string,position:Position,mode:PlayerMode,clubId:string,nationality='Argentina'):CareerState{
   const seed=mode==='daily'
@@ -147,12 +199,15 @@ export function createCareer(name:string,position:Position,mode:PlayerMode,clubI
     : Math.floor(Math.random()*2147483647)
   const retirementAge=39+(seed%4)
   const maxSeasons=retirementAge-17
+  const club=clubById(clubId)
+  const contractYears=2+(seed%3)
   const s:CareerState={
     version:2,gameMode:'player',mode,seed,playerName:name.trim()||'El Pibe',nationality,position,
     age:17,season:1,maxSeasons,clubId,overall:Math.round(roleOverall(baseStatsByPosition[position],position)),stats:{...baseStatsByPosition[position]},form:68,energy:92,reputation:8,fans:12,clubLegacy:0,retirementAge,
     coachTrust:55,discipline:62,leadership:42,morale:72,injuryRisk:8,money:12000,matches:0,goals:0,
-    assists:0,titles:0,caps:0,nationalGoals:0,trainingCredits:2,seenEvents:[],history:[],achievements:[],offers:[],
-    activeEvent:null,retired:false
+    assists:0,titles:0,caps:0,nationalGoals:0,trainingCredits:2,seenEvents:[],history:[],achievements:[],offers:[],transferOffers:[],
+    marketDecisionRequired:false,currentSalary:club.salary,contractYearsLeft:contractYears,contractYearsTotal:contractYears,
+    finalStyle:null,pendingFinal:null,retirementPending:false,activeEvent:null,retired:false
   }
   return {...s,activeEvent:openingEvent(position)}
 }
@@ -196,6 +251,7 @@ export function choosePlayerEvent(s:CareerState,o:EventOption){
 }
 
 export function simulateSeason(s:CareerState):CareerState{
+  if(!s.finalStyle||s.pendingFinal||s.marketDecisionRequired||s.retired)return s
   const club=clubById(s.clubId)
   const r=rngFrom(s.seed+s.season*4999+s.overall+s.discipline*11)
   const stats=statsFor(s)
@@ -213,23 +269,29 @@ export function simulateSeason(s:CareerState):CareerState{
   const goals=Math.max(0,Math.round(matches*atk*(perf/100)*finishingFactor*(.33+r()*.22)))
   const assists=Math.max(0,Math.round(matches*ast*(perf/100)*passingFactor*(.24+r()*.2)))
   const defensiveBonus=s.position==='2'?Math.round((stats.defending+stats.physical+s.leadership+perf)/38):s.position==='1'?Math.round((stats.reflexes+stats.physical+perf)/34):0
-  const title=r()<(club.prestige+s.overall+s.form+s.morale)/430?1:0
   const rating=Math.round((6+perf/58+r()*.95+(s.position==='2'?defensiveBonus*.015:0))*10)/10
   const nextStats=evolveStats(s,rating)
-  const caps=0
-  const nationalGoals=0
-  const score=Math.round(
-    matches*10+goals*42+assists*30+title*850+rating*75+
+  const baseScore=Math.round(
+    matches*10+goals*42+assists*30+rating*75+
     club.prestige*4+s.reputation*3+s.leadership*2
   )
+  const finalChance=Math.max(.13,Math.min(.64,.12+(perf-54)/105+club.prestige/520+s.reputation/720))
+  const qualifiedForFinal=r()<finalChance
+  const sameLeague=clubs.filter(candidate=>candidate.leagueId===club.leagueId&&candidate.id!==club.id)
+  const opponent=sameLeague[Math.floor(r()*sameLeague.length)]??clubs.find(candidate=>candidate.id!==club.id)??club
+  const competitions=['Copa Nacional','Final de Liga','Copa Federal']
+  const competition=competitions[Math.floor(r()*competitions.length)]
   const record:SeasonRecord={
-    season:s.season,age:s.age,clubId:s.clubId,matches,goals,assists,titles:title,rating,score,
-    note:title?'Campeón. La temporada cambió tu lugar en el club.':
-      rating>=7.8?'Temporada de consolidación y mercado caliente.':
-      rating<6.8?'Año irregular. El próximo puede ser decisivo.':'Cumpliste y seguís creciendo.'
+    season:s.season,age:s.age,clubId:s.clubId,matches,goals,assists,titles:0,rating,score:baseScore,
+    note:qualifiedForFinal
+      ?'Llegaste a una final. La temporada todavía no terminó.'
+      :rating>=7.8?'Temporada de consolidación y mercado caliente.':
+       rating<6.8?'Año irregular. El próximo puede ser decisivo.':'Cumpliste y seguís creciendo.'
   }
   const targetRetirementAge=s.retirementAge??39
   const shouldRetire=s.age+1>=targetRetirementAge
+  const salary=s.currentSalary??club.salary
+  const contractYearsLeft=Math.max(0,(s.contractYearsLeft??3)-1)
   let n:CareerState={
     ...s,
     age:s.age+1,
@@ -238,43 +300,157 @@ export function simulateSeason(s:CareerState):CareerState{
     overall:clamp(Math.round(roleOverall(nextStats,s.position)),45,97),
     form:clamp(56+r()*32),
     energy:clamp(78+r()*21),
-    reputation:clamp(s.reputation+Math.max(1,Math.round((rating-6.4)*1.6))+title*3),
-    fans:clamp(s.fans+Math.max(0,Math.round(goals*.18+assists*.12+title*2))),
-    clubLegacy:clamp((s.clubLegacy??0)+Math.max(1,Math.min(6,Math.round((rating-6.2)*1.35)+(title?2:0)+(s.leadership>=78?1:0))),0,100),
+    reputation:clamp(s.reputation+Math.max(1,Math.round((rating-6.4)*1.6))),
+    fans:clamp(s.fans+Math.max(0,Math.round(goals*.18+assists*.12))),
+    clubLegacy:clamp((s.clubLegacy??0)+Math.max(1,Math.min(4,Math.round((rating-6.2)*1.25)+(s.leadership>=78?1:0))),0,100),
     coachTrust:clamp(s.coachTrust+Math.round((rating-6.8)*4)),
     discipline:clamp(s.discipline+(r()>.55?1:-1)),
     leadership:clamp(s.leadership+(s.age>23?2:1)),
     morale:clamp(62+r()*30),
     injuryRisk:clamp(Math.max(5,s.injuryRisk-5)+(s.age>30?3:0)),
-    money:s.money+club.salary*12,
+    money:s.money+salary*12,
     matches:s.matches+matches,
     goals:s.goals+goals,
     assists:s.assists+assists,
-    titles:s.titles+title,
-    caps:s.caps+caps,
-    nationalGoals:s.nationalGoals+nationalGoals,
     trainingCredits:2,
     history:[...s.history,record],
     offers:[],
+    transferOffers:[],
+    marketDecisionRequired:false,
+    contractYearsLeft,
+    pendingFinal:null,
     activeEvent:null,
-    retired:shouldRetire,
+    retired:false,
+    retirementPending:shouldRetire,
   }
+
   const achievements=new Set(n.achievements)
   if(n.goals>=50)achievements.add('50 goles')
   if(n.matches>=100)achievements.add('100 partidos')
-  if(n.titles>=1)achievements.add('Primer título')
   if((n.clubLegacy??0)>=72)achievements.add('Ídolo del club')
   if(n.overall>=90)achievements.add('Clase mundial')
   if(n.position==='2'&&n.matches>=180)achievements.add('Patrón del fondo')
   n={...n,achievements:[...achievements]}
 
-  if(shouldRetire){
-    const finalScore=careerScore(n)
-    return {...n,finalScore}
+  if(qualifiedForFinal){
+    return {
+      ...n,
+      pendingFinal:{
+        id:`final-${record.season}-${opponent.id}`,
+        competition,
+        opponentClubId:opponent.id,
+        miniGame:finalMiniGameFor(s.position,r),
+        seasonRecordIndex:n.history.length-1,
+      },
+    }
   }
 
-  return {...n,offers:offersFor(n),activeEvent:nextPlayerEvent(n)}
+  if(shouldRetire)return finalizeRetirement(n)
+  return withMarket(n)
 }
+
+const completeFinal=(s:CareerState,won:boolean,source:'skill'|'luck',score=0):CareerState=>{
+  const pending=s.pendingFinal
+  if(!pending)return s
+  const history=[...s.history]
+  const record=history[pending.seasonRecordIndex]
+  if(record){
+    history[pending.seasonRecordIndex]={
+      ...record,
+      titles:won?1:0,
+      score:record.score+(won?850:220)+Math.round(score*.35),
+      note:won
+        ?`Campeón de ${pending.competition}. La final la resolviste por ${source==='skill'?'habilidad':'cábala'}.`
+        :`Finalista de ${pending.competition}. Estuviste a un partido del título.`,
+    }
+  }
+  let next:CareerState={
+    ...s,
+    history,
+    pendingFinal:null,
+    titles:s.titles+(won?1:0),
+    reputation:clamp(s.reputation+(won?4:1)),
+    fans:clamp(s.fans+(won?4:1)),
+    clubLegacy:clamp((s.clubLegacy??0)+(won?5:2)),
+    morale:clamp(s.morale+(won?8:-4)),
+    money:s.money+(won?(s.currentSalary??clubById(s.clubId).salary)*2:0),
+  }
+  if(won){
+    const achievements=new Set(next.achievements)
+    achievements.add('Primer título')
+    next={...next,achievements:[...achievements]}
+  }
+  if(next.retirementPending)return finalizeRetirement(next)
+  return withMarket({...next,retirementPending:false})
+}
+
+export function resolveSkillFinal(s:CareerState,score:number):CareerState{
+  const pending=s.pendingFinal
+  if(!pending)return s
+  const opponent=clubById(pending.opponentClubId)
+  const current=clubById(s.clubId)
+  const threshold=Math.max(285,Math.min(410,325+(opponent.prestige-current.prestige)*2))
+  return completeFinal(s,score>=threshold,'skill',score)
+}
+
+export function resolveCabalFinal(s:CareerState,ritual:number):CareerState{
+  const pending=s.pendingFinal
+  if(!pending)return s
+  const r=rngFrom(s.seed+pending.seasonRecordIndex*811+ritual*197+s.discipline*3+s.morale)
+  const trait=ritual===0?s.morale:ritual===1?s.discipline:s.leadership
+  const chance=Math.max(.4,Math.min(.72,.37+trait/420+s.reputation/900))
+  return completeFinal(s,r()<chance,'luck')
+}
+
+export function stayAtClub(s:CareerState):CareerState{
+  if(!s.marketDecisionRequired)return s
+  if((s.contractYearsLeft??0)<=0)return renewCurrentClub(s,2)
+  const next={...s,marketDecisionRequired:false,offers:[],transferOffers:[]}
+  return {...next,activeEvent:nextPlayerEvent(next)}
+}
+
+export function renewCurrentClub(s:CareerState,years=3):CareerState{
+  const club=clubById(s.clubId)
+  const base=s.currentSalary??club.salary
+  const raise=1.06+s.reputation/500+s.overall/900
+  const salary=Math.round(Math.max(base,club.salary)*raise/1000)*1000
+  const next:CareerState={
+    ...s,
+    currentSalary:salary,
+    contractYearsLeft:years,
+    contractYearsTotal:years,
+    money:s.money+salary,
+    marketDecisionRequired:false,
+    offers:[],
+    transferOffers:[],
+    morale:clamp(s.morale+3),
+  }
+  return {...next,activeEvent:nextPlayerEvent(next)}
+}
+
+export function acceptTransferOffer(s:CareerState,offer:TransferOffer):CareerState{
+  const destination=clubById(offer.clubId)
+  const legacyCarry=Math.min(4,Math.round(s.reputation/24))
+  const next:CareerState={
+    ...s,
+    clubId:offer.clubId,
+    currentSalary:offer.salary,
+    contractYearsLeft:offer.years,
+    contractYearsTotal:offer.years,
+    money:s.money+offer.signingBonus,
+    offers:[],
+    transferOffers:[],
+    marketDecisionRequired:false,
+    reputation:clamp(s.reputation+3),
+    fans:clamp(s.fans-2),
+    clubLegacy:legacyCarry,
+    coachTrust:offer.role==='FIGURA'?68:offer.role==='TITULAR'?58:48,
+    morale:clamp(s.morale+5),
+  }
+  return {...next,activeEvent:nextPlayerEvent({...next,clubId:destination.id})}
+}
+
+
 
 export function trainCareer(s:CareerState,focus:'physical'|'technique'|'finishing'|'mind'|'defending'){
   if(!s.trainingCredits)return s
@@ -289,11 +465,16 @@ export function trainCareer(s:CareerState,focus:'physical'|'technique'|'finishin
 }
 
 export function transferTo(s:CareerState,id:string):CareerState{
+  const existing=s.transferOffers?.find(offer=>offer.clubId===id)
+  if(existing)return acceptTransferOffer(s,existing)
   const c=clubById(id)
-  return {
-    ...s,clubId:id,offers:[],reputation:clamp(s.reputation+4),fans:clamp(s.fans-3),clubLegacy:Math.min(6,Math.round((s.reputation??0)/18)),
-    coachTrust:48,morale:clamp(s.morale+4),money:s.money+c.salary*2,activeEvent:nextPlayerEvent({...s,clubId:id})
-  }
+  return acceptTransferOffer(s,{
+    clubId:id,
+    salary:Math.round(c.salary/1000)*1000,
+    years:2,
+    role:'TITULAR',
+    signingBonus:c.salary*2,
+  })
 }
 
 export function careerScore(s:CareerState){
