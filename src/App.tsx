@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import {
   clubs,
   clubsByLeague,
@@ -98,7 +98,7 @@ function LeyendaLogo({size='md'}:{size?:'sm'|'md'|'lg'}){
 function MockLogin({onEnter}:{onEnter:(name:string)=>void}){
   const [name,setName]=useState('')
   const [password,setPassword]=useState('')
-  const submit=(event:React.FormEvent)=>{
+  const submit=(event:FormEvent)=>{
     event.preventDefault()
     onEnter(name.trim()||'Invitado')
   }
@@ -412,7 +412,7 @@ function Home({
             <span className="eyebrow">NUEVA GENERACIÓN · V2</span>
             <span className="status-dot">● EN DESARROLLO</span>
           </div>
-          <div className="hero-card__brand"><span>LEYENDA</span><small>Argentina Lab · club, rol, decisiones y stats</small></div>
+          <div className="hero-card__brand"><LeyendaLogo size="lg"/><span>LEYENDA</span><small>Argentina Lab · club, rol, decisiones y stats</small></div>
           <div className="mode-tabs">
             <button className={gameMode==='player'?'active':''} onClick={()=>setGameMode('player')}>MODO JUGADOR</button>
             <button className={gameMode==='coach'?'active':''} onClick={()=>setGameMode('coach')}>MODO ENTRENADOR</button>
