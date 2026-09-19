@@ -164,12 +164,12 @@ export const statLabels:Record<PlayerStatKey,string> = {
 }
 
 export const baseStatsByPosition:Record<Position,PlayerStats> = {
-  '9':{pace:68,finishing:76,passing:58,dribbling:67,defending:34,physical:65,reflexes:25},
-  '10':{pace:64,finishing:66,passing:78,dribbling:77,defending:42,physical:55,reflexes:25},
-  '7':{pace:78,finishing:66,passing:64,dribbling:76,defending:38,physical:57,reflexes:25},
-  '5':{pace:61,finishing:52,passing:72,dribbling:64,defending:70,physical:68,reflexes:25},
-  '2':{pace:58,finishing:38,passing:57,dribbling:45,defending:78,physical:79,reflexes:25},
-  '1':{pace:43,finishing:24,passing:56,dribbling:35,defending:46,physical:68,reflexes:80},
+  '9':{pace:63,finishing:65,passing:54,dribbling:59,defending:34,physical:61,reflexes:22},
+  '10':{pace:58,finishing:56,passing:66,dribbling:65,defending:42,physical:52,reflexes:22},
+  '7':{pace:66,finishing:56,passing:56,dribbling:65,defending:36,physical:54,reflexes:22},
+  '5':{pace:56,finishing:46,passing:66,dribbling:56,defending:64,physical:62,reflexes:22},
+  '2':{pace:53,finishing:31,passing:51,dribbling:41,defending:67,physical:68,reflexes:22},
+  '1':{pace:41,finishing:20,passing:51,dribbling:31,defending:43,physical:59,reflexes:70},
 }
 
 export const positions:Array<{id:Position;title:string;subtitle:string;boost:number}> = [
