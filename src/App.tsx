@@ -550,19 +550,45 @@ function Home({
   </div>
 }
 
-function GameSideNav({tab,setTab,coach}:{tab:Tab;setTab:(t:Tab)=>void;coach:boolean}){
-  const items:Array<[Tab,string,string]> = coach
-    ? [['career','⌂','Inicio'],['squad','▦','Equipo'],['minigames','◎','Desafíos'],['history','≡','Historia'],['ranking','⌁','Ranking']]
-    : [['career','⌂','Carrera'],['market','↗','Mercado'],['training','◇','Entreno'],['shop','▣','Tienda'],['minigames','◎','Juegos'],['history','≡','Historia'],['ranking','⌁','Ranking']]
-  const go=(next:Tab)=>{setTab(next);window.scrollTo({top:0,behavior:'smooth'})}
-  return <nav className="game-side-nav" aria-label="Secciones del juego">
-    <div className="game-side-nav__mark"><LeyendaLogo size="sm"/></div>
-    {items.map(([id,icon,label])=><button key={id} className={tab===id?'active':''} onClick={()=>go(id)} aria-label={label} title={label}>
-      <span>{icon}</span><small>{label}</small>
-    </button>)}
-  </nav>
+function GameTopNav({
+  tab,setTab,coach,clubName,onExit,theme,onTheme
+}:{
+  tab:Tab
+  setTab:(t:Tab)=>void
+  coach:boolean
+  clubName:string
+  onExit:()=>void
+  theme:Theme
+  onTheme:()=>void
+}){
+  const [moreOpen,setMoreOpen]=useState(false)
+  const primary:Array<[Tab,string]> = coach
+    ? [['career','Inicio'],['squad','Equipo'],['minigames','Desafíos']]
+    : [['career','Carrera'],['market','Mercado'],['minigames','Jugar']]
+  const secondary:Array<[Tab,string]> = coach
+    ? [['history','Historia'],['ranking','Ranking']]
+    : [['training','Entreno'],['shop','Tienda'],['history','Historia'],['ranking','Ranking']]
+  const go=(next:Tab)=>{
+    setMoreOpen(false)
+    setTab(next)
+    window.scrollTo({top:0,behavior:'smooth'})
+  }
+  const secondaryActive=secondary.some(([id])=>id===tab)
+  return <header className="game-topbar">
+    <div className="game-topbar__brand">
+      <button onClick={onExit} aria-label="Volver al menú"><LeyendaLogo size="sm"/></button>
+      <div><strong>LEYENDA</strong><small>{clubName}</small></div>
+    </div>
+    <nav className="game-topbar__nav" aria-label="Secciones del juego">
+      {primary.map(([id,label])=><button key={id} className={tab===id?'active':''} onClick={()=>go(id)}>{label}</button>)}
+      <button className={secondaryActive||moreOpen?'active':''} onClick={()=>setMoreOpen(open=>!open)}>Más <span>⌄</span></button>
+    </nav>
+    <button className="game-topbar__theme" onClick={onTheme} aria-label="Cambiar tema">{theme==='dark'?'☾':'☀'}</button>
+    {moreOpen&&<div className="game-topbar__more">
+      {secondary.map(([id,label])=><button key={id} className={tab===id?'active':''} onClick={()=>go(id)}>{label}</button>)}
+    </div>}
+  </header>
 }
-
 const shopItems:Array<{id:string;icon:string;name:string;description:string;cost:number;effects:EventOption['effects'];kind:'staff'|'asset'}>= [
   {id:'physio',icon:'✚',name:'Kinesiólogo personal',description:'Menos riesgo de lesión y mejor recuperación.',cost:180000,effects:{injuryRisk:-10,energy:6},kind:'staff'},
   {id:'psych',icon:'◉',name:'Psicólogo deportivo',description:'Más moral y disciplina en los momentos duros.',cost:150000,effects:{morale:10,discipline:4},kind:'staff'},
@@ -1701,10 +1727,7 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
   }
 
   return <div className="shell game-shell">
-    <header className="game-header">
-      <button className="brand brand--button" onClick={onExit}><LeyendaLogo size="sm"/><span><strong>LEYENDA</strong><small>← MENÚ</small></span></button>
-      <ThemeToggle theme={theme} onToggle={onTheme}/>
-    </header>
+    <GameTopNav tab={tab} setTab={setTab} coach={false} clubName={club.name} onExit={onExit} theme={theme} onTheme={onTheme}/>
 
     <main className="game-main">
       {seasonSummary&&<div className="season-result-overlay" onClick={()=>setSeasonSummary(null)}>
@@ -1785,7 +1808,6 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
           <div className="timeline">{[...state.history].reverse().map(s=><article key={s.season}><ClubCrest name={clubById(s.clubId).name} size="sm"/><div><strong>{clubById(s.clubId).name}</strong><span>Temporada {s.season} · {s.age} años</span><p>{s.note}</p></div><aside><b>{s.rating}</b><span>RAT</span></aside></article>)}</div>}
       </section>}
     </main>
-    <GameSideNav tab={tab} setTab={setTab} coach={false}/>
   </div>
 }
 
@@ -1808,10 +1830,7 @@ function CoachGame({state,setState,theme,onTheme,onExit}:{state:CoachState;setSt
   },[state.retired,state.finalScore])
 
   return <div className="shell game-shell">
-    <header className="game-header">
-      <button className="brand brand--button" onClick={onExit}><LeyendaLogo size="sm"/><span><strong>LEYENDA</strong><small>← MENÚ</small></span></button>
-      <ThemeToggle theme={theme} onToggle={onTheme}/>
-    </header>
+    <GameTopNav tab={tab} setTab={setTab} coach={true} clubName={club.name} onExit={onExit} theme={theme} onTheme={onTheme}/>
 
     <main className="game-main">
       {tab==='career'&&<div className="career-overview">
@@ -1845,7 +1864,6 @@ function CoachGame({state,setState,theme,onTheme,onExit}:{state:CoachState;setSt
       {tab==='ranking'&&<RankingPanel scores={scores}/>}
       {tab==='history'&&<section className="panel"><div className="panel-head"><div><span className="eyebrow">ARCHIVO DEL DT</span><h2>Temporadas</h2></div></div><div className="timeline">{[...state.history].reverse().map(s=><article key={s.season}><ClubCrest name={clubById(s.clubId).name} size="sm"/><div><strong>{clubById(s.clubId).name}</strong><span>Temporada {s.season}</span><p>{s.note}</p></div><aside><b>#{s.position}</b><span>{s.points} PTS</span></aside></article>)}</div></section>}
     </main>
-    <GameSideNav tab={tab} setTab={setTab} coach={true}/>
   </div>
 }
 
