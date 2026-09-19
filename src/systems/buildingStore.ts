@@ -171,7 +171,8 @@ const finalCabalaGameFor=(r:()=>number):CabalaGameId=>{
 const challengeFor=(s:CareerState,perf:number,r:()=>number):{kind:CareerOutcomeKind;competition:string}=>{
   const club=clubById(s.clubId)
   const league=leagueById(club.leagueId)
-  if(league.tier>1){
+  const tier=s.divisionTier??league.tier
+  if(tier>1){
     if(perf>=58)return {kind:'promotion',competition:'Final por el ascenso'}
     return {kind:'survival',competition:'Partido por la permanencia'}
   }
@@ -244,7 +245,7 @@ export function createCareer(name:string,position:Position,mode:PlayerMode,clubI
   const contractYears=2+(seed%3)
   const s:CareerState={
     version:2,gameMode:'player',mode,seed,playerName:name.trim()||'El Pibe',nationality,position,
-    age:17,season:1,maxSeasons,clubId,overall:Math.round(roleOverall(baseStatsByPosition[position],position)),stats:{...baseStatsByPosition[position]},form:68,energy:92,reputation:8,fans:12,clubLegacy:0,retirementAge,
+    age:17,season:1,maxSeasons,clubId,divisionTier:leagueById(club.leagueId).tier,overall:Math.round(roleOverall(baseStatsByPosition[position],position)),stats:{...baseStatsByPosition[position]},form:68,energy:92,reputation:8,fans:12,clubLegacy:0,retirementAge,
     coachTrust:55,discipline:62,leadership:42,morale:72,injuryRisk:8,money:12000,matches:0,goals:0,
     assists:0,titles:0,caps:0,nationalGoals:0,trainingCredits:2,seenEvents:[],lastStorySeason:0,history:[],achievements:[],offers:[],transferOffers:[],
     marketDecisionRequired:false,currentSalary:club.salary,contractYearsLeft:contractYears,contractYearsTotal:contractYears,
@@ -423,6 +424,11 @@ const completeFinal=(s:CareerState,won:boolean,source:'skill'|'luck',score=0):Ca
   const wonTitle=won&&pending.kind==='title'
   const wonPromotion=won&&pending.kind==='promotion'
   const survived=won&&pending.kind==='survival'
+  const currentTier=s.divisionTier??leagueById(clubById(s.clubId).leagueId).tier
+  const nextTier=
+    pending.kind==='promotion'&&won?Math.max(1,currentTier-1):
+    pending.kind==='survival'&&!won?currentTier+1:
+    currentTier
   const titleText=
     pending.kind==='title'
       ?(won?'Campeón de '+pending.competition+'.':'Perdiste la final de '+pending.competition+'.')
@@ -457,6 +463,7 @@ const completeFinal=(s:CareerState,won:boolean,source:'skill'|'luck',score=0):Ca
     ...s,
     history,
     pendingFinal:null,
+    divisionTier:nextTier,
     titles:s.titles+(wonTitle?1:0),
     trophies,
     glory:(s.glory??0)+glory,
@@ -526,6 +533,7 @@ export function acceptTransferOffer(s:CareerState,offer:TransferOffer):CareerSta
   const next:CareerState={
     ...s,
     clubId:offer.clubId,
+    divisionTier:leagueById(destination.leagueId).tier,
     currentSalary:offer.salary,
     contractYearsLeft:offer.years,
     contractYearsTotal:offer.years,
