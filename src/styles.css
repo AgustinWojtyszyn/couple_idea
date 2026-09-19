@@ -6507,3 +6507,103 @@ html,body,#root{max-width:100%;overflow-x:hidden}
     white-space:nowrap;
   }
 }
+
+
+/* V9 · visual career assets */
+.shop-section-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin:16px 0 8px;
+  color:#8295aa;
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:.11em;
+}
+.shop-section-head>b{
+  color:#6ebeff;
+}
+.shop-section-head--assets{
+  margin-top:22px;
+  color:#d1b867;
+}
+.asset-shop-grid{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:8px;
+}
+.asset-shop-grid>button{
+  min-height:190px;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:6px;
+  padding:9px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:
+    radial-gradient(circle at 70% 15%,rgba(233,193,78,.11),transparent 30%),
+    var(--surface-2);
+  color:var(--text);
+  text-align:left;
+}
+.asset-shop-grid>button:disabled{opacity:.5}
+.asset-shop-grid>button.owned{
+  opacity:1;
+  border-color:rgba(235,196,76,.28);
+  background:linear-gradient(145deg,rgba(85,65,15,.25),var(--surface-2));
+}
+.asset-shop-art{
+  position:relative;
+  overflow:hidden;
+  width:100%;
+  height:82px;
+  display:grid;
+  place-items:center;
+  border-radius:10px;
+  background:
+    linear-gradient(180deg,#19314d,#0b1827);
+}
+.asset-shop-art>b{
+  position:relative;
+  z-index:2;
+  color:#f1d270;
+  font-size:30px;
+}
+.asset-shop-art>i{
+  position:absolute;
+  border:1px solid rgba(113,185,255,.16);
+  border-radius:50%;
+}
+.asset-shop-art>i:nth-child(2){width:88px;height:88px;right:-31px;top:-27px}
+.asset-shop-art>i:nth-child(3){width:58px;height:58px;left:-19px;bottom:-27px}
+.asset-shop-grid strong{
+  font-size:11px;
+}
+.asset-shop-grid small{
+  color:var(--muted);
+  font-size:8px;
+  line-height:1.3;
+}
+.asset-shop-grid em{
+  margin-top:auto;
+  color:#f0cf6c;
+  font-size:8px;
+  font-style:normal;
+  font-weight:900;
+}
+@media(max-width:700px){
+  .asset-shop-grid{
+    display:flex;
+    overflow-x:auto;
+    scroll-snap-type:x mandatory;
+    scrollbar-width:none;
+  }
+  .asset-shop-grid::-webkit-scrollbar{display:none}
+  .asset-shop-grid>button{
+    flex:0 0 66%;
+    min-height:175px;
+    scroll-snap-align:start;
+  }
+}
