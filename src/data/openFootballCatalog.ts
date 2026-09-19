@@ -1,4 +1,4 @@
-import { registerLeagueSeed } from '../world/Architecture'
+import { leagues, clubsByLeague, registerLeagueSeed } from '../world/Architecture'
 
 type CatalogEntry = {
   country:string
@@ -106,11 +106,14 @@ const writeCache=(cache:CacheShape)=>{
   try{localStorage.setItem(cacheKey,JSON.stringify(cache))}catch{}
 }
 
-const idFor=(entry:CatalogEntry,tier:number)=>`of-${entry.code}-${tier}`
+const generatedId=(entry:CatalogEntry,tier:number)=>`of-${entry.code}-${tier}`
+const idFor=(entry:CatalogEntry,tier:number)=>leagues.find(league=>league.country===entry.country&&league.tier===tier)?.id??generatedId(entry,tier)
 
 for(const entry of entries){
   for(const tier of entry.tiers){
-    registerLeagueSeed({id:idFor(entry,tier),country:entry.country,division:tier,teams:[]})
+    if(!leagues.some(league=>league.country===entry.country&&league.tier===tier)){
+      registerLeagueSeed({id:generatedId(entry,tier),country:entry.country,division:tier,teams:[]})
+    }
   }
 }
 
@@ -119,7 +122,7 @@ for(const entry of entries){
   for(const tier of entry.tiers){
     const id=idFor(entry,tier)
     const teams=cachedAtBoot[id]
-    if(teams?.length)registerLeagueSeed({id,country:entry.country,division:tier,teams})
+    if(teams?.length&&!clubsByLeague(id).length)registerLeagueSeed({id,country:entry.country,division:tier,teams})
   }
 }
 
@@ -150,6 +153,9 @@ export async function ensureOpenFootballLeague(leagueId:string){
   const target=entryForLeague(leagueId)
   if(!target)return {ok:false,teams:[] as string[],source:OPEN_FOOTBALL_SOURCE}
   const cache=readCache()
+  if(clubsByLeague(leagueId).length){
+    return {ok:true,teams:clubsByLeague(leagueId).map(team=>team.name),source:'local'}
+  }
   if(cache[leagueId]?.length){
     registerLeagueSeed({id:leagueId,country:target.entry.country,division:target.tier,teams:cache[leagueId]})
     return {ok:true,teams:cache[leagueId],source:OPEN_FOOTBALL_SOURCE}
