@@ -1511,13 +1511,13 @@ function CareerRetirementSummary({state}:{state:CareerState}){
 
 function CabalaPracticePanel(){
   const games:Array<{id:CabalaGameId;icon:string;name:string;description:string}>=[
-    {id:'higher-lower',icon:'♠',name:'El pálpito',description:'Mayor o menor. Tres cartas para sostener la fe.'},
+    {id:'higher-lower',icon:'🃏',name:'El pálpito',description:'Arrancás con un número y jugás tres predicciones de mayor o menor.'},
     {id:'dice-seven',icon:'⚄',name:'La Generala',description:'Cinco dados, tres tiradas y podés guardar los que te sirvan.'},
     {id:'coin-run',icon:'◐',name:'Moneda de vestuario',description:'Leé una racha de cara o ceca.'},
     {id:'lucky-number',icon:'17',name:'Número marcado',description:'Encontrá el casillero con la pelota.'},
     {id:'lucky-shirt',icon:'▾',name:'La camiseta',description:'Una sola elección antes de salir.'},
-    {id:'three-cups',icon:'◒',name:'Tres vasos',description:'Seguí dónde escondieron la pelota.'},
-    {id:'wheel',icon:'✺',name:'Rueda del destino',description:'Frená la rueda en una zona dorada.'},
+    {id:'three-cups',icon:'🥤',name:'Tres vasos',description:'Mirá la pelota, seguí la mezcla y elegí el vaso correcto.'},
+    {id:'wheel',icon:'🎡',name:'Rueda del destino',description:'Una sola frenada. El resultado sale de dónde la detenés.'},
     {id:'tower',icon:'⚑',name:'La tribuna',description:'Elegí el sector donde sentís que está la noche.'},
     {id:'grid-reveal',icon:'▦',name:'Grilla de la suerte',description:'Memorizá dónde apareció el gol.'},
     {id:'boots',icon:'⌁',name:'Los tapones',description:'Leé el clima y elegí antes del partido.'},
