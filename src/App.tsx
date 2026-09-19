@@ -1012,8 +1012,8 @@ function FinalStyleChoice({onChoose}:{onChoose:(style:FinalStyle)=>void}){
 
 function CabalaMiniGame({game,onComplete}:{game:CabalaGameId;onComplete:(won:boolean,score:number)=>void}){
   const roundsByGame:Record<CabalaGameId,number>={
-    'higher-lower':3,'dice-seven':1,'coin-run':1,'lucky-number':1,'lucky-shirt':1,
-    'three-cups':1,'wheel':1,'tower':3,'grid-reveal':1,'boots':1,
+    'higher-lower':1,'dice-seven':1,'coin-run':1,'lucky-number':1,'lucky-shirt':1,
+    'three-cups':1,'wheel':1,'tower':1,'grid-reveal':1,'boots':1,
   }
   const maxRounds=roundsByGame[game]
   const [round,setRound]=useState(0)
@@ -1172,14 +1172,14 @@ function CabalaMiniGame({game,onComplete}:{game:CabalaGameId;onComplete:(won:boo
     'lucky-shirt':'La camiseta',
     'three-cups':'Tres vasos',
     'wheel':'Rueda del destino',
-    'tower':'La torre',
+    'tower':'La tribuna',
     'grid-reveal':'Grilla de la suerte',
     'boots':'Los tapones',
   }
 
   const kicker:Record<CabalaGameId,string>={
     'higher-lower':'CARTAS','dice-seven':'CINCO DADOS','coin-run':'RACHA','lucky-number':'INTUICIÓN','lucky-shirt':'RITUAL',
-    'three-cups':'MEMORIA + SUERTE','wheel':'TIMING + AZAR','tower':'LECTURA','grid-reveal':'PÁLPITO','boots':'CLIMA',
+    'three-cups':'MEMORIA + SUERTE','wheel':'TIMING + AZAR','tower':'PÁLPITO DE HINCHADA','grid-reveal':'PÁLPITO','boots':'CLIMA',
   }
 
   const weatherMeta=[['☀','SECO','Tapón corto'],['☂','LLUVIA','Tapón largo'],['≈','MIXTO','Tapón intermedio']][weather]
@@ -1240,10 +1240,15 @@ function CabalaMiniGame({game,onComplete}:{game:CabalaGameId;onComplete:(won:boo
       <button className="skill-main-action luck-action" disabled={finished||animating} onClick={wheelStop}>{animating?'DECIDIENDO…':'FRENAR RUEDA'}</button>
     </div>}
 
-    {game==='tower'&&<div className="cabala-tower-stage">
-      <div className="tower-visual">{Array.from({length:4},(_,index)=><i key={index}/>)}</div>
-      <div className="cabala-question">Una salida está estudiada por el rival. Elegí otra.</div>
-      <div className="three-actions"><button disabled={finished} onClick={()=>towerPick(0)}>IZQUIERDA</button><button disabled={finished} onClick={()=>towerPick(1)}>CENTRO</button><button disabled={finished} onClick={()=>towerPick(2)}>DERECHA</button></div>
+    {game==='tower'&&<div className="cabala-tribuna-stage">
+      <div className="tribuna-night">
+        {[0,1,2].map(value=><button key={value} disabled={finished} className={value===luckyNumber?'pulse':''} onClick={()=>towerPick(value)}>
+          <i/><i/><i/><i/><i/>
+          <b>{value===0?'POPULAR IZQ':value===1?'PLATEA':'POPULAR DER'}</b>
+          <span>⚑</span>
+        </button>)}
+      </div>
+      <div className="cabala-question">La cancha ruge distinto en un sector. Elegí dónde sentís que nace la noche.</div>
     </div>}
 
     {game==='grid-reveal'&&<div className="cabala-grid-stage">
@@ -1453,7 +1458,7 @@ function CabalaPracticePanel(){
     {id:'lucky-shirt',icon:'▾',name:'La camiseta',description:'Una sola elección antes de salir.'},
     {id:'three-cups',icon:'◒',name:'Tres vasos',description:'Seguí dónde escondieron la pelota.'},
     {id:'wheel',icon:'✺',name:'Rueda del destino',description:'Frená la rueda en una zona dorada.'},
-    {id:'tower',icon:'▥',name:'La torre',description:'Evitá la salida que el rival estudió.'},
+    {id:'tower',icon:'⚑',name:'La tribuna',description:'Elegí el sector donde sentís que está la noche.'},
     {id:'grid-reveal',icon:'▦',name:'Grilla de la suerte',description:'Memorizá dónde apareció el gol.'},
     {id:'boots',icon:'⌁',name:'Los tapones',description:'Leé el clima y elegí antes del partido.'},
   ]
