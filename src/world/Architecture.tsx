@@ -6,6 +6,8 @@ export type GameMode = 'player' | 'coach'
 export type Theme = 'dark' | 'light'
 export type Tab = 'career' | 'market' | 'training' | 'history' | 'minigames' | 'ranking' | 'squad' | 'shop'
 export type MiniGameId = 'penalties' | 'freekicks' | 'dribble' | 'keeper' | 'duel' | 'tactics' | 'scouting' | 'locker' | 'lineup' | 'negotiation'
+export type CabalaGameId = 'higher-lower' | 'dice-seven' | 'coin-run' | 'lucky-number' | 'lucky-shirt'
+export type CareerOutcomeKind = 'title' | 'survival' | 'promotion'
 export type PlayerStatKey = 'pace' | 'finishing' | 'passing' | 'dribbling' | 'defending' | 'physical' | 'reflexes'
 export type PlayerStats = Record<PlayerStatKey, number>
 
@@ -17,7 +19,7 @@ export type Club = {
 
 export type SeasonRecord = {
   season:number; age:number; clubId:string; matches:number; goals:number; assists:number;
-  titles:number; rating:number; score:number; note:string
+  titles:number; rating:number; score:number; note:string; glory?:number
 }
 
 export type Effects = Partial<Record<
@@ -85,6 +87,9 @@ export type CareerState = {
   finalStyle?:FinalStyle|null
   pendingFinal?:FinalChallenge|null
   retirementPending?:boolean
+  trophies?:TrophyRecord[]
+  glory?:number
+  lastSeasonGlory?:number
   activeEvent:CareerEvent|null
   retired:boolean
   finalScore?:number
@@ -129,10 +134,19 @@ export type RunScore = {
 export type MiniGame = { id:MiniGameId; name:string; description:string; icon:string; playerOnly?:boolean; coachOnly?:boolean }
 export type FinalChallenge = {
   id:string
+  kind:CareerOutcomeKind
   competition:string
   opponentClubId:string
   miniGame:MiniGameId
+  cabalaGame:CabalaGameId
   seasonRecordIndex:number
+}
+export type TrophyRecord = {
+  id:string
+  name:string
+  icon:string
+  season:number
+  clubId:string
 }
 export type TransferOffer = {
   clubId:string
