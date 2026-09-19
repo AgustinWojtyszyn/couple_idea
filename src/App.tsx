@@ -457,9 +457,24 @@ const shopItems:Array<{id:string;icon:string;name:string;description:string;cost
   {id:'physio',icon:'✚',name:'Kinesiólogo personal',description:'Menos riesgo de lesión y mejor recuperación.',cost:180000,effects:{injuryRisk:-10,energy:6}},
   {id:'psych',icon:'◉',name:'Psicólogo deportivo',description:'Más moral y disciplina en los momentos duros.',cost:150000,effects:{morale:10,discipline:4}},
   {id:'physical',icon:'◆',name:'Preparador físico',description:'Mejora tu potencia y capacidad de sostener temporadas.',cost:260000,effects:{physical:4,pace:2,energy:7}},
-  {id:'video',icon:'⌁',name:'Analista de video',description:'Mejor lectura: pase, defensa y confianza del DT.',cost:240000,effects:{passing:3,defending:2,coachTrust:5}},
-  {id:'technical',icon:'◎',name:'Entrenador técnico',description:'Pulí tu gesto individual de manera permanente.',cost:320000,effects:{dribbling:4,finishing:3}},
+  {id:'video',icon:'⌁',name:'Analista de video',description:'Lectura específica de tu puesto y confianza del DT.',cost:240000,effects:{}},
+  {id:'technical',icon:'◎',name:'Entrenador técnico',description:'Trabajo individual específico para tu función.',cost:320000,effects:{}},
 ]
+
+function shopEffectsFor(position:Position,id:string,base:EventOption['effects']):EventOption['effects']{
+  if(id==='video'){
+    if(position==='1')return {passing:3,reflexes:2,coachTrust:5}
+    if(position==='2'||position==='5')return {passing:3,defending:3,coachTrust:5}
+    return {passing:3,dribbling:2,coachTrust:5}
+  }
+  if(id==='technical'){
+    if(position==='1')return {reflexes:4,passing:2}
+    if(position==='2')return {defending:3,passing:3,physical:1}
+    if(position==='5')return {passing:4,defending:2}
+    return {dribbling:4,finishing:3}
+  }
+  return base
+}
 
 function ShopPanel({state,setState}:{state:CareerState;setState:(next:CareerState)=>void}){
   const owned=new Set(state.purchases??[])
@@ -469,12 +484,13 @@ function ShopPanel({state,setState}:{state:CareerState;setState:(next:CareerStat
     <div className="shop-list">{shopItems.map(item=>{
       const bought=owned.has(item.id)
       const disabled=bought||state.money<item.cost
+      const effects=shopEffectsFor(state.position,item.id,item.effects)
       return <button key={item.id} disabled={disabled} onClick={()=>{
-        const next=applyEffects(state,item.effects)
+        const next=applyEffects(state,effects)
         setState({...next,activeEvent:state.activeEvent,money:next.money-item.cost,purchases:[...(state.purchases??[]),item.id]})
       }}>
         <b>{item.icon}</b>
-        <span><strong>{item.name}</strong><small>{item.description}</small><EffectChips effects={item.effects}/></span>
+        <span><strong>{item.name}</strong><small>{item.description}</small><EffectChips effects={effects}/></span>
         <em>{bought?'CONTRATADO':'$ '+formatMoney(item.cost)}</em>
       </button>
     })}</div>
@@ -667,6 +683,25 @@ function MiniGamesPanel({mode,onScore}:{mode:'player'|'coach';onScore:(game:Mini
   </section>
 }
 
+function trainingOptionsFor(position:Position){
+  const common={
+    physical:['physical','Potencia física','Físico · velocidad · energía'],
+    technique:['technique','Técnica específica','Control y pase'],
+    finishing:['finishing','Definición','Finalización y ataque'],
+    defending:['defending','Defensa y cruces','Marca · físico · liderazgo'],
+    mind:['mind',position==='1'?'Reflejos y lectura':'Cabeza fría',position==='1'?'Reflejos · moral · disciplina':'Moral · disciplina · lectura'],
+  } as const
+  const ids:Record<Position,Array<keyof typeof common>>={
+    '9':['physical','technique','finishing','mind'],
+    '10':['technique','finishing','physical','mind'],
+    '7':['physical','technique','finishing','mind'],
+    '5':['technique','defending','physical','mind'],
+    '2':['defending','physical','technique','mind'],
+    '1':['mind','physical','technique'],
+  }
+  return ids[position].map(id=>common[id])
+}
+
 function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;setState:(s:CareerState)=>void;theme:Theme;onTheme:()=>void;onExit:()=>void}){
   const [tab,setTab]=useState<Tab>('career')
   const [scores,setScores]=useState<RunScore[]>(()=>getRunScores())
@@ -770,13 +805,7 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
       {tab==='training'&&<section className="panel">
         <div className="panel-head"><div><span className="eyebrow">ENTRENAMIENTO</span><h2>{state.trainingCredits} sesiones disponibles</h2></div></div>
         <div className="training-grid">
-          {[
-            ['physical','Potencia física','+4 Físico · +2 Velocidad'],
-            ['technique','Técnica individual','+4 Regate · +3 Pase'],
-            ['finishing','Definición','+5 Definición'],
-            ['defending','Defensa y cruces','+5 Defensa · +2 Físico'],
-            ['mind','Cabeza fría','Moral · disciplina · lectura'],
-          ].map(x=><button key={x[0]} disabled={!state.trainingCredits} onClick={()=>setState(trainCareer(state,x[0] as 'physical'|'technique'|'finishing'|'mind'|'defending'))}><b>◇</b><strong>{x[1]}</strong><span>{x[2]}</span></button>)}
+          {trainingOptionsFor(state.position).map(x=><button key={x[0]} disabled={!state.trainingCredits} onClick={()=>setState(trainCareer(state,x[0] as 'physical'|'technique'|'finishing'|'mind'|'defending'))}><b>◇</b><strong>{x[1]}</strong><span>{x[2]}</span></button>)}
         </div>
       </section>}
 
