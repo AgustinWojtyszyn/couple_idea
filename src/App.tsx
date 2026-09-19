@@ -1710,7 +1710,7 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
   }
 
   const playMini=(game:MiniGameId,value:number)=>{
-    const bonus=value>=360?2:1
+    const bonus=value>=80?2:1
     const effects:EventOption['effects']=
       game==='penalties'||game==='freekicks'?{finishing:bonus,form:1}:
       game==='dribble'||game==='personal-run'?{dribbling:bonus,pace:1}:
@@ -1761,6 +1761,12 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
       <div className="quick-stats quick-stats--career">
         <Stat value={state.matches} label="PJ"/><Stat value={state.goals} label="GOLES"/><Stat value={state.assists} label="ASIST."/><Stat value={state.titles} label="TÍTULOS"/><Stat value={(state.glory??0).toLocaleString('es-AR')} label="GLORIA"/>
       </div>
+      <div className="career-vitals" aria-label="Estado del jugador">
+        <span><small>FORMA</small><b>{Math.round(state.form)}</b><i><em style={{width:state.form+'%'}}/></i></span>
+        <span><small>ENERGÍA</small><b>{Math.round(state.energy)}</b><i><em style={{width:state.energy+'%'}}/></i></span>
+        <span><small>MORAL</small><b>{Math.round(state.morale)}</b><i><em style={{width:state.morale+'%'}}/></i></span>
+        <strong>{state.energy>70?'ÓPTIMO':state.energy>45?'CARGADO':'AL LÍMITE'}</strong>
+      </div>
 
       </div>}
 
@@ -1775,11 +1781,7 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
           <><span className="eyebrow">TEMPORADA {state.season} DE {state.maxSeasons}</span><h2>Todo listo para competir.</h2><p>Tu estado físico, la confianza, el vestuario y las decisiones ya están en juego.</p><button className="play-button" onClick={playSeason}>▶ JUGAR TEMPORADA</button></>}
         </section>
 
-        <aside className="panel condition-panel condition-panel--compact">
-          <div className="panel-head"><div><span className="eyebrow">CONDICIÓN</span><h3>Cómo llegás</h3></div><span className="condition-label">{state.energy>70?'ÓPTIMO':state.energy>45?'CARGADO':'AL LÍMITE'}</span></div>
-          <Meter label="Forma" value={state.form}/><Meter label="Energía" value={state.energy}/><Meter label="Moral" value={state.morale}/>
-          <div className="condition-mini"><span>DT <b>{Math.round(state.coachTrust)}</b></span><span>DISC <b>{Math.round(state.discipline)}</b></span><span>LID <b>{Math.round(state.leadership)}</b></span></div>
-        </aside>
+
       </div>}
 
       {tab==='career'&&!state.retired&&<details className="career-details">
