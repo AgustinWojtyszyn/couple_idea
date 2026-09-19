@@ -77,8 +77,8 @@ export async function getClubMedia(name:string):Promise<ClubMedia>{
     if(!search.ok)throw new Error('search failed')
     const data=await search.json() as {search?:Array<{id:string;label:string;description?:string}>}
     const candidates=data.search??[]
-    const football=candidates.find(x=>/fútbol|football|soccer|club deportivo|association football/i.test(x.description||''))??candidates[0]
-    if(!football)throw new Error('not found')
+    const football=candidates.find(x=>/fútbol|football|soccer|club deportivo|association football/i.test(x.description||''))
+    if(!football)throw new Error('football club not found')
 
     const entityRes=await fetch(
       'https://www.wikidata.org/w/api.php?'+new URLSearchParams({
