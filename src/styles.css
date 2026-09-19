@@ -1681,3 +1681,109 @@ button:focus-visible,input:focus-visible,select:focus-visible{box-shadow:0 0 0 3
   font-size:18px;
   line-height:1;
 }
+
+
+/* V2 · season result moment */
+.season-result-overlay{
+  position:fixed;
+  inset:0;
+  z-index:120;
+  display:grid;
+  place-items:end center;
+  padding:16px 12px max(18px,env(safe-area-inset-bottom));
+  background:rgba(1,5,12,.8);
+  backdrop-filter:blur(10px);
+}
+.season-result{
+  width:min(100%,520px);
+  position:relative;
+  overflow:hidden;
+  border:1px solid var(--line-strong);
+  border-radius:22px;
+  background:
+    radial-gradient(circle at 50% -20%,rgba(47,124,255,.22),transparent 36%),
+    var(--surface);
+  box-shadow:0 30px 90px rgba(0,0,0,.5);
+  padding:22px 16px 16px;
+  text-align:center;
+}
+.season-result:before{
+  content:'';
+  position:absolute;
+  left:0;right:0;top:0;
+  height:3px;
+  background:linear-gradient(90deg,transparent,var(--blue-2),transparent);
+}
+.season-result--champion{
+  border-color:rgba(255,211,106,.34);
+  background:
+    radial-gradient(circle at 50% -10%,rgba(255,211,106,.2),transparent 40%),
+    var(--surface);
+}
+.season-result--champion:before{
+  background:linear-gradient(90deg,transparent,var(--warn),transparent);
+}
+.season-result__eyebrow{
+  display:block;
+  margin-bottom:14px;
+  color:var(--blue-2);
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:.14em;
+}
+.season-result--champion .season-result__eyebrow{color:var(--warn)}
+.season-result .real-crest,
+.season-result .crest{
+  margin:0 auto;
+}
+.season-result h2{
+  margin:12px 0 4px;
+  font:700 30px/.95 var(--font-display);
+}
+.season-result>p{
+  margin:0;
+  color:var(--muted);
+  font-size:9px;
+}
+.season-result__stats{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:6px;
+  margin-top:16px;
+}
+.season-result__stats .stat{
+  min-height:58px;
+}
+.season-result__score{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-top:10px;
+  padding:12px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:var(--surface-2);
+}
+.season-result__score span{
+  color:var(--muted);
+  font-size:7px;
+  font-weight:900;
+  letter-spacing:.08em;
+}
+.season-result__score strong{
+  font:700 26px/1 var(--font-display);
+  color:var(--blue-2);
+}
+.season-result>em{
+  display:block;
+  margin:13px auto 0;
+  max-width:360px;
+  color:var(--muted);
+  font-size:9px;
+  line-height:1.5;
+  font-style:normal;
+}
+@media(min-width:680px){
+  .season-result-overlay{place-items:center}
+}
