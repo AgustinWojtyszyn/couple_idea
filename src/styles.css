@@ -2475,3 +2475,213 @@ button:focus-visible,input:focus-visible,select:focus-visible{box-shadow:0 0 0 3
   .matchday-scene__identity{right:36px;top:43px;transform:scale(1.18)}
   .matchday-scene__name{font-size:84px}
 }
+
+
+/* V4 · cleaner stadium scene, no character dummy */
+.matchday-scene__stands{
+  position:absolute;
+  left:0;right:0;top:42px;
+  height:82px;
+  display:flex;
+  gap:2px;
+  padding:0 4%;
+  opacity:.75;
+}
+.matchday-scene__stands i{
+  flex:1;
+  border-radius:10px 10px 0 0;
+  background:
+    linear-gradient(180deg,rgba(121,157,205,.28),rgba(16,35,58,.88)),
+    repeating-linear-gradient(90deg,rgba(255,255,255,.12) 0 2px,transparent 2px 7px);
+  clip-path:polygon(6% 100%,0 18%,12% 0,88% 0,100% 18%,94% 100%);
+}
+.matchday-scene--photo .matchday-scene__stands{
+  opacity:.12;
+}
+.matchday-scene__scoreboard{
+  position:absolute;
+  z-index:4;
+  left:16px;
+  right:16px;
+  bottom:20px;
+  min-height:88px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:12px;
+  border:1px solid rgba(255,255,255,.16);
+  border-radius:15px;
+  background:rgba(3,10,19,.72);
+  backdrop-filter:blur(12px);
+  box-shadow:0 14px 34px rgba(0,0,0,.28);
+}
+.matchday-scene__scoreboard>div{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+}
+.matchday-scene__scoreboard small{
+  color:#75b6ff;
+  font-size:7px;
+  font-weight:900;
+  letter-spacing:.1em;
+}
+.matchday-scene__scoreboard strong{
+  margin-top:3px;
+  color:white;
+  font:700 23px/.95 var(--font-display);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.matchday-scene__scoreboard span{
+  margin-top:5px;
+  color:#b8c7db;
+  font-size:8px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.matchday-scene__meta{
+  position:absolute;
+  z-index:5;
+  right:14px;
+  top:16px;
+  display:flex;
+  gap:6px;
+  align-items:center;
+  padding:7px 9px;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:999px;
+  background:rgba(2,8,16,.62);
+  color:#d9e8f8;
+  font-size:7px;
+  font-weight:800;
+}
+.matchday-scene__meta b{
+  color:#7ec2ff;
+}
+.matchday-scene--fallback{
+  background:
+    radial-gradient(circle at 50% -20%,rgba(96,178,255,.22),transparent 34%),
+    linear-gradient(180deg,#0f1e31 0 42%,#0d3c2d 43% 100%);
+}
+.matchday-scene--fallback .matchday-scene__name{
+  opacity:.9;
+}
+.human-silhouette,
+.coach-silhouette{
+  display:none!important;
+}
+
+/* V4 · obvious minigame access */
+.minigame-promo{
+  grid-column:1/-1;
+  width:100%;
+  min-height:104px;
+  display:grid;
+  grid-template-columns:62px minmax(0,1fr) auto;
+  align-items:center;
+  gap:12px;
+  margin-top:0;
+  border:1px solid rgba(85,164,255,.32);
+  border-radius:17px;
+  background:
+    radial-gradient(circle at 0 50%,rgba(47,124,255,.2),transparent 34%),
+    linear-gradient(135deg,#0e2138,#0a1627);
+  color:#fff;
+  padding:13px;
+  text-align:left;
+  box-shadow:0 14px 36px rgba(17,72,145,.18);
+}
+.minigame-promo__visual{
+  position:relative;
+  width:58px;
+  height:72px;
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+  border-radius:13px;
+  background:
+    linear-gradient(rgba(255,255,255,.1) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.08) 1px,transparent 1px),
+    linear-gradient(180deg,#14623f,#0b402a);
+  background-size:14px 14px,14px 14px,auto;
+}
+.minigame-promo__visual:before{
+  content:'';
+  position:absolute;
+  left:50%;
+  top:0;
+  bottom:0;
+  width:1px;
+  background:rgba(255,255,255,.28);
+}
+.minigame-promo__visual>span{
+  position:relative;
+  z-index:3;
+  display:grid;
+  place-items:center;
+  width:30px;height:30px;
+  border-radius:50%;
+  background:#fff;
+  color:#1d69ca;
+  font-size:16px;
+  box-shadow:0 5px 12px rgba(0,0,0,.28);
+}
+.minigame-promo__visual i{
+  position:absolute;
+  width:8px;height:8px;
+  border-radius:50%;
+  background:#67b5ff;
+  border:1px solid white;
+}
+.minigame-promo__visual i:nth-of-type(1){left:8px;top:12px}
+.minigame-promo__visual i:nth-of-type(2){right:10px;top:24px}
+.minigame-promo__visual i:nth-of-type(3){left:13px;bottom:10px}
+.minigame-promo>div:nth-child(2){
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+}
+.minigame-promo strong{
+  margin-top:4px;
+  font:700 21px/.95 var(--font-display);
+}
+.minigame-promo small{
+  margin-top:5px;
+  color:#a9bad0;
+  font-size:8px;
+  line-height:1.35;
+}
+.minigame-promo>b{
+  color:#71b9ff;
+  font-size:8px;
+  white-space:nowrap;
+}
+.minigame-promo--coach{
+  background:
+    radial-gradient(circle at 0 50%,rgba(98,216,255,.14),transparent 34%),
+    linear-gradient(135deg,#102a32,#0a1721);
+}
+.minigame-promo--coach .minigame-promo__visual{
+  background:
+    linear-gradient(rgba(255,255,255,.1) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.08) 1px,transparent 1px),
+    #173e31;
+  background-size:14px 14px,14px 14px,auto;
+}
+
+@media(max-width:430px){
+  .minigame-promo{
+    grid-template-columns:52px minmax(0,1fr);
+  }
+  .minigame-promo__visual{
+    width:50px;
+    height:64px;
+  }
+  .minigame-promo>b{
+    grid-column:2;
+    margin-top:-5px;
+  }
+}
