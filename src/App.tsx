@@ -989,9 +989,9 @@ function MiniGamesPanel({
       onBack={()=>setActive(null)}
       onComplete={value=>{onScore(active,value);onComplete?.(value)}}
     />
-    const featured=games.filter(game=>['freekicks','through-pass','personal-run','duel','keeper','memory-board'].includes(game.id))
+    const featured=games.filter(game=>['freekicks','through-pass','personal-run','duel','keeper','memory-board','timing-run','ball-track'].includes(game.id))
     return <section className="panel modern-games-hub">
-      <div className="panel-head"><div><span className="eyebrow">PARTIDOS DECISIVOS</span><h2>Seis formas de jugarte la historia.</h2></div><span className="pill">UNA JUGADA</span></div>
+      <div className="panel-head"><div><span className="eyebrow">⚡ VIRTUOSO · 8 DESAFÍOS</span><h2>Ocho formas de jugarte la historia.</h2></div><span className="pill">UNA JUGADA</span></div>
       <p className="minigame-hub__intro">Cada desafío es una escena completa: gesto, timing, lectura o memoria. Entrás, jugás una acción y salís con un resultado.</p>
       <div className="modern-games-grid">{featured.map(game=><button key={game.id} onClick={()=>setActive(game.id)}>
         <SkillGameThumb id={game.id}/>
@@ -1383,7 +1383,7 @@ function CareerFinalPanel({
 
     {style==='mixto'&&!mixedMode&&<div className="mixed-final-choice">
       <button onClick={()=>setMixedMode('skill')}><b>◎</b><strong>JUGARLA</strong><span>Resolver la final con un minijuego de habilidad.</span></button>
-      <button onClick={()=>setMixedMode('luck')}><b>⚄</b><strong>IR CON LA CÁBALA</strong><span>Elegir un ritual y aceptar lo que salga.</span></button>
+      <button onClick={()=>setMixedMode('luck')}><b>🔮</b><strong>IR AL PÁLPITO</strong><span>Elegir una señal y aceptar lo que salga.</span></button>
     </div>}
 
     {luckMode&&<div className="cabala-game">
@@ -1561,7 +1561,7 @@ function CabalaPracticePanel(){
     {result&&<div className={'practice-result '+(result.startsWith('CÁBALA')?'good':'bad')}>{result}</div>}
   </section>
   return <section className="panel games-style-hub">
-    <div className="panel-head"><div><span className="eyebrow">AL PÁLPITO · 10 JUEGOS</span><h2>La suerte también se juega.</h2></div><span className="pill">⚄</span></div>
+    <div className="panel-head"><div><span className="eyebrow">🔮 AL PÁLPITO · 10 JUEGOS</span><h2>El destino también se juega.</h2></div><span className="pill">✨</span></div>
     <p className="games-style-intro">Practicá las mismas cábalas que pueden definir un título, un ascenso o una permanencia.</p>
     <div className="cabala-practice-grid">{games.map(game=><button key={game.id} onClick={()=>{setActive(game.id);setResult('')}}><CabalaGameThumb id={game.id}/><span><strong>{game.name}</strong><small>{game.description}</small></span><em>JUGAR →</em></button>)}</div>
   </section>
