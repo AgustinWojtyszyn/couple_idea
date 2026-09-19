@@ -1,0 +1,1 @@
+Validate stat-driven V2 build.
