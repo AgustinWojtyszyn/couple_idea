@@ -5546,3 +5546,42 @@ html,body,#root{max-width:100%;overflow-x:hidden}
     top:8px;
   }
 }
+
+
+/* Extra Habilidoso motion */
+.slalom-field{
+  position:relative;
+  overflow:hidden;
+}
+.slalom-field span{
+  transition:none;
+  transform:translateX(0);
+}
+.slalom-field--move-0 span{animation:slalom-left .46s ease-out}
+.slalom-field--move-1 span{animation:slalom-right .46s ease-out}
+@keyframes slalom-left{
+  0%{transform:translate(0,0) scale(1)}
+  45%{transform:translate(-48px,-38px) scale(.9)}
+  100%{transform:translate(-72px,-82px) scale(.78)}
+}
+@keyframes slalom-right{
+  0%{transform:translate(0,0) scale(1)}
+  45%{transform:translate(48px,-38px) scale(.9)}
+  100%{transform:translate(72px,-82px) scale(.78)}
+}
+.duel-visual{
+  position:relative;
+}
+.duel-ball{
+  position:absolute;
+  left:50%;
+  bottom:12px;
+  transform:translateX(-50%);
+  font-size:22px;
+}
+.duel-visual--action-0 .defender-silhouette{animation:duel-step-left .46s ease-out}
+.duel-visual--action-1 .defender-silhouette{animation:duel-hold .46s ease-out}
+.duel-visual--action-2 .defender-silhouette{animation:duel-slide .46s ease-out}
+@keyframes duel-step-left{50%{transform:translateX(-28px) scale(1.08)}}
+@keyframes duel-hold{50%{transform:scale(1.14)}}
+@keyframes duel-slide{50%{transform:translate(26px,18px) rotate(-18deg) scale(1.12)}}
