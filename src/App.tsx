@@ -863,7 +863,7 @@ function MiniGamesPanel({
   const [score,setScore]=useState(0)
   const [feedback,setFeedback]=useState('')
   const [completed,setCompleted]=useState(false)
-  const [motion,setMotion]=useState<{ball:number;keeper:number;kind:'shot'|'save'}|null>(null)
+  const [motion,setMotion]=useState<{ball:number;keeper:number;kind:'shot'|'save'|'dribble'|'duel'}|null>(null)
   const [freeKickFlight,setFreeKickFlight]=useState<'idle'|'goal'|'wide'>('idle')
   const livePhase=useGamePhase(Boolean(active)&&!completed,1800)
 
@@ -924,12 +924,20 @@ function MiniGamesPanel({
     }
     if(active==='duel'){
       const cue=round%3
-      commit(choice===cue?100:28,choice===cue?'CRUCE LIMPIO':'TE SUPERÓ')
+      setMotion({ball:choice,keeper:cue,kind:'duel'})
+      window.setTimeout(()=>{
+        commit(choice===cue?100:28,choice===cue?'CRUCE LIMPIO':'TE SUPERÓ')
+        setMotion(null)
+      },460)
       return
     }
     if(active==='dribble'){
       const target=(round+score)%2
-      commit(choice===target?100:24,choice===target?'LO DEJASTE ATRÁS':'TE CERRÓ')
+      setMotion({ball:choice,keeper:target,kind:'dribble'})
+      window.setTimeout(()=>{
+        commit(choice===target?100:24,choice===target?'LO DEJASTE ATRÁS':'TE CERRÓ')
+        setMotion(null)
+      },460)
       return
     }
   }
@@ -1016,13 +1024,13 @@ function MiniGamesPanel({
       </div>}
 
       {active==='dribble'&&<div className="skill-stage dribble-stage">
-        <div className="slalom-field"><i/><i/><i/><i/><i/><span>●</span></div>
+        <div className={'slalom-field '+(motion?.kind==='dribble'?'slalom-field--move-'+motion.ball:'')}><i/><i/><i/><i/><i/><span>⚽</span></div>
         <strong className="big-cue">{dribbleCue}</strong>
         <div className="two-actions"><button onClick={()=>playerChoice(0)}>← IZQUIERDA</button><button onClick={()=>playerChoice(1)}>DERECHA →</button></div>
       </div>}
 
       {active==='duel'&&<div className="skill-stage duel-stage">
-        <div className="duel-visual"><span className="defender-silhouette">◆</span><b>VS</b><span className="attacker-silhouette">●</span></div>
+        <div className={'duel-visual '+(motion?.kind==='duel'?'duel-visual--action-'+motion.ball:'')}><span className="defender-silhouette">◆</span><b>VS</b><span className="attacker-silhouette">●</span><i className="duel-ball">⚽</i></div>
         <strong className="big-cue">{duelCue}</strong>
         <div className="three-actions"><button onClick={()=>playerChoice(0)}>ANTICIPAR</button><button onClick={()=>playerChoice(1)}>ACOMPAÑAR</button><button onClick={()=>playerChoice(2)}>BARRER</button></div>
       </div>}
