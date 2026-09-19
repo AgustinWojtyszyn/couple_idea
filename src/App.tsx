@@ -1242,7 +1242,7 @@ function CabalaMiniGame({game,onComplete}:{game:CabalaGameId;onComplete:(won:boo
 
     {game==='tower'&&<div className="cabala-tribuna-stage">
       <div className="tribuna-night">
-        {[0,1,2].map(value=><button key={value} disabled={finished} className={value===luckyNumber?'pulse':''} onClick={()=>towerPick(value)}>
+        {[0,1,2].map(value=><button key={value} disabled={finished} className={Math.floor(loopPhase*3)===value?'pulse':''} onClick={()=>towerPick(value)}>
           <i/><i/><i/><i/><i/>
           <b>{value===0?'POPULAR IZQ':value===1?'PLATEA':'POPULAR DER'}</b>
           <span>⚑</span>
