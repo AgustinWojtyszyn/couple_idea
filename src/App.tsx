@@ -69,8 +69,11 @@ function normalizeSaveState(value:SaveState):SaveState{
     caps:0,
     nationalGoals:0,
     finalStyle:value.finalStyle??null,
-    pendingFinal:value.pendingFinal??null,
+    pendingFinal:value.pendingFinal&&'kind' in value.pendingFinal&&'cabalaGame' in value.pendingFinal?value.pendingFinal:null,
     retirementPending:value.retirementPending??false,
+    trophies:value.trophies??[],
+    glory:value.glory??0,
+    lastSeasonGlory:value.lastSeasonGlory??0,
     marketDecisionRequired:value.marketDecisionRequired??false,
     transferOffers:value.transferOffers??[],
     currentSalary:value.currentSalary??current.salary,
@@ -103,6 +106,10 @@ function useClubMedia(name:string){
       if(!alive)return
       setMedia(value)
       setLoading(false)
+      void getClubMedia(name,true).then(fresh=>{
+        if(!alive)return
+        if(fresh.logo||fresh.image||fresh.stadiumImage)setMedia(fresh)
+      })
     })
     return()=>{alive=false}
   },[name])
@@ -339,7 +346,7 @@ function Home({
   useEffect(()=>{
     if(country!=='Argentina')return
     const id=window.setTimeout(()=>{
-      void preloadClubMedia(availableClubs.map(club=>club.name),4)
+      void preloadClubMedia(availableClubs.map(club=>club.name),4,true)
     },180)
     return()=>window.clearTimeout(id)
   },[country,activeLeague])
