@@ -67,6 +67,7 @@ function normalizeSaveState(value:SaveState):SaveState{
     retirementAge,
     maxSeasons:retirementAge-17,
     clubLegacy:value.clubLegacy??inferredLegacy,
+    divisionTier:value.divisionTier??leagueById(current.leagueId).tier,
     caps:0,
     nationalGoals:0,
     finalStyle:value.finalStyle??null,
@@ -1231,7 +1232,7 @@ function MarketPanel({
 
     <article className="current-contract-card">
       <ClubCrest name={club.name} size="lg"/>
-      <div><small>CLUB ACTUAL</small><strong>{club.name}</strong><span>{leagueById(club.leagueId).name}</span></div>
+      <div><small>CLUB ACTUAL</small><strong>{club.name}</strong><span>Liga {club.country} · {state.divisionTier??leagueById(club.leagueId).tier}ª División</span></div>
       <aside><b>$ {formatMoney(salary)}</b><span>/ mes</span><em>{yearsLeft>0?yearsLeft+' año'+(yearsLeft===1?'':'s')+' restante'+(yearsLeft===1?'':'s'):'CONTRATO VENCIDO'}</em></aside>
     </article>
 
@@ -1335,6 +1336,7 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
     loadLeaderboard().then(setScores)
   },[])
   const league=leagueById(club.leagueId)
+  const displayLeague='Liga '+club.country+' · '+(state.divisionTier??league.tier)+'ª División'
 
   useEffect(()=>{
     if(state.retired&&state.finalScore&&!scores.some(s=>s.id==='player-'+state.seed)){
@@ -1415,7 +1417,7 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
       {tab==='career'&&<div className="career-overview">
       <section className="identity-card identity-card--media" style={(playerMedia.stadiumImage??playerMedia.image)?{backgroundImage:'linear-gradient(90deg,var(--surface) 35%,rgba(5,10,18,.58)),url("'+(playerMedia.stadiumImage??playerMedia.image)+'")'}:undefined}>
         <ClubCrest name={club.name} size="lg"/>
-        <div className="identity-card__copy"><span className="eyebrow">{league.name}</span><h1>{state.playerName}</h1><p>{state.position} · {state.age} años · {club.name}</p>{state.finalStyle&&<small className={'career-style-badge career-style-badge--'+state.finalStyle}>{state.finalStyle.toUpperCase()}</small>}</div>
+        <div className="identity-card__copy"><span className="eyebrow">{displayLeague}</span><h1>{state.playerName}</h1><p>{state.position} · {state.age} años · {club.name}</p>{state.finalStyle&&<small className={'career-style-badge career-style-badge--'+state.finalStyle}>{state.finalStyle.toUpperCase()}</small>}</div>
         <div className="overall"><strong>{state.overall}</strong><span>OVR</span></div>
       </section>
       <MatchdayScene clubName={club.name} media={playerMedia} mode="player" season={state.season} age={state.age}/>
