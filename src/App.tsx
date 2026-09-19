@@ -1128,14 +1128,12 @@ function CabalaMiniGame({game,onComplete}:{game:CabalaGameId;onComplete:(won:boo
   const [hits,setHits]=useState(0)
   const [feedback,setFeedback]=useState('Elegí. No hay vuelta atrás.')
   const [card,setCard]=useState(()=>2+Math.floor(Math.random()*12))
-  const [lastRoll,setLastRoll]=useState<number|null>(null)
   const [lastCoin,setLastCoin]=useState<'CARA'|'CECA'|null>(null)
   const [luckyNumber,setLuckyNumber]=useState(()=>Math.floor(Math.random()*3))
   const [shirtWinner,setShirtWinner]=useState(()=>[7,9,10,11,23][Math.floor(Math.random()*5)])
   const [revealed,setRevealed]=useState(true)
   const [weather,setWeather]=useState(()=>Math.floor(Math.random()*3))
   const [animating,setAnimating]=useState(false)
-  const [diceFaces,setDiceFaces]=useState<[number,number]>([3,5])
   const [generalaDice,setGeneralaDice]=useState<number[]>([1,1,1,1,1])
   const [generalaHeld,setGeneralaHeld]=useState<boolean[]>([false,false,false,false,false])
   const [generalaRolls,setGeneralaRolls]=useState(0)
@@ -1296,9 +1294,9 @@ function CabalaMiniGame({game,onComplete}:{game:CabalaGameId;onComplete:(won:boo
 
   return <section className={'cabala-minigame cabala-minigame--'+game}>
     <div className="cabala-minigame__top">
-      <span>⚄ {kicker[game]} · {finished?'TERMINADO':'RONDA '+(round+1)+'/'+maxRounds}</span>
+      <span>⚄ {kicker[game]} · {finished?'TERMINADO':game==='dice-seven'?'HASTA 3 TIRADAS':maxRounds===1?'JUGADA ÚNICA':'RONDA '+(round+1)+'/'+maxRounds}</span>
       <strong>{title[game]}</strong>
-      <small>{hits} aciertos</small>
+      <small>{game==='dice-seven'?generalaRolls+' tiradas':maxRounds===1?'una decisión':hits+' aciertos'}</small>
     </div>
 
     {game==='higher-lower'&&<div className="cabala-cards-stage">
