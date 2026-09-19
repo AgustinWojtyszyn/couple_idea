@@ -1533,7 +1533,7 @@ export function App(){
   const [demoUser,setDemoUser]=useState(()=>sessionStorage.getItem(AUTH_KEY)||'')
   const [save,setSave]=useState<SaveState>(()=>{
     try{
-      const raw=localStorage.getItem(SAVE_KEY)
+      const raw=sessionStorage.getItem(SAVE_KEY)
       return raw?normalizeSaveState(JSON.parse(raw) as SaveState):null
     }catch{return null}
   })
@@ -1544,12 +1544,12 @@ export function App(){
   },[theme])
 
   useEffect(()=>{
-    if(save)localStorage.setItem(SAVE_KEY,JSON.stringify(save))
+    if(save)sessionStorage.setItem(SAVE_KEY,JSON.stringify(save))
   },[save])
 
   const toggleTheme=()=>setTheme(t=>t==='dark'?'light':'dark')
   const enterDemo=(name:string)=>{sessionStorage.setItem(AUTH_KEY,name);setDemoUser(name);window.scrollTo({top:0,behavior:'auto'})}
-  const exit=()=>{setSave(null);localStorage.removeItem(SAVE_KEY)}
+  const exit=()=>{setSave(null);sessionStorage.removeItem(SAVE_KEY)}
 
   if(!demoUser)return <MockLogin onEnter={enterDemo}/>
 
