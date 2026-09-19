@@ -119,14 +119,6 @@ const openingEvent=(position:Position)=>{
   ]}
 }
 
-const nextPlayerEvent=(s:CareerState)=>{
-  const baseEligible=playerEvents.filter(e=>(!e.positions||e.positions.includes(s.position))&&(!e.minSeason||s.season>=e.minSeason))
-  const unseen=baseEligible.filter(e=>!(s.seenEvents??[]).includes(e.id))
-  const eligible=unseen.length?unseen:baseEligible
-  const r=rngFrom(s.seed+s.season*971+s.age*37+s.matches)
-  return eligible[Math.floor(r()*eligible.length)]??playerEvents[0]
-}
-
 const maybePlayerEvent=(s:CareerState,context:'stay'|'renew'|'transfer'):CareerState['activeEvent']=>{
   const unseen=new Set(s.seenEvents??[])
   const specializationId='spec-'+s.position
