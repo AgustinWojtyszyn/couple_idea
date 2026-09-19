@@ -6,7 +6,7 @@ export type ClubMedia = {
   wikidataId?: string
 }
 
-const CACHE_KEY='leyenda-club-media-v3'
+const CACHE_KEY='leyenda-club-media-v4'
 const inFlight=new Map<string,Promise<ClubMedia>>()
 
 function readCache():Record<string,ClubMedia>{
@@ -14,6 +14,100 @@ function readCache():Record<string,ClubMedia>{
 }
 function writeCache(cache:Record<string,ClubMedia>){
   try{localStorage.setItem(CACHE_KEY,JSON.stringify(cache))}catch{}
+}
+
+
+const exactWikiTitles:Record<string,string>={
+  'Tigre':'Club Atlético Tigre',
+  'Vélez Sarsfield':'Club Atlético Vélez Sarsfield',
+  'Godoy Cruz':'Club Deportivo Godoy Cruz Antonio Tomba',
+  'Rosario Central':'Club Atlético Rosario Central',
+  "Newell's Old Boys":"Club Atlético Newell's Old Boys",
+  'Independiente Rivadavia':'Club Sportivo Independiente Rivadavia',
+  'Defensa y Justicia':'Club Social y Deportivo Defensa y Justicia',
+  'Banfield':'Club Atlético Banfield',
+  'Lanús':'Club Atlético Lanús',
+  'Deportivo Riestra':'Club Deportivo Riestra',
+  'Barracas Central':'Club Atlético Barracas Central',
+  'Racing Club':'Racing Club',
+  'Independiente':'Club Atlético Independiente',
+  'Sarmiento de Junín':'Club Atlético Sarmiento (Junín)',
+  'Belgrano de Córdoba':'Club Atlético Belgrano',
+  'Huracán':'Club Atlético Huracán',
+  'San Martín de San Juan':'Club Atlético San Martín (San Juan)',
+  'Atlético Tucumán':'Club Atlético Tucumán',
+  'San Lorenzo':'Club Atlético San Lorenzo de Almagro',
+  'Talleres de Córdoba':'Club Atlético Talleres (Córdoba)',
+  'Estudiantes':'Club Estudiantes de La Plata',
+  'Unión de Santa Fe':'Club Atlético Unión (Santa Fe)',
+  'Instituto de Córdoba':'Instituto Atlético Central Córdoba',
+  'Gimnasia de La Plata':'Club de Gimnasia y Esgrima La Plata',
+  'Platense':'Club Atlético Platense',
+  'River Plate':'Club Atlético River Plate',
+  'Boca Juniors':'Club Atlético Boca Juniors',
+  'Argentinos Juniors':'Asociación Atlética Argentinos Juniors',
+  'Central Córdoba SdE':'Club Atlético Central Córdoba (Santiago del Estero)',
+  'Aldosivi':'Club Atlético Aldosivi',
+  'Agropecuario':'Club Agropecuario Argentino',
+  'All Boys':'Club Atlético All Boys',
+  'Almagro':'Club Almagro',
+  'Alvarado':'Club Atlético Alvarado',
+  'Atlanta':'Club Atlético Atlanta',
+  'Chacarita Juniors':'Club Atlético Chacarita Juniors',
+  'Chaco For Ever':'Club Atlético Chaco For Ever',
+  'Colegiales':'Club Atlético Colegiales (Munro)',
+  'Colón':'Club Atlético Colón',
+  'Defensores de Belgrano':'Club Atlético Defensores de Belgrano',
+  'Deportivo Madryn':'Club Social y Deportivo Madryn',
+  'Deportivo Maipú':'Club Deportivo Maipú',
+  'Deportivo Morón':'Club Deportivo Morón',
+  'Estudiantes de Buenos Aires':'Club Atlético Estudiantes (Buenos Aires)',
+  'Estudiantes de Río Cuarto':'Asociación Atlética Estudiantes',
+  'Ferro Carril Oeste':'Club Ferro Carril Oeste',
+  'Gimnasia de Jujuy':'Gimnasia y Esgrima de Jujuy',
+  'Gimnasia y Tiro':'Club de Gimnasia y Tiro',
+  'Güemes':'Club Atlético Güemes',
+  'Los Andes':'Club Atlético Los Andes',
+  'Mitre de Santiago del Estero':'Club Atlético Mitre (Santiago del Estero)',
+  'Nueva Chicago':'Club Atlético Nueva Chicago',
+  'Patronato':'Club Atlético Patronato de la Juventud Católica',
+  'Quilmes':'Quilmes Atlético Club',
+  'Racing de Córdoba':'Club Atlético Racing',
+  'San Martín de Tucumán':'Club Atlético San Martín (Tucumán)',
+  'San Miguel':'Club Atlético San Miguel',
+  'Temperley':'Club Atlético Temperley',
+  'Tristán Suárez':'Club Tristán Suárez',
+  'Arsenal de Sarandí':'Arsenal Fútbol Club',
+  'Almirante Brown':'Club Almirante Brown',
+  'Defensores Unidos':'Club Atlético Defensores Unidos',
+  'Talleres de Remedios de Escalada':'Club Atlético Talleres (Remedios de Escalada)',
+  'Gimnasia y Esgrima de Mendoza':'Club Atlético Gimnasia y Esgrima (Mendoza)',
+  'Central Norte':'Club Atlético Central Norte (Salta)',
+  'Acassuso':'Club Atlético Acassuso',
+}
+
+async function exactWikipediaMedia(name:string):Promise<ClubMedia>{
+  const title=exactWikiTitles[name]
+  if(!title)return {}
+  try{
+    const res=await fetch(
+      'https://es.wikipedia.org/w/api.php?'+new URLSearchParams({
+        action:'query',
+        titles:title,
+        prop:'pageimages|pageprops',
+        piprop:'thumbnail',
+        pithumbsize:'512',
+        redirects:'1',
+        format:'json',
+        origin:'*',
+      })
+    )
+    if(!res.ok)return {}
+    const data=await res.json() as {query?:{pages?:Record<string,{thumbnail?:{source?:string};pageprops?:{wikibase_item?:string}}>} }
+    const page=Object.values(data.query?.pages??{})[0]
+    if(!page)return {}
+    return {logo:page.thumbnail?.source,image:page.thumbnail?.source,wikidataId:page.pageprops?.wikibase_item}
+  }catch{return {}}
 }
 
 const aliases:Record<string,string>={
@@ -89,6 +183,12 @@ export async function getClubMedia(name:string,forceRefresh=false):Promise<ClubM
 
   const task=(async()=>{
   try{
+    const exact=await exactWikipediaMedia(name)
+    if(exact.logo){
+      cache[name]=exact
+      writeCache(cache)
+      return exact
+    }
     const query=aliases[name]||name
     const search=await fetch(
       'https://www.wikidata.org/w/api.php?'+new URLSearchParams({
