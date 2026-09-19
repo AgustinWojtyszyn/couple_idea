@@ -70,6 +70,7 @@ export type CareerState = {
   nationalGoals:number
   trainingCredits:number
   purchases?:string[]
+  seenEvents?:string[]
   history:SeasonRecord[]
   achievements:string[]
   offers:string[]
@@ -230,6 +231,36 @@ export const playerEvents:CareerEvent[] = [
   {id:'keeper_pen',category:'football',eyebrow:'MINUTO 93',title:'Penal en contra',body:'El pateador mira siempre al arquero antes de arrancar.',positions:['1'],options:[
     {id:'study',label:'Esperar hasta el final',description:'Confianza en la lectura.',effects:{form:7,reputation:5,energy:-2}},
     {id:'guess',label:'Jugarte antes',description:'Todo o nada.',effects:{fans:6,form:-2}},
+  ]},
+  {id:'spec-9',category:'football',eyebrow:'EVOLUCIÓN',title:'Tu juego pide una especialización',body:'Ya no alcanza con ser prometedor. El cuerpo técnico quiere que elijas qué clase de 9 vas a ser.',positions:['9'],minSeason:3,options:[
+    {id:'killer',label:'KILLER',description:'Menos elaboración. Más gol.',effects:{finishing:6,physical:2,passing:-2}},
+    {id:'mobile9',label:'NUEVE MÓVIL',description:'Salís del área y conectás el ataque.',effects:{passing:5,dribbling:4,finishing:2}},
+    {id:'power9',label:'POTENCIA',description:'Atacás espacio y choque.',effects:{pace:4,physical:5,finishing:2}},
+  ]},
+  {id:'spec-2',category:'football',eyebrow:'EVOLUCIÓN',title:'Elegí qué defensor querés ser',body:'El entrenador te ofrece tres caminos muy distintos para convertirte en patrón del fondo.',positions:['2'],minSeason:3,options:[
+    {id:'stopper',label:'STOPPER',description:'Agresivo, frontal y fuerte en el duelo.',effects:{defending:6,physical:5,discipline:-2}},
+    {id:'libero',label:'LÍBERO',description:'Anticipo y salida limpia.',effects:{passing:6,defending:4,pace:2}},
+    {id:'captain2',label:'CAUDILLO',description:'Ordenás la línea y mandás en el área.',effects:{defending:4,leadership:8,physical:3}},
+  ]},
+  {id:'spec-10',category:'football',eyebrow:'EVOLUCIÓN',title:'Tu talento necesita una firma',body:'Podés convertirte en director, gambeteador o un 10 con llegada constante.',positions:['10'],minSeason:3,options:[
+    {id:'director',label:'DIRECTOR',description:'Todo pasa por tu pase.',effects:{passing:7,dribbling:3,pace:-1}},
+    {id:'magician',label:'GAMBETEADOR',description:'Recibís y rompés líneas solo.',effects:{dribbling:7,pace:3,physical:-1}},
+    {id:'scorer10',label:'LLEGADOR',description:'Pisás el área como delantero.',effects:{finishing:6,passing:3,physical:2}},
+  ]},
+  {id:'spec-7',category:'football',eyebrow:'EVOLUCIÓN',title:'¿Cómo querés desequilibrar?',body:'La banda ya te queda chica. Elegí cómo hacer daño.',positions:['7'],minSeason:3,options:[
+    {id:'winger',label:'EXTREMO PURO',description:'Velocidad y uno contra uno.',effects:{pace:6,dribbling:6,defending:-2}},
+    {id:'inside7',label:'A PIERNA CAMBIADA',description:'Entrás hacia el arco para definir.',effects:{finishing:6,dribbling:4,passing:2}},
+    {id:'worker7',label:'IDA Y VUELTA',description:'Más recorrido y sacrificio.',effects:{physical:5,defending:4,pace:3}},
+  ]},
+  {id:'spec-5',category:'football',eyebrow:'EVOLUCIÓN',title:'El mediocampo puede ser tuyo',body:'Definí el rol que vas a ocupar cuando el partido se ensucia.',positions:['5'],minSeason:3,options:[
+    {id:'anchor5',label:'PIVOTE',description:'Cortás todo y sostenés al equipo.',effects:{defending:6,physical:5,pace:-1}},
+    {id:'organizer5',label:'ORGANIZADOR',description:'Primer pase, pausa y lectura.',effects:{passing:7,dribbling:3,physical:-1}},
+    {id:'mixed5',label:'MIXTO',description:'Presencia en las dos áreas.',effects:{pace:3,passing:4,physical:4,finishing:2}},
+  ]},
+  {id:'spec-1',category:'football',eyebrow:'EVOLUCIÓN',title:'Definí tu estilo bajo los tres palos',body:'A esta altura ya todos conocen tus virtudes. Elegí cuál llevar al máximo.',positions:['1'],minSeason:3,options:[
+    {id:'shotstopper',label:'ATAJADOR',description:'Puro reflejo y reacción.',effects:{reflexes:7,physical:2}},
+    {id:'sweeper1',label:'ARQUERO JUGADOR',description:'Salís del área y empezás ataques.',effects:{passing:6,pace:3,reflexes:2}},
+    {id:'commander1',label:'COMANDANTE',description:'Dominás el área y ordenás la defensa.',effects:{reflexes:3,physical:4,leadership:8}},
   ]},
   {id:'selection',category:'football',eyebrow:'SELECCIÓN',title:'Te llaman para una gira internacional',body:'Llegás con poco descanso y tu club juega una final apenas volvés.',minSeason:3,options:[
     {id:'go',label:'Ir igual',description:'La camiseta nacional pesa.',effects:{reputation:10,energy:-12,fans:6}},
