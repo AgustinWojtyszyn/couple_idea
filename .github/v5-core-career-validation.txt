@@ -1,0 +1,1 @@
+Validate V5 finals styles and transfer market core loop.
