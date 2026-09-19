@@ -5195,3 +5195,198 @@ html,body,#root{max-width:100%;overflow-x:hidden}
     padding-right:184px!important;
   }
 }
+
+
+/* =========================================================
+   V8 · minigame cards and real motion
+   ========================================================= */
+.game-thumb{
+  width:92px;
+  height:64px;
+  flex:none;
+  display:block;
+  border-radius:14px;
+  overflow:hidden;
+  box-shadow:0 10px 24px rgba(0,0,0,.22);
+}
+.game-thumb svg{display:block;width:100%;height:100%}
+.game-thumb .thumb-bg{fill:#0d2034;stroke:rgba(121,187,255,.28);stroke-width:2}
+.game-thumb .thumb-line{fill:none;stroke:#8fd2ff;stroke-width:3}
+.game-thumb .thumb-grid{fill:none;stroke:rgba(199,232,255,.35);stroke-width:1.6}
+.game-thumb .thumb-path{fill:none;stroke:#5fc7ff;stroke-width:3;stroke-linecap:round;stroke-dasharray:5 4}
+.game-thumb .thumb-ball{fill:#f7fbff;stroke:#76c7ff;stroke-width:2}
+.game-thumb .thumb-player{fill:#4d8dff;stroke:#c8e5ff;stroke-width:2}
+.game-thumb .thumb-cone{fill:#ffc857}
+.game-thumb .thumb-cell{fill:#173552;stroke:#3b6b9f;stroke-width:1.3}
+.game-thumb .thumb-hot{fill:#68d7ff;stroke:#d8f5ff;stroke-width:1.3}
+.game-thumb--luck .thumb-bg{fill:#211b0e;stroke:rgba(239,198,91,.34)}
+.game-thumb--luck .thumb-card{fill:#473818;stroke:#efca64;stroke-width:2}
+.game-thumb--luck .thumb-card--back{fill:#2a2044;stroke:#bc91ff}
+.game-thumb--luck .thumb-hot{fill:#ffd45f;stroke:#fff0a6}
+.game-thumb--luck .thumb-path{stroke:#ffd45f}
+
+.minigame-grid--v2 button,
+.cabala-practice-grid button{
+  grid-template-columns:94px minmax(0,1fr)!important;
+  gap:12px!important;
+  align-items:center!important;
+  overflow:hidden;
+}
+.minigame-grid--v2 button>div,
+.cabala-practice-grid button>span{
+  min-width:0;
+}
+.minigame-grid--v2 button strong,
+.cabala-practice-grid button strong{
+  font-size:14px!important;
+}
+.minigame-grid--v2 button span,
+.cabala-practice-grid button small{
+  font-size:10px!important;
+  line-height:1.35!important;
+}
+.minigame-grid--v2 button>em,
+.cabala-practice-grid button>em{
+  grid-column:2!important;
+  justify-self:start!important;
+  margin-top:-3px!important;
+}
+
+/* Moving free kick */
+.timing-bar{
+  position:relative!important;
+  overflow:hidden!important;
+}
+.timing-bar>b{
+  position:absolute!important;
+  top:-6px!important;
+  bottom:-6px!important;
+  width:14px!important;
+  border-radius:999px!important;
+  background:#fff!important;
+  box-shadow:0 0 13px #fff,0 0 26px rgba(111,215,255,.85)!important;
+  transform:none!important;
+  animation:none!important;
+  transition:left .03s linear!important;
+}
+.freekick-scene{
+  position:relative;
+  overflow:hidden;
+}
+.freekick-scene .mini-ball{
+  transform:translate(0,0);
+  transition:none;
+}
+.freekick-scene--goal .mini-ball{
+  animation:free-kick-goal .62s cubic-bezier(.16,.76,.34,1) forwards;
+}
+.freekick-scene--wide .mini-ball{
+  animation:free-kick-wide .62s cubic-bezier(.16,.76,.34,1) forwards;
+}
+.freekick-scene .shot-trail{
+  position:absolute;
+  left:25%;
+  bottom:23%;
+  width:0;
+  height:3px;
+  border-radius:99px;
+  background:linear-gradient(90deg,rgba(255,255,255,.05),#8de2ff);
+  transform:rotate(-31deg);
+  transform-origin:left center;
+  opacity:0;
+}
+.freekick-scene--goal .shot-trail,
+.freekick-scene--wide .shot-trail{
+  animation:shot-trail .55s ease-out forwards;
+}
+@keyframes free-kick-goal{
+  0%{transform:translate(0,0) scale(1)}
+  45%{transform:translate(88px,-86px) scale(.88)}
+  100%{transform:translate(184px,-122px) scale(.62)}
+}
+@keyframes free-kick-wide{
+  0%{transform:translate(0,0) scale(1)}
+  100%{transform:translate(210px,-74px) scale(.58)}
+}
+@keyframes shot-trail{
+  0%{width:0;opacity:0}
+  25%{opacity:.8}
+  100%{width:180px;opacity:0}
+}
+
+/* Penalty / goalkeeper movement */
+.goal-frame{position:relative!important;overflow:visible!important}
+.moving-ball{
+  position:absolute;
+  left:50%;
+  bottom:-34px;
+  z-index:8;
+  font-size:24px;
+  transform:translateX(-50%);
+  opacity:0;
+}
+[class*="moving-ball--zone-"]{
+  opacity:1;
+  animation-duration:.5s;
+  animation-timing-function:cubic-bezier(.18,.76,.32,1);
+  animation-fill-mode:forwards;
+}
+.moving-ball--zone-0{animation-name:penalty-left}
+.moving-ball--zone-1{animation-name:penalty-center}
+.moving-ball--zone-2{animation-name:penalty-right}
+.keeper--zone-0{animation:keeper-left .48s ease-out forwards!important}
+.keeper--zone-1{animation:keeper-center .48s ease-out forwards!important}
+.keeper--zone-2{animation:keeper-right .48s ease-out forwards!important}
+@keyframes penalty-left{
+  to{left:18%;bottom:44%;transform:translateX(-50%) scale(.65)}
+}
+@keyframes penalty-center{
+  to{left:50%;bottom:56%;transform:translateX(-50%) scale(.65)}
+}
+@keyframes penalty-right{
+  to{left:82%;bottom:44%;transform:translateX(-50%) scale(.65)}
+}
+@keyframes keeper-left{
+  to{left:20%!important;transform:translate(-50%,-50%) rotate(-28deg)!important}
+}
+@keyframes keeper-center{
+  to{left:50%!important;transform:translate(-50%,-58%) scale(1.08)!important}
+}
+@keyframes keeper-right{
+  to{left:80%!important;transform:translate(-50%,-50%) rotate(28deg)!important}
+}
+
+/* Live bars used by advanced games */
+.sprint-track>b,
+.timing-bar--kick>b{
+  animation:none!important;
+  transition:left .03s linear!important;
+}
+
+/* stronger stage framing */
+.skill-stage,
+.visual-game,
+.cabala-minigame{
+  box-shadow:inset 0 0 0 1px rgba(128,192,255,.05),0 18px 44px rgba(0,0,0,.18);
+}
+.skill-stage:before,
+.visual-game:before{
+  content:'';
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:linear-gradient(125deg,rgba(255,255,255,.025),transparent 36%);
+}
+
+@media(max-width:560px){
+  .game-thumb{width:76px;height:56px}
+  .minigame-grid--v2 button,
+  .cabala-practice-grid button{
+    grid-template-columns:78px minmax(0,1fr)!important;
+  }
+  .minigame-grid--v2 button,
+  .cabala-practice-grid button{
+    min-height:92px!important;
+    padding:9px!important;
+  }
+}
