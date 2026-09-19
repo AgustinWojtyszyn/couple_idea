@@ -11,6 +11,17 @@ export const verifiedLeagueSeeds: LeagueSeed[] = [
     teams:['Tigre','Vélez Sarsfield','Godoy Cruz','Rosario Central',"Newell's Old Boys",'Independiente Rivadavia','Defensa y Justicia','Banfield','Lanús','Deportivo Riestra','Barracas Central','Racing Club','Independiente','Sarmiento de Junín','Belgrano de Córdoba','Huracán','San Martín de San Juan','Atlético Tucumán','San Lorenzo','Talleres de Córdoba','Estudiantes','Unión de Santa Fe','Instituto de Córdoba','Gimnasia de La Plata','Platense','River Plate','Boca Juniors','Argentinos Juniors','Central Córdoba SdE','Aldosivi']
   },
   {
+    id:'arg-2',country:'Argentina',division:2,
+    teams:[
+      'Agropecuario','All Boys','Almagro','Alvarado','Atlanta','Chacarita Juniors','Chaco For Ever','Colegiales',
+      'Colón','Defensores de Belgrano','Deportivo Madryn','Deportivo Maipú','Deportivo Morón','Estudiantes de Buenos Aires',
+      'Estudiantes de Río Cuarto','Ferro Carril Oeste','Gimnasia de Jujuy','Gimnasia y Tiro','Güemes','Los Andes',
+      'Mitre de Santiago del Estero','Nueva Chicago','Patronato','Quilmes','Racing de Córdoba','San Martín de Tucumán',
+      'San Miguel','Temperley','Tristán Suárez','Arsenal de Sarandí','Almirante Brown','Defensores Unidos','Talleres de Remedios de Escalada',
+      'Gimnasia y Esgrima de Mendoza','Central Norte','Acassuso'
+    ]
+  },
+  {
     id:'eng-1',country:'Inglaterra',division:1,
     teams:['Arsenal FC','Coventry City FC','Hull City AFC','Manchester United FC','Ipswich Town FC','Sunderland AFC','Nottingham Forest FC','Leeds United FC','Everton FC','Crystal Palace FC','Brentford FC','Tottenham Hotspur FC','Manchester City FC','AFC Bournemouth','Brighton & Hove Albion FC','Aston Villa FC','Newcastle United FC','Liverpool FC','Fulham FC','Chelsea FC']
   },
@@ -76,4 +87,4 @@ export const verifiedLeagueSeeds: LeagueSeed[] = [
   }
 ]
 
-export const sourceNotice = 'Nombres de clubes obtenidos de fuentes de datos de fútbol abiertas; los escudos visuales de LEYENDA son originales y no reproducen escudos oficiales.'
+export const sourceNotice = 'Los clubes argentinos usan referencias explícitas a sus páginas de Wikipedia/Wikimedia para resolver escudos. LEYENDA no usa nombres de futbolistas reales.'
