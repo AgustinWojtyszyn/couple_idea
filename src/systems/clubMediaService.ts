@@ -53,9 +53,37 @@ function commonsUrl(file?:string){
   return file?'https://commons.wikimedia.org/wiki/Special:Redirect/file/'+encodeURIComponent(file):undefined
 }
 
-export async function getClubMedia(name:string):Promise<ClubMedia>{
+async function wikipediaFallback(query:string):Promise<ClubMedia>{
+  try{
+    const res=await fetch(
+      'https://es.wikipedia.org/w/api.php?'+new URLSearchParams({
+        action:'query',
+        generator:'search',
+        gsrsearch:query+' fútbol club',
+        gsrlimit:'6',
+        prop:'pageimages|pageterms',
+        piprop:'thumbnail',
+        pithumbsize:'420',
+        format:'json',
+        origin:'*',
+      })
+    )
+    if(!res.ok)return {}
+    const data=await res.json() as {query?:{pages?:Record<string,{title?:string;thumbnail?:{source?:string};terms?:{description?:string[]}}>}}
+    const pages=Object.values(data.query?.pages??{})
+    const normalized=query.toLowerCase()
+    const page=pages.find(item=>{
+      const title=(item.title??'').toLowerCase()
+      const description=(item.terms?.description??[]).join(' ').toLowerCase()
+      return (title.includes(normalized.split(' ')[0])||normalized.includes(title.split(' ')[0]))&&/fútbol|football|club/i.test(title+' '+description)
+    })??pages.find(item=>/fútbol|football|club/i.test((item.title??'')+' '+((item.terms?.description??[]).join(' '))))
+    return page?.thumbnail?.source?{logo:page.thumbnail.source,image:page.thumbnail.source}:{}
+  }catch{return {}}
+}
+
+export async function getClubMedia(name:string,forceRefresh=false):Promise<ClubMedia>{
   const cache=readCache()
-  if(cache[name])return cache[name]
+  if(cache[name]&&!forceRefresh)return cache[name]
   const pending=inFlight.get(name)
   if(pending)return pending
 
@@ -118,12 +146,18 @@ export async function getClubMedia(name:string):Promise<ClubMedia>{
         }
       }catch{}
     }
-    const result:ClubMedia={logo:commonsUrl(logo),image:commonsUrl(image),stadiumImage,stadiumName,wikidataId:football.id}
+    let result:ClubMedia={logo:commonsUrl(logo),image:commonsUrl(image),stadiumImage,stadiumName,wikidataId:football.id}
+    if(!result.logo){
+      const fallback=await wikipediaFallback(query)
+      result={...fallback,...result,logo:result.logo??fallback.logo,image:result.image??fallback.image}
+    }
     cache[name]=result
     writeCache(cache)
     return result
   }catch{
-    return {}
+    const fallback=await wikipediaFallback(aliases[name]||name)
+    if(fallback.logo||fallback.image){cache[name]=fallback;writeCache(cache)}
+    return fallback
   }finally{
     inFlight.delete(name)
   }
@@ -140,13 +174,13 @@ function warmImage(url?:string){
   img.src=url
 }
 
-export async function preloadClubMedia(names:string[],concurrency=4){
+export async function preloadClubMedia(names:string[],concurrency=4,forceRefresh=false){
   const unique=[...new Set(names)]
   let cursor=0
   const worker=async()=>{
     while(cursor<unique.length){
       const index=cursor++
-      const media=await getClubMedia(unique[index])
+      const media=await getClubMedia(unique[index],forceRefresh)
       warmImage(media.logo)
       warmImage(media.stadiumImage??media.image)
     }
