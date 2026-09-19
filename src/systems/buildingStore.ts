@@ -145,6 +145,25 @@ const finalMiniGameFor=(position:Position,r:()=>number):MiniGameId=>{
   return pool[Math.floor(r()*pool.length)]??pool[0]
 }
 
+const finalCabalaGameFor=(r:()=>number):CabalaGameId=>{
+  const games:CabalaGameId[]=['higher-lower','dice-seven','coin-run','lucky-number','lucky-shirt']
+  return games[Math.floor(r()*games.length)]??'higher-lower'
+}
+
+const challengeFor=(s:CareerState,perf:number,r:()=>number):{kind:CareerOutcomeKind;competition:string}=>{
+  const club=clubById(s.clubId)
+  const league=leagueById(club.leagueId)
+  if(league.tier>1){
+    if(perf>=58)return {kind:'promotion',competition:'Final por el ascenso'}
+    return {kind:'survival',competition:'Partido por la permanencia'}
+  }
+  if(perf<56)return {kind:'survival',competition:'Partido por la permanencia'}
+  const domestic=['Liga Argentina','Copa Argentina']
+  const continental=['Copa Sudamericana','Copa Libertadores']
+  const unlockedContinental=s.season>=4||s.reputation>=38||s.overall>=76
+  const pool=unlockedContinental&&r()>.48?[...domestic,...continental]:domestic
+  return {kind:'title',competition:pool[Math.floor(r()*pool.length)]??'Copa Argentina'}
+}
 const transferOffersFor=(s:CareerState):TransferOffer[]=>{
   const current=clubById(s.clubId)
   const r=rngFrom(s.seed+s.season*1709+s.overall*13+s.reputation*7)
