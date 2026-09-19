@@ -19,6 +19,7 @@ import {
   type PlayerStatKey,
   type Position,
   type RunScore,
+  type SeasonRecord,
   type Tab,
   type Theme,
 } from './world/Architecture'
@@ -490,6 +491,7 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
   const [tab,setTab]=useState<Tab>('career')
   const [scores,setScores]=useState<RunScore[]>(()=>getRunScores())
   const [lastEffects,setLastEffects]=useState<EventOption['effects']|null>(null)
+  const [seasonSummary,setSeasonSummary]=useState<SeasonRecord|null>(null)
   const club=clubById(state.clubId)
   const playerStats=statsFor(state)
   const playerMedia=useClubMedia(club.name)
@@ -507,6 +509,13 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
       void submitLeaderboardScore(run).then(()=>loadLeaderboard()).then(setScores)
     }
   },[state.retired,state.finalScore])
+
+  const playSeason=()=>{
+    const next=simulateSeason(state)
+    setSeasonSummary(next.history[next.history.length-1]??null)
+    setLastEffects(null)
+    setState(next)
+  }
 
   const playMini=(game:MiniGameId,value:number)=>{
     const bonus=Math.max(1,Math.round(value/110))
@@ -527,6 +536,23 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
     </header>
 
     <main className="game-main">
+      {seasonSummary&&<div className="season-result-overlay" onClick={()=>setSeasonSummary(null)}>
+        <section className={'season-result '+(seasonSummary.titles?'season-result--champion':'')} onClick={event=>event.stopPropagation()}>
+          <span className="season-result__eyebrow">{seasonSummary.titles?'🏆 TEMPORADA CAMPEONA':'TEMPORADA COMPLETA'}</span>
+          <ClubCrest name={clubById(seasonSummary.clubId).name} size="lg"/>
+          <h2>{clubById(seasonSummary.clubId).name}</h2>
+          <p>Temporada {seasonSummary.season} · {seasonSummary.age} años</p>
+          <div className="season-result__stats">
+            <Stat value={seasonSummary.matches} label="PJ"/>
+            <Stat value={seasonSummary.goals} label="GOLES"/>
+            <Stat value={seasonSummary.assists} label="ASIST."/>
+            <Stat value={seasonSummary.rating} label="RATING"/>
+          </div>
+          <div className="season-result__score"><span>SCORE DE TEMPORADA</span><strong>{seasonSummary.score.toLocaleString('es-AR')}</strong></div>
+          <em>{seasonSummary.note}</em>
+          <button className="play-button" onClick={()=>setSeasonSummary(null)}>CONTINUAR →</button>
+        </section>
+      </div>}
       <section className="identity-card identity-card--media" style={playerMedia.image?{backgroundImage:'linear-gradient(90deg,var(--surface) 35%,rgba(5,10,18,.58)),url("'+playerMedia.image+'")'}:undefined}>
         <ClubCrest name={club.name} size="lg"/>
         <div className="identity-card__copy"><span className="eyebrow">{league.name}</span><h1>{state.playerName}</h1><p>{state.position} · {state.age} años · {club.name}</p></div>
@@ -545,7 +571,7 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
           {lastEffects&&<div className="decision-feedback"><div><span className="eyebrow">DECISIÓN TOMADA</span><strong>Tu jugador cambió</strong><EffectChips effects={lastEffects}/></div><button onClick={()=>setLastEffects(null)}>×</button></div>}
           {state.retired?<><span className="eyebrow">FINAL DE CARRERA</span><h2>Tu historia ya está escrita.</h2><p>Terminaste {state.history.length} temporadas con {state.matches} partidos y {state.titles} títulos.</p><div className="final-score"><span>SCORE FINAL</span><strong>{careerScore(state).toLocaleString('es-AR')}</strong></div></>:
           state.activeEvent?<><span className="eyebrow">{state.activeEvent.eyebrow}</span><h2>{state.activeEvent.title}</h2><p>{state.activeEvent.body}</p><div className="decision-list">{state.activeEvent.options.map(o=><button key={o.id} onClick={()=>{setLastEffects(o.effects);setState(choosePlayerEvent(state,o as EventOption))}}><div><strong>{o.label}</strong><span>{o.description}</span><EffectChips effects={o.effects}/></div><b>→</b></button>)}</div></>:
-          <><span className="eyebrow">TEMPORADA {state.season} DE {state.maxSeasons}</span><h2>Todo listo para competir.</h2><p>Tu estado físico, la confianza, el vestuario y las decisiones ya están en juego.</p><button className="play-button" onClick={()=>setState(simulateSeason(state))}>▶ JUGAR TEMPORADA</button></>}
+          <><span className="eyebrow">TEMPORADA {state.season} DE {state.maxSeasons}</span><h2>Todo listo para competir.</h2><p>Tu estado físico, la confianza, el vestuario y las decisiones ya están en juego.</p><button className="play-button" onClick={playSeason}>▶ JUGAR TEMPORADA</button></>}
         </section>
 
         <aside className="panel condition-panel">
