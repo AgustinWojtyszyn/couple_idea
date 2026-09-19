@@ -947,6 +947,8 @@ function MiniGamesPanel({
 }){
   const games=miniGames.filter(game=>mode==='player'?game.playerOnly:game.coachOnly)
   const [active,setActive]=useState<MiniGameId|null>(forcedGame??null)
+  const [coachScoreValue,setCoachScoreValue]=useState(0)
+  const [coachFeedback,setCoachFeedback]=useState('')
 
   useEffect(()=>{if(forcedGame)setActive(forcedGame)},[forcedGame])
 
@@ -969,8 +971,6 @@ function MiniGamesPanel({
     </section>
   }
 
-  const [coachScoreValue,setCoachScoreValue]=useState(0)
-  const [coachFeedback,setCoachFeedback]=useState('')
   const playCoach=(game:MiniGameId,index:number)=>{
     const target=(game.length+index)%3
     const earned=target===1?100:target===2?72:48
