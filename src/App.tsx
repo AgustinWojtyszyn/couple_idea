@@ -371,7 +371,7 @@ function BottomNav({tab,setTab,coach}:{tab:Tab;setTab:(t:Tab)=>void;coach:boolea
   const items:Array<[Tab,string,string]> = coach
     ? [['career','⌂','Inicio'],['squad','▦','Equipo'],['minigames','◎','Desafíos'],['history','≡','Historia'],['ranking','⌁','Ranking']]
     : [['career','⌂','Carrera'],['market','↗','Mercado'],['training','◇','Entreno'],['shop','▣','Tienda'],['minigames','◎','Juegos'],['ranking','⌁','Ranking']]
-  return <nav className="bottom-nav">{items.map(([id,icon,label])=><button key={id} className={tab===id?'active':''} onClick={()=>setTab(id)}><span>{icon}</span><small>{label}</small></button>)}</nav>
+  return <nav className="bottom-nav" style={{gridTemplateColumns:`repeat(${items.length},1fr)`}}>{items.map(([id,icon,label])=><button key={id} className={tab===id?'active':''} onClick={()=>setTab(id)}><span>{icon}</span><small>{label}</small></button>)}</nav>
 }
 
 const shopItems:Array<{id:string;icon:string;name:string;description:string;cost:number;effects:EventOption['effects']}>= [
