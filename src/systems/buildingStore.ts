@@ -496,24 +496,7 @@ export function resolveSkillFinal(s:CareerState,score:number):CareerState{
   if(!pending)return s
   const opponent=clubById(pending.opponentClubId)
   const current=clubById(s.clubId)
-  const maxScores:Partial<Record<MiniGameId,number>>={
-    'penalties':500,
-    'freekicks':100,
-    'dribble':300,
-    'keeper':500,
-    'duel':300,
-    'memory-board':300,
-    'personal-run':400,
-    'timing-run':300,
-    'ball-track':300,
-    'code-call':300,
-    'hold-up':300,
-    'through-pass':300,
-    'grid-gap':300,
-    'long-kick':300,
-    'pressure-exit':400,
-  }
-  const maxScore=maxScores[pending.miniGame]??500
+  const maxScore=100
   const prestigeDelta=opponent.prestige-current.prestige
   const requiredRatio=Math.max(.56,Math.min(.78,.64+prestigeDelta/260))
   const threshold=Math.round(maxScore*requiredRatio)
