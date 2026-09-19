@@ -1850,8 +1850,27 @@ export function App(){
   useEffect(()=>{
     let alive=true
     const argentinaCrestNames=clubs.filter(club=>club.country==='Argentina').map(club=>club.name)
-    void preloadClubMedia(argentinaCrestNames,Math.min(16,argentinaCrestNames.length),false)
-      .finally(()=>{if(alive)setAssetsReady(true)})
+    const warmImages=async()=>{
+      await preloadClubMedia(argentinaCrestNames,Math.min(16,argentinaCrestNames.length),false)
+      const medias=await Promise.all(argentinaCrestNames.map(name=>getClubMedia(name)))
+      const urls=[...new Set(medias.map(media=>media.logo).filter((url):url is string=>Boolean(url)))]
+      let cursor=0
+      const workers=Array.from({length:Math.min(12,urls.length)},async()=>{
+        while(cursor<urls.length){
+          const url=urls[cursor++]
+          await new Promise<void>(resolve=>{
+            const img=new Image()
+            const done=()=>resolve()
+            img.onload=done
+            img.onerror=done
+            img.src=url
+            if(img.complete)resolve()
+          })
+        }
+      })
+      await Promise.all(workers)
+    }
+    void warmImages().finally(()=>{if(alive)setAssetsReady(true)})
     return()=>{alive=false}
   },[])
 
