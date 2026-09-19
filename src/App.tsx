@@ -49,6 +49,7 @@ import {
 } from './systems/buildingStore'
 import { globalRankingEnabled, loadLeaderboard, submitLeaderboardScore } from './systems/rankingService'
 import { getClubMedia, preloadClubMedia, type ClubMedia } from './systems/clubMediaService'
+import { ensureOpenFootballLeague, isOpenFootballLeague, OPEN_FOOTBALL_LICENSE } from './data/openFootballCatalog'
 
 type SaveState = CareerState | CoachState | null
 
@@ -394,10 +395,14 @@ function Home({
   const [clubId,setClubId]=useState('')
   const [position,setPosition]=useState<Position>('9')
   const [clubPickerOpen,setClubPickerOpen]=useState(false)
+  const [catalogRevision,setCatalogRevision]=useState(0)
+  const [leagueLoading,setLeagueLoading]=useState(false)
+  const [leagueLoadFailed,setLeagueLoadFailed]=useState(false)
 
   const availableLeagues=country?leagues.filter(l=>l.country===country).sort((a,b)=>a.tier-b.tier):[]
   const activeLeague=availableLeagues.some(l=>l.id===leagueId)?leagueId:''
   const availableClubs=activeLeague?clubsByLeague(activeLeague):[]
+  void catalogRevision
   const activeClub=availableClubs.some(club=>club.id===clubId)?clubId:''
   const selectedClub=activeClub?clubById(activeClub):null
   const {media:selectedMedia}=useClubMedia(selectedClub?.name??'')
@@ -417,12 +422,25 @@ function Home({
   }
 
   useEffect(()=>{
-    if(country!=='Argentina'||!activeLeague)return
+    if(!activeLeague||!isOpenFootballLeague(activeLeague)||clubsByLeague(activeLeague).length)return
+    let alive=true
+    setLeagueLoading(true)
+    setLeagueLoadFailed(false)
+    void ensureOpenFootballLeague(activeLeague).then(result=>{
+      if(!alive)return
+      setLeagueLoadFailed(!result.ok)
+      setCatalogRevision(value=>value+1)
+    }).finally(()=>{if(alive)setLeagueLoading(false)})
+    return()=>{alive=false}
+  },[activeLeague])
+
+  useEffect(()=>{
+    if(country!=='Argentina'||!activeLeague||!availableClubs.length)return
     const id=window.setTimeout(()=>{
       void preloadClubMedia(availableClubs.map(club=>club.name),5,false)
     },120)
     return()=>window.clearTimeout(id)
-  },[country,activeLeague])
+  },[country,activeLeague,catalogRevision])
 
   const leagueLabel=activeLeague?leagueById(activeLeague):null
 
@@ -486,14 +504,17 @@ function Home({
           {activeLeague&&<section className="club-choice-zone">
             <div className="club-choice-head">
               <div><span className="eyebrow">{country.toUpperCase()} · {leagueLabel?.tier}ª DIVISIÓN</span><h3>Elegí tu club</h3></div>
-              <button className="club-picker-open" onClick={()=>setClubPickerOpen(true)}>{availableClubs.length} CLUBES · VER TODOS</button>
+              <button className="club-picker-open" disabled={leagueLoading||!availableClubs.length} onClick={()=>setClubPickerOpen(true)}>{leagueLoading?'CARGANDO…':availableClubs.length+' CLUBES · VER TODOS'}</button>
             </div>
+            {leagueLoading?<div className="league-data-state"><b>⚽</b><span><strong>Cargando liga abierta…</strong><small>Datos CC0 de OpenFootball. Se guarda en este dispositivo para próximas partidas.</small></span></div>:
+            leagueLoadFailed&&!availableClubs.length?<div className="league-data-state league-data-state--error"><b>↻</b><span><strong>Esta temporada no está publicada en la fuente.</strong><small>Probá otra división; el catálogo sólo habilita datos con licencia abierta verificable.</small></span></div>:
             <div className="club-strip club-strip--choice">
               {availableClubs.slice(0,12).map(club=><button key={club.id} className={club.id===activeClub?'active':''} onClick={()=>setClubId(club.id)}>
                 <ClubCrest name={club.name}/>
                 <span>{club.name}</span>
               </button>)}
-            </div>
+            </div>}
+            {isOpenFootballLeague(activeLeague)&&<small className="open-data-note">FUENTE DE CLUBES · OPENFOOTBALL · {OPEN_FOOTBALL_LICENSE}</small>}
           </section>}
 
           {selectedClub?<div className="club-preview club-preview--media club-preview--selected" style={(selectedMedia.stadiumImage??selectedMedia.image)?{backgroundImage:'linear-gradient(90deg,var(--surface) 18%,rgba(5,10,18,.7)),url("'+(selectedMedia.stadiumImage??selectedMedia.image)+'")'}:undefined}>
