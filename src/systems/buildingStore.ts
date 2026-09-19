@@ -9,11 +9,14 @@ import {
   type CoachState,
   type Effects,
   type EventOption,
+  type FinalStyle,
+  type MiniGameId,
   type PlayerMode,
   type PlayerStats,
   type Position,
   type RunScore,
   type SeasonRecord,
+  type TransferOffer,
   type CoachSeason,
 } from '../world/Architecture'
 
