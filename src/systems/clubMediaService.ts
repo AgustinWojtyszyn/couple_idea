@@ -7,6 +7,7 @@ export type ClubMedia = {
 }
 
 const CACHE_KEY='leyenda-club-media-v2'
+const inFlight=new Map<string,Promise<ClubMedia>>()
 
 function readCache():Record<string,ClubMedia>{
   try{return JSON.parse(localStorage.getItem(CACHE_KEY)||'{}')}catch{return{}}
@@ -37,7 +38,10 @@ function commonsUrl(file?:string){
 export async function getClubMedia(name:string):Promise<ClubMedia>{
   const cache=readCache()
   if(cache[name])return cache[name]
+  const pending=inFlight.get(name)
+  if(pending)return pending
 
+  const task=(async()=>{
   try{
     const query=aliases[name]||name
     const search=await fetch(
@@ -105,5 +109,32 @@ export async function getClubMedia(name:string):Promise<ClubMedia>{
     cache[name]=result
     writeCache(cache)
     return result
+  }finally{
+    inFlight.delete(name)
   }
+  })()
+
+  inFlight.set(name,task)
+  return task
+}
+
+function warmImage(url?:string){
+  if(!url||typeof Image==='undefined')return
+  const img=new Image()
+  img.decoding='async'
+  img.src=url
+}
+
+export async function preloadClubMedia(names:string[],concurrency=4){
+  const unique=[...new Set(names)]
+  let cursor=0
+  const worker=async()=>{
+    while(cursor<unique.length){
+      const index=cursor++
+      const media=await getClubMedia(unique[index])
+      warmImage(media.logo)
+      warmImage(media.stadiumImage??media.image)
+    }
+  }
+  await Promise.all(Array.from({length:Math.min(concurrency,unique.length)},()=>worker()))
 }
