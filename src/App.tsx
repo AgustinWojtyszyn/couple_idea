@@ -102,12 +102,18 @@ function Stat({value,label}:{value:string|number;label:string}){
   return <div className="stat"><strong>{value}</strong><span>{label}</span></div>
 }
 
-function IdolProgress({value,reputation}:{value:number;reputation:number}){
-  const level=value<20?'RECIÉN LLEGADO':value<45?'UNO MÁS':value<70?'REFERENTE':value<90?'ÍDOLO':'LEYENDA'
+function IdolProgress({value,years}:{value:number;years:number}){
+  const level=
+    value<6?'DESCONOCIDO':
+    value<15?'YA TE UBICAN':
+    value<30?'TITULAR QUERIDO':
+    value<48?'REFERENTE':
+    value<68?'BANDERA':
+    value<90?'ÍDOLO':'LEYENDA'
   return <section className="idol-progress">
-    <div className="idol-progress__head"><span>IDOLOTRÍA</span><strong>{level} · {Math.round(value)}/100</strong></div>
-    <div className="idol-progress__track"><i style={{width:Math.max(1,value)+'%'}}/><b className="i1">●</b><b className="i2">♥</b><b className="i3">★</b><b className="i4">♛</b></div>
-    <div className="idol-progress__foot"><span>🇦🇷 SELECCIÓN</span><strong>{reputation>=72?'EN EL RADAR':reputation>=48?'CERCA':'SIN CHANCE'}</strong></div>
+    <div className="idol-progress__head"><span>HUELLA EN EL CLUB</span><strong>{level} · {Math.round(value)}/100</strong></div>
+    <div className="idol-progress__track"><i style={{width:Math.max(1,value)+'%'}}/><b className="i1">●</b><b className="i2">◆</b><b className="i3">★</b><b className="i4">♛</b></div>
+    <div className="idol-progress__foot"><span>AÑOS EN ESTE CLUB</span><strong>{years} {years===1?'AÑO':'AÑOS'}</strong></div>
   </section>
 }
 
@@ -437,53 +443,181 @@ function RankingPanel({scores}:{scores:RunScore[]}){
   </section>
 }
 
-function MiniGamesPanel({onScore}:{onScore:(game:MiniGameId,score:number)=>void}){
+function MiniGamesPanel({mode,onScore}:{mode:'player'|'coach';onScore:(game:MiniGameId,score:number)=>void}){
+  const games=miniGames.filter(game=>mode==='player'?game.playerOnly:game.coachOnly)
   const [active,setActive]=useState<MiniGameId|null>(null)
   const [round,setRound]=useState(0)
   const [score,setScore]=useState(0)
-  const [message,setMessage]=useState('')
+  const [feedback,setFeedback]=useState('')
+  const [completed,setCompleted]=useState(false)
 
-  const play=(id:MiniGameId)=>{
-    if(active!==id){setActive(id);setRound(0);setScore(0);setMessage('')}
+  const reset=(id:MiniGameId)=>{
+    setActive(id)
+    setRound(0)
+    setScore(0)
+    setFeedback('')
+    setCompleted(false)
   }
 
-  const action=(choice:number)=>{
-    if(!active)return
-    const roll=Math.random()
-    let earned=0
-    if(active==='penalties'||active==='keeper') earned=choice===Math.floor(roll*3)?0:Math.round(45+roll*55)
-    else if(active==='duel') earned=(choice+Math.floor(roll*3))%3===1?100:Math.round(25+roll*45)
-    else if(active==='scouting') earned=choice===2?100:Math.round(30+roll*40)
-    else earned=Math.round(35+roll*65)
-    const nextScore=score+earned
+  const commit=(earned:number,message:string)=>{
+    if(!active||completed)return
     const nextRound=round+1
-    setScore(nextScore)
+    const nextScore=score+earned
     setRound(nextRound)
-    setMessage(earned>=80?'PERFECTO':earned>=55?'BIEN':'SEGUÍ')
+    setScore(nextScore)
+    setFeedback(message+' · +'+earned)
     if(nextRound>=5){
+      setCompleted(true)
       onScore(active,nextScore)
-      setMessage('FINAL · '+nextScore+' PTS')
     }
   }
 
+  const playerChoice=(choice:number)=>{
+    if(!active)return
+    if(active==='penalties'){
+      const keeper=Math.floor(Math.random()*3)
+      commit(choice===keeper?18:100,choice===keeper?'ATAJÓ EL ARQUERO':'GOL')
+      return
+    }
+    if(active==='keeper'){
+      const shot=Math.floor(Math.random()*3)
+      commit(choice===shot?100:22,choice===shot?'ATAJADÓN':'NO LLEGASTE')
+      return
+    }
+    if(active==='duel'){
+      const cue=round%3
+      commit(choice===cue?100:28,choice===cue?'CRUCE LIMPIO':'TE SUPERÓ')
+      return
+    }
+    if(active==='dribble'){
+      const target=(round+score)%2
+      commit(choice===target?100:24,choice===target?'LO DEJASTE ATRÁS':'TE CERRÓ')
+      return
+    }
+  }
+
+  const timingShot=()=>{
+    const phase=(Date.now()%1800)/18
+    const distance=Math.abs(phase-72)
+    const earned=Math.max(18,Math.round(100-distance*2.15))
+    commit(earned,earned>=88?'AL ÁNGULO':earned>=62?'BUEN REMATE':'LE FALTÓ PRECISIÓN')
+  }
+
+  const coachChoice=(choice:number)=>{
+    if(!active)return
+    const roundIndex=round%5
+    const correct:Record<string,number[]> = {
+      tactics:[1,0,2,1,2],
+      lineup:[0,2,1,0,2],
+      locker:[2,1,0,2,1],
+      scouting:[1,2,0,1,2],
+      negotiation:[1,0,2,1,0],
+    }
+    const expected=correct[active]?.[roundIndex]??0
+    commit(choice===expected?100:choice===((expected+1)%3)?55:20,choice===expected?'DECISIÓN PERFECTA':'DECISIÓN DISCUTIBLE')
+  }
+
   if(active){
-    const game=miniGames.find(g=>g.id===active)!
-    const finished=round>=5
-    return <section className="panel minigame-arena">
-      <button className="back-link" onClick={()=>setActive(null)}>← Volver</button>
-      <span className="eyebrow">{game.name.toUpperCase()}</span>
-      <h2>{game.description}</h2>
-      <div className="arena-score"><span>RONDA {Math.min(round+1,5)}/5</span><strong>{score}</strong></div>
-      <div className="arena-visual"><div className="pitch-lines"/><span className="arena-ball">●</span><b>{message||'ELEGÍ'}</b></div>
-      {!finished?<div className="arena-actions">
-        <button onClick={()=>action(0)}>IZQUIERDA</button><button onClick={()=>action(1)}>CENTRO</button><button onClick={()=>action(2)}>DERECHA</button>
-      </div>:<button className="play-button" onClick={()=>{setRound(0);setScore(0);setMessage('')}}>JUGAR DE NUEVO</button>}
+    const game=miniGames.find(item=>item.id===active)!
+    const roundLabel=Math.min(round+1,5)
+    const duelCue=['RECORTE','PIQUE LARGO','CUERPO A CUERPO'][round%3]
+    const dribbleCue=(round+score)%2===0?'← CAMBIO A IZQUIERDA':'CAMBIO A DERECHA →'
+    const tacticalScenarios=[
+      'El rival sale con doble punta y te gana la espalda.',
+      'Te presionan alto y tu salida corta está bloqueada.',
+      'El rival se mete atrás con nueve hombres.',
+      'Ganás por uno y faltan quince minutos.',
+      'Tu lateral está amonestado y el extremo rival lo busca.',
+    ]
+    const scoutCards=[
+      [{a:'Técnica 66',b:'Físico 72',c:'Techo medio'},{a:'Técnica 61',b:'Físico 64',c:'Techo alto'},{a:'Técnica 70',b:'Físico 59',c:'Techo bajo'}],
+      [{a:'Pase 71',b:'Lectura 65',c:'Techo alto'},{a:'Pase 68',b:'Lectura 72',c:'Techo medio'},{a:'Pase 62',b:'Lectura 60',c:'Techo alto'}],
+      [{a:'Defensa 63',b:'Físico 70',c:'Techo alto'},{a:'Defensa 69',b:'Físico 68',c:'Techo medio'},{a:'Defensa 72',b:'Físico 74',c:'Techo bajo'}],
+      [{a:'Velocidad 74',b:'Regate 61',c:'Techo medio'},{a:'Velocidad 68',b:'Regate 69',c:'Techo alto'},{a:'Velocidad 72',b:'Regate 67',c:'Techo medio'}],
+      [{a:'Reflejos 66',b:'Juego aéreo 62',c:'Techo medio'},{a:'Reflejos 69',b:'Juego aéreo 65',c:'Techo bajo'},{a:'Reflejos 64',b:'Juego aéreo 70',c:'Techo alto'}],
+    ][round%5]
+
+    return <section className="panel minigame-arena minigame-arena--v2">
+      <div className="minigame-topline">
+        <button className="back-link" onClick={()=>setActive(null)}>← Volver</button>
+        <span>RONDA {roundLabel}/5</span>
+      </div>
+      <div className="minigame-title"><b>{game.icon}</b><div><span className="eyebrow">{mode==='player'?'HABILIDAD':'DESPACHO DEL DT'}</span><h2>{game.name}</h2><p>{game.description}</p></div></div>
+      <div className="arena-score"><span>PUNTOS</span><strong>{score}</strong></div>
+
+      {active==='penalties'&&<div className="skill-stage penalty-stage">
+        <div className="goal-frame"><span className="keeper">●</span><i className="net"/></div>
+        <div className="skill-prompt">Elegí dónde patear.</div>
+        <div className="three-actions"><button onClick={()=>playerChoice(0)}>↙ IZQ</button><button onClick={()=>playerChoice(1)}>↑ CENTRO</button><button onClick={()=>playerChoice(2)}>DER ↘</button></div>
+      </div>}
+
+      {active==='keeper'&&<div className="skill-stage penalty-stage keeper-stage">
+        <div className="goal-frame"><span className="keeper keeper--you">🧤</span><i className="net"/></div>
+        <div className="skill-prompt">Leé la carrera y tirate.</div>
+        <div className="three-actions"><button onClick={()=>playerChoice(0)}>↙ IZQ</button><button onClick={()=>playerChoice(1)}>↑ CENTRO</button><button onClick={()=>playerChoice(2)}>DER ↘</button></div>
+      </div>}
+
+      {active==='freekicks'&&<div className="skill-stage freekick-stage">
+        <div className="freekick-scene"><div className="wall"><i/><i/><i/><i/></div><div className="mini-goal"/><span className="mini-ball">●</span></div>
+        <div className="timing-bar"><i/><b/></div>
+        <div className="skill-prompt">El marcador se mueve. Pegale cerca de la zona celeste.</div>
+        <button className="skill-main-action" onClick={timingShot}>⚡ PATEAR</button>
+      </div>}
+
+      {active==='dribble'&&<div className="skill-stage dribble-stage">
+        <div className="slalom-field"><i/><i/><i/><i/><i/><span>●</span></div>
+        <strong className="big-cue">{dribbleCue}</strong>
+        <div className="two-actions"><button onClick={()=>playerChoice(0)}>← IZQUIERDA</button><button onClick={()=>playerChoice(1)}>DERECHA →</button></div>
+      </div>}
+
+      {active==='duel'&&<div className="skill-stage duel-stage">
+        <div className="duel-visual"><span className="defender-silhouette">◆</span><b>VS</b><span className="attacker-silhouette">●</span></div>
+        <strong className="big-cue">{duelCue}</strong>
+        <div className="three-actions"><button onClick={()=>playerChoice(0)}>ANTICIPAR</button><button onClick={()=>playerChoice(1)}>ACOMPAÑAR</button><button onClick={()=>playerChoice(2)}>BARRER</button></div>
+      </div>}
+
+      {active==='tactics'&&<div className="skill-stage coach-game-stage">
+        <div className="tactical-board"><i className="half"/>{[18,33,48,62,77].map((x,i)=><span key={i} style={{left:x+'%',top:(25+(i%2)*42)+'%'}}/> )}</div>
+        <strong className="scenario-title">{tacticalScenarios[round%5]}</strong>
+        <div className="coach-options"><button onClick={()=>coachChoice(0)}>BLOQUE BAJO + SALIDA RÁPIDA</button><button onClick={()=>coachChoice(1)}>AJUSTAR PRESIÓN Y ALTURA</button><button onClick={()=>coachChoice(2)}>CAMBIAR ESTRUCTURA</button></div>
+      </div>}
+
+      {active==='lineup'&&<div className="skill-stage coach-game-stage">
+        <div className="formation-board"><span>●</span><span>●</span><span>●</span><span>●</span><span>●</span><span>●</span><span>●</span><span>●</span><span>●</span><span>●</span><b>GK</b></div>
+        <strong className="scenario-title">{tacticalScenarios[(round+2)%5]}</strong>
+        <div className="coach-options"><button onClick={()=>coachChoice(0)}>4-3-3 · ANCHO</button><button onClick={()=>coachChoice(1)}>4-4-2 · BLOQUE MEDIO</button><button onClick={()=>coachChoice(2)}>3-5-2 · SUPERIORIDAD CENTRAL</button></div>
+      </div>}
+
+      {active==='locker'&&<div className="skill-stage coach-game-stage locker-stage">
+        <div className="locker-art"><span>▤</span><i/><i/><i/></div>
+        <strong className="scenario-title">{['La figura fue suplente y explotó frente al grupo.','Perdiste un clásico y el vestuario está quebrado.','Un juvenil pide jugar o irse.','Dos referentes se pelearon en el entrenamiento.','Estás a un partido del título y sobra ansiedad.'][round%5]}</strong>
+        <div className="coach-options"><button onClick={()=>coachChoice(0)}>MARCAR AUTORIDAD</button><button onClick={()=>coachChoice(1)}>HABLAR EN PRIVADO</button><button onClick={()=>coachChoice(2)}>RESPALDAR AL GRUPO</button></div>
+      </div>}
+
+      {active==='scouting'&&<div className="skill-stage coach-game-stage scouting-stage">
+        <strong className="scenario-title">Elegí el proyecto con mejor combinación de presente y techo.</strong>
+        <div className="prospect-grid">{scoutCards.map((card,index)=><button key={index} onClick={()=>coachChoice(index)}><b>U20-{index+1}</b><span>{card.a}</span><span>{card.b}</span><em>{card.c}</em></button>)}</div>
+      </div>}
+
+      {active==='negotiation'&&<div className="skill-stage coach-game-stage negotiation-stage">
+        <div className="negotiation-visual"><span>$</span><div><i/><i/><i/></div></div>
+        <strong className="scenario-title">{['El club vendedor pide demasiado por un titular.','Tu figura exige renovar antes del clásico.','Te ofrecen comprar a un juvenil por debajo de mercado.','Un agente presiona con otra oferta.','Necesitás liberar salario antes del cierre.'][round%5]}</strong>
+        <div className="coach-options"><button onClick={()=>coachChoice(0)}>ACEPTAR AHORA</button><button onClick={()=>coachChoice(1)}>CONTRAOFERTAR</button><button onClick={()=>coachChoice(2)}>LEVANTARSE DE LA MESA</button></div>
+      </div>}
+
+      <div className={'minigame-feedback '+(completed?'complete':'')}>{completed?'DESAFÍO COMPLETO · '+score+' PTS':feedback||'JUGÁ LA RONDA'}</div>
+      {completed&&<button className="play-button" onClick={()=>reset(active)}>JUGAR DE NUEVO</button>}
     </section>
   }
 
-  return <section className="panel">
-    <div className="panel-head"><div><span className="eyebrow">CENTRO DE DESAFÍOS</span><h2>Minijuegos</h2></div><span className="pill">{miniGames.length} MODOS</span></div>
-    <div className="minigame-grid">{miniGames.map(g=><button key={g.id} onClick={()=>play(g.id)}><b>{g.icon}</b><div><strong>{g.name}</strong><span>{g.description}</span></div><em>JUGAR →</em></button>)}</div>
+  return <section className="panel minigame-hub">
+    <div className="panel-head"><div><span className="eyebrow">{mode==='player'?'CENTRO DE HABILIDAD':'LABORATORIO DEL DT'}</span><h2>{mode==='player'?'Cinco pruebas jugables':'Cinco desafíos de gestión'}</h2></div><span className="pill">5 MODOS</span></div>
+    <p className="minigame-hub__intro">{mode==='player'?'Cada prueba entrena una parte distinta de tu jugador. No son decisiones de texto: tenés que acertar.':'Táctica, scouting, vestuario, formación y mercado. Tus decisiones puntúan el trabajo de entrenador.'}</p>
+    <div className="minigame-grid minigame-grid--v2">{games.map(game=><button key={game.id} onClick={()=>reset(game.id)}>
+      <b>{game.icon}</b>
+      <div><strong>{game.name}</strong><span>{game.description}</span></div>
+      <em>JUGAR →</em>
+    </button>)}</div>
   </section>
 }
 
@@ -521,10 +655,10 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
     const bonus=Math.max(1,Math.round(value/110))
     const effects:EventOption['effects']=
       game==='penalties'||game==='freekicks'?{finishing:bonus,form:2}:
-      game==='passing'?{passing:bonus,dribbling:Math.max(1,bonus-1)}:
+      game==='dribble'?{dribbling:bonus,pace:Math.max(1,bonus-1)}:
       game==='keeper'?{reflexes:bonus,form:2}:
       game==='duel'?{defending:bonus,physical:Math.max(1,bonus-1)}:
-      {passing:Math.max(1,bonus-1),reputation:2}
+      {form:1}
     const next=applyEffects(state,effects)
     setState({...next,activeEvent:state.activeEvent})
   }
@@ -564,7 +698,7 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
       </div>
 
       <PlayerAttributes state={{...state,stats:playerStats}}/>
-      <IdolProgress value={state.fans} reputation={state.reputation}/>
+      <IdolProgress value={state.clubLegacy??0} years={state.history.filter(item=>item.clubId===state.clubId).length}/>
 
       {tab==='career'&&<div className="dashboard-grid">
         <section className="panel event-panel">
@@ -599,7 +733,7 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
         </div>
       </section>}
 
-      {tab==='shop'&&<ShopPanel state={state} setState={setState}/>}\n      {tab==='minigames'&&<MiniGamesPanel onScore={playMini}/>}
+      {tab==='shop'&&<ShopPanel state={state} setState={setState}/>}\n      {tab==='minigames'&&<MiniGamesPanel mode="player" onScore={playMini}/>}
       {tab==='ranking'&&<RankingPanel scores={scores}/>}
       {tab==='history'&&<section className="panel">
         <div className="panel-head"><div><span className="eyebrow">ARCHIVO</span><h2>Tu historia</h2></div><span className="pill">{state.history.length} TEMP.</span></div>
@@ -659,7 +793,7 @@ function CoachGame({state,setState,theme,onTheme,onExit}:{state:CoachState;setSt
         <div className="squad-note">Los futbolistas del plantel se representan por rol y atributos, nunca por nombres de jugadores reales.</div>
       </section>}
 
-      {tab==='minigames'&&<MiniGamesPanel onScore={(_,value)=>setState({...state,tacticalRating:Math.min(100,state.tacticalRating+Math.round(value/150))})}/>}
+      {tab==='minigames'&&<MiniGamesPanel mode="coach" onScore={(_,value)=>setState({...state,tacticalRating:Math.min(100,state.tacticalRating+Math.max(1,Math.round(value/180))),fanTrust:Math.min(100,state.fanTrust+(value>=400?2:0))})}/>}
       {tab==='ranking'&&<RankingPanel scores={scores}/>}
       {tab==='history'&&<section className="panel"><div className="panel-head"><div><span className="eyebrow">ARCHIVO DEL DT</span><h2>Temporadas</h2></div></div><div className="timeline">{[...state.history].reverse().map(s=><article key={s.season}><ClubCrest name={clubById(s.clubId).name} size="sm"/><div><strong>{clubById(s.clubId).name}</strong><span>Temporada {s.season}</span><p>{s.note}</p></div><aside><b>#{s.position}</b><span>{s.points} PTS</span></aside></article>)}</div></section>}
     </main>
