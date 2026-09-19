@@ -1,0 +1,1 @@
+Validate V10 mobile-first layout and single-play minigames.
