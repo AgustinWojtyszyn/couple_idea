@@ -1,6 +1,7 @@
 import { verifiedLeagueSeeds } from '../data/verifiedLeagues'
 export type Position = '9' | '10' | '7' | '5' | '2' | '1'
 export type PlayerMode = 'classic' | 'daily'
+export type FinalStyle = 'cabulero' | 'mixto' | 'habilidoso'
 export type GameMode = 'player' | 'coach'
 export type Theme = 'dark' | 'light'
 export type Tab = 'career' | 'market' | 'training' | 'history' | 'minigames' | 'ranking' | 'squad' | 'shop'
@@ -76,6 +77,13 @@ export type CareerState = {
   history:SeasonRecord[]
   achievements:string[]
   offers:string[]
+  transferOffers?:TransferOffer[]
+  marketDecisionRequired?:boolean
+  currentSalary?:number
+  contractYearsLeft?:number
+  contractYearsTotal?:number
+  finalStyle?:FinalStyle|null
+  pendingFinal?:FinalChallenge|null
   activeEvent:CareerEvent|null
   retired:boolean
   finalScore?:number
@@ -118,6 +126,20 @@ export type RunScore = {
 }
 
 export type MiniGame = { id:MiniGameId; name:string; description:string; icon:string; playerOnly?:boolean; coachOnly?:boolean }
+export type FinalChallenge = {
+  id:string
+  competition:string
+  opponentClubId:string
+  miniGame:MiniGameId
+  seasonRecordIndex:number
+}
+export type TransferOffer = {
+  clubId:string
+  salary:number
+  years:number
+  role:'ROTACIÓN'|'TITULAR'|'FIGURA'|'PROYECTO'
+  signingBonus:number
+}
 
 const slug=(value:string)=>value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')
 const initials=(name:string)=>name.split(/\s+/).filter(Boolean).slice(0,3).map(x=>x[0]).join('').toUpperCase()
