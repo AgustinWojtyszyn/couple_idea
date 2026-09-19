@@ -843,6 +843,9 @@ function MiniGamesPanel({
   const [score,setScore]=useState(0)
   const [feedback,setFeedback]=useState('')
   const [completed,setCompleted]=useState(false)
+  const [motion,setMotion]=useState<{ball:number;keeper:number;kind:'shot'|'save'}|null>(null)
+  const [freeKickFlight,setFreeKickFlight]=useState<'idle'|'goal'|'wide'>('idle')
+  const livePhase=useGamePhase(Boolean(active)&&!completed,1800)
 
   useEffect(()=>{
     if(!forcedGame)return
@@ -851,6 +854,8 @@ function MiniGamesPanel({
     setScore(0)
     setFeedback('')
     setCompleted(false)
+    setMotion(null)
+    setFreeKickFlight('idle')
   },[forcedGame])
 
   const reset=(id:MiniGameId)=>{
@@ -859,6 +864,8 @@ function MiniGamesPanel({
     setScore(0)
     setFeedback('')
     setCompleted(false)
+    setMotion(null)
+    setFreeKickFlight('idle')
   }
 
   const commit=(earned:number,message:string)=>{
@@ -876,15 +883,23 @@ function MiniGamesPanel({
   }
 
   const playerChoice=(choice:number)=>{
-    if(!active)return
+    if(!active||motion)return
     if(active==='penalties'){
       const keeper=Math.floor(Math.random()*3)
-      commit(choice===keeper?18:100,choice===keeper?'ATAJÓ EL ARQUERO':'GOL')
+      setMotion({ball:choice,keeper,kind:'shot'})
+      window.setTimeout(()=>{
+        commit(choice===keeper?18:100,choice===keeper?'ATAJÓ EL ARQUERO':'GOL')
+        setMotion(null)
+      },520)
       return
     }
     if(active==='keeper'){
       const shot=Math.floor(Math.random()*3)
-      commit(choice===shot?100:22,choice===shot?'ATAJADÓN':'NO LLEGASTE')
+      setMotion({ball:shot,keeper:choice,kind:'save'})
+      window.setTimeout(()=>{
+        commit(choice===shot?100:22,choice===shot?'ATAJADÓN':'NO LLEGASTE')
+        setMotion(null)
+      },520)
       return
     }
     if(active==='duel'){
@@ -900,10 +915,14 @@ function MiniGamesPanel({
   }
 
   const timingShot=()=>{
-    const phase=(Date.now()%1800)/18
-    const distance=Math.abs(phase-72)
-    const earned=Math.max(18,Math.round(100-distance*2.15))
-    commit(earned,earned>=88?'AL ÁNGULO':earned>=62?'BUEN REMATE':'LE FALTÓ PRECISIÓN')
+    if(freeKickFlight!=='idle')return
+    const distance=Math.abs(livePhase-.72)
+    const earned=distance<=.055?100:distance<=.12?82:distance<=.2?58:24
+    setFreeKickFlight(earned>=58?'goal':'wide')
+    window.setTimeout(()=>{
+      commit(earned,earned>=90?'AL ÁNGULO':earned>=62?'BUEN REMATE':'LE FALTÓ PRECISIÓN')
+      setFreeKickFlight('idle')
+    },650)
   }
 
   const coachChoice=(choice:number)=>{
@@ -958,22 +977,22 @@ function MiniGamesPanel({
       <div className="arena-score"><span>PUNTOS</span><strong>{score}</strong></div>
 
       {active==='penalties'&&<div className="skill-stage penalty-stage">
-        <div className="goal-frame"><span className="keeper">●</span><i className="net"/></div>
+        <div className="goal-frame"><span className={'keeper '+(motion?'keeper--zone-'+motion.keeper:'')}>●</span><span className={'moving-ball '+(motion?'moving-ball--zone-'+motion.ball:'')}>⚽</span><i className="net"/></div>
         <div className="skill-prompt">Elegí dónde patear.</div>
         <div className="three-actions"><button onClick={()=>playerChoice(0)}>↙ IZQ</button><button onClick={()=>playerChoice(1)}>↑ CENTRO</button><button onClick={()=>playerChoice(2)}>DER ↘</button></div>
       </div>}
 
       {active==='keeper'&&<div className="skill-stage penalty-stage keeper-stage">
-        <div className="goal-frame"><span className="keeper keeper--you">🧤</span><i className="net"/></div>
+        <div className="goal-frame"><span className={'keeper keeper--you '+(motion?'keeper--zone-'+motion.keeper:'')}>🧤</span><span className={'moving-ball '+(motion?'moving-ball--zone-'+motion.ball:'')}>⚽</span><i className="net"/></div>
         <div className="skill-prompt">Leé la carrera y tirate.</div>
         <div className="three-actions"><button onClick={()=>playerChoice(0)}>↙ IZQ</button><button onClick={()=>playerChoice(1)}>↑ CENTRO</button><button onClick={()=>playerChoice(2)}>DER ↘</button></div>
       </div>}
 
       {active==='freekicks'&&<div className="skill-stage freekick-stage">
-        <div className="freekick-scene"><div className="wall"><i/><i/><i/><i/></div><div className="mini-goal"/><span className="mini-ball">●</span></div>
-        <div className="timing-bar"><i/><b/></div>
+        <div className={'freekick-scene freekick-scene--'+freeKickFlight}><div className="wall"><i/><i/><i/><i/></div><div className="mini-goal"/><span className="mini-ball">⚽</span><span className="shot-trail"/></div>
+        <div className="timing-bar"><i/><b style={{left:'calc('+Math.round(livePhase*100)+'% - 7px)'}}/></div>
         <div className="skill-prompt">El marcador se mueve. Pegale cerca de la zona celeste.</div>
-        <button className="skill-main-action" onClick={timingShot}>⚡ PATEAR</button>
+        <button className="skill-main-action" disabled={freeKickFlight!=='idle'} onClick={timingShot}>⚡ {freeKickFlight==='idle'?'PATEAR':'VIAJANDO…'}</button>
       </div>}
 
       {active==='dribble'&&<div className="skill-stage dribble-stage">
