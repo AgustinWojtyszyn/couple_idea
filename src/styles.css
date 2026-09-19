@@ -3400,3 +3400,482 @@ button:focus-visible,input:focus-visible,select:focus-visible{box-shadow:0 0 0 3
     grid-template-columns:1fr 1fr 1fr;
   }
 }
+
+
+/* V6 · LEYENDA brand crest */
+.leyenda-logo{
+  position:relative;
+  flex:none;
+  display:grid;
+  place-items:center;
+  width:44px;
+  height:44px;
+}
+.leyenda-logo--sm{width:40px;height:40px}
+.leyenda-logo--md{width:52px;height:52px}
+.leyenda-logo--lg{width:74px;height:74px}
+.leyenda-logo__ball{
+  position:relative;
+  z-index:3;
+  display:grid;
+  place-items:center;
+  width:72%;
+  height:72%;
+  border-radius:50%;
+  background:
+    radial-gradient(circle at 35% 28%,rgba(255,255,255,.33),transparent 22%),
+    linear-gradient(145deg,#58a8ff,#1d63d6 58%,#102f72);
+  border:2px solid rgba(255,255,255,.7);
+  box-shadow:
+    0 10px 24px rgba(30,105,220,.28),
+    inset 0 0 0 3px rgba(5,14,28,.2);
+}
+.leyenda-logo__ball:before{
+  content:'';
+  position:absolute;
+  inset:14%;
+  border:1px solid rgba(255,255,255,.26);
+  border-radius:50%;
+}
+.leyenda-logo__ball>b{
+  color:#fff;
+  font:800 1.15em/1 var(--font-display);
+  transform:skew(-8deg);
+  text-shadow:0 3px 8px rgba(0,0,0,.35);
+}
+.leyenda-logo__ball>i{
+  position:absolute;
+  width:5px;height:5px;
+  border-radius:50%;
+  background:rgba(255,255,255,.68);
+}
+.leyenda-logo__ball>i:nth-child(2){left:17%;top:48%}
+.leyenda-logo__ball>i:nth-child(3){right:17%;top:34%}
+.leyenda-logo__ball>i:nth-child(4){left:49%;bottom:13%}
+.leyenda-logo__laurel{
+  position:absolute;
+  z-index:1;
+  top:15%;
+  bottom:6%;
+  width:30%;
+}
+.leyenda-logo__laurel--left{left:-1%;transform:rotate(-12deg)}
+.leyenda-logo__laurel--right{right:-1%;transform:scaleX(-1) rotate(-12deg)}
+.leyenda-logo__laurel i{
+  position:absolute;
+  width:11px;
+  height:5px;
+  border-radius:100% 0 100% 0;
+  background:linear-gradient(90deg,#8fd1ff,#4f8cff);
+  transform:rotate(-38deg);
+  box-shadow:0 2px 5px rgba(24,94,187,.2);
+}
+.leyenda-logo__laurel i:nth-child(1){left:2px;bottom:5%}
+.leyenda-logo__laurel i:nth-child(2){left:0;bottom:28%}
+.leyenda-logo__laurel i:nth-child(3){left:4px;bottom:51%}
+.leyenda-logo__laurel i:nth-child(4){left:10px;bottom:72%}
+.hero-card__brand>.leyenda-logo{
+  margin:0 auto 10px;
+  filter:drop-shadow(0 10px 28px rgba(54,128,255,.25));
+}
+
+/* V6 · local demo login */
+.demo-login{
+  min-height:100vh;
+  position:relative;
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+  padding:24px 14px;
+  background:
+    radial-gradient(circle at 50% -10%,rgba(49,126,255,.3),transparent 34rem),
+    linear-gradient(180deg,#07111f,#03070d 78%);
+}
+.demo-login:before{
+  content:'';
+  position:absolute;
+  inset:0;
+  opacity:.22;
+  background:
+    linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+  background-size:30px 30px;
+}
+.demo-login__stadium{
+  position:absolute;
+  left:-8%;
+  right:-8%;
+  bottom:-100px;
+  height:310px;
+  border-radius:50% 50% 0 0;
+  transform:perspective(300px) rotateX(58deg);
+  background:
+    repeating-linear-gradient(90deg,#0b5138 0 58px,#0d6042 58px 116px);
+  border:2px solid rgba(255,255,255,.12);
+  opacity:.76;
+}
+.demo-login__stadium:before{
+  content:'';
+  position:absolute;
+  left:50%;top:0;bottom:0;
+  width:1px;
+  background:rgba(255,255,255,.26);
+}
+.demo-login__stadium:after{
+  content:'';
+  position:absolute;
+  left:50%;top:35%;
+  width:105px;height:105px;
+  border:2px solid rgba(255,255,255,.24);
+  border-radius:50%;
+  transform:translate(-50%,-50%);
+}
+.demo-login__stadium i{
+  position:absolute;
+  top:-80px;
+  width:72px;height:8px;
+  border-radius:99px;
+  background:#dff2ff;
+  box-shadow:0 0 22px #b6e5ff,0 0 52px rgba(105,190,255,.55);
+}
+.demo-login__stadium i:nth-child(1){left:12%}
+.demo-login__stadium i:nth-child(2){left:34%}
+.demo-login__stadium i:nth-child(3){right:34%}
+.demo-login__stadium i:nth-child(4){right:12%}
+.demo-login__card{
+  position:relative;
+  z-index:3;
+  width:min(100%,440px);
+  border:1px solid rgba(117,165,230,.22);
+  border-radius:24px;
+  background:linear-gradient(180deg,rgba(12,25,43,.96),rgba(6,15,27,.97));
+  box-shadow:0 30px 90px rgba(0,0,0,.46);
+  padding:22px 18px 18px;
+  backdrop-filter:blur(20px);
+}
+.demo-login__brand{
+  display:flex;
+  align-items:center;
+  gap:13px;
+}
+.demo-login__brand>div{
+  display:flex;
+  flex-direction:column;
+}
+.demo-login__brand>div>span{
+  font:800 31px/.9 var(--font-display);
+  letter-spacing:.08em;
+}
+.demo-login__brand small{
+  margin-top:5px;
+  color:var(--muted);
+  font-size:7px;
+  font-weight:800;
+  letter-spacing:.12em;
+}
+.demo-login__copy{
+  margin-top:28px;
+}
+.demo-login__copy h1{
+  margin:6px 0 8px;
+  font:700 38px/.92 var(--font-display);
+  letter-spacing:-.02em;
+}
+.demo-login__copy p{
+  margin:0;
+  color:var(--muted);
+  font-size:10px;
+  line-height:1.55;
+}
+.demo-login form{
+  display:grid;
+  gap:12px;
+  margin-top:22px;
+}
+.demo-login label{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.demo-login label>span{
+  color:var(--muted);
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:.12em;
+}
+.demo-login input{
+  width:100%;
+  height:52px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:#050c16;
+  color:#fff;
+  padding:0 13px;
+  font-size:13px;
+  font-weight:700;
+}
+.demo-login input:focus{
+  border-color:var(--blue);
+  box-shadow:0 0 0 3px rgba(47,124,255,.13);
+}
+.demo-login form>button{
+  min-height:54px;
+  border:0;
+  border-radius:12px;
+  background:linear-gradient(180deg,#3f8cff,#2566d2);
+  color:white;
+  box-shadow:0 13px 28px rgba(47,124,255,.24);
+  font:700 16px/1 var(--font-display);
+  letter-spacing:.04em;
+}
+.demo-login__guest{
+  width:100%;
+  min-height:45px;
+  margin-top:9px;
+  border:1px solid var(--line);
+  border-radius:11px;
+  background:transparent;
+  color:var(--muted);
+  font-size:10px;
+  font-weight:800;
+}
+.demo-login__note{
+  display:block;
+  margin-top:11px;
+  color:var(--muted-2);
+  font-size:7px;
+  line-height:1.4;
+  text-align:center;
+}
+
+/* V6 · Cabulero / Habilidoso hubs */
+.games-style-intro{
+  margin:10px 0 14px;
+  color:var(--muted);
+  font-size:9px;
+  line-height:1.55;
+}
+.cabala-practice-grid{
+  display:grid;
+  gap:8px;
+}
+.cabala-practice-grid button{
+  min-height:74px;
+  display:grid;
+  grid-template-columns:42px minmax(0,1fr) auto;
+  align-items:center;
+  gap:10px;
+  border:1px solid var(--line);
+  border-radius:13px;
+  background:linear-gradient(135deg,rgba(255,211,91,.06),var(--surface-2));
+  color:var(--text);
+  padding:10px;
+  text-align:left;
+}
+.cabala-practice-grid button>b{
+  display:grid;
+  place-items:center;
+  width:40px;height:40px;
+  border-radius:12px;
+  background:rgba(255,211,91,.1);
+  color:#ffd35b;
+  font:800 17px/1 var(--font-display);
+}
+.cabala-practice-grid button>span{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+}
+.cabala-practice-grid strong{font-size:10px}
+.cabala-practice-grid small{
+  margin-top:4px;
+  color:var(--muted);
+  font-size:7px;
+  line-height:1.35;
+}
+.cabala-practice-grid em{
+  color:#ffd35b;
+  font-size:7px;
+  font-style:normal;
+  font-weight:900;
+  white-space:nowrap;
+}
+.practice-result{
+  margin-top:10px;
+  padding:11px;
+  border-radius:10px;
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:.05em;
+  text-align:center;
+}
+.practice-result.good{
+  color:var(--good);
+  border:1px solid rgba(88,223,166,.24);
+  background:rgba(88,223,166,.07);
+}
+.practice-result.bad{
+  color:var(--danger);
+  border:1px solid rgba(255,111,130,.24);
+  background:rgba(255,111,130,.07);
+}
+.mixed-games-hub{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.mixed-games-tabs{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:6px;
+  padding:5px;
+  border:1px solid var(--line);
+  border-radius:13px;
+  background:var(--surface);
+}
+.mixed-games-tabs button{
+  min-height:42px;
+  border:0;
+  border-radius:9px;
+  background:transparent;
+  color:var(--muted);
+  font-size:8px;
+  font-weight:900;
+}
+.mixed-games-tabs button.active{
+  background:rgba(47,124,255,.14);
+  color:var(--blue-2);
+}
+.cabala-practice .back-link{
+  margin-bottom:10px;
+}
+
+/* V6 · mobile rhythm inspired by compact football-game UIs */
+@media(max-width:720px){
+  .site-header,.game-header{
+    height:76px;
+    padding:0 18px;
+  }
+  .brand{gap:12px}
+  .brand strong{font-size:21px}
+  .brand small{margin-top:5px;font-size:7.5px}
+  .home-main,.game-main{
+    padding-left:16px;
+    padding-right:16px;
+  }
+  .home-main{padding-top:20px;padding-bottom:42px}
+  .game-main{padding-top:20px;padding-bottom:116px}
+  .hero-card{
+    min-height:252px;
+    padding:20px;
+    border-radius:22px;
+  }
+  .hero-card__brand{padding:20px 0 16px}
+  .hero-card__brand span:not(.leyenda-logo):not(.leyenda-logo__laurel):not(.leyenda-logo__ball){
+    line-height:.82;
+  }
+  .daily-card,.create-card,.panel,.story-mode-panel,
+  .attributes-card,.idol-progress,.matchday-scene,
+  .market-core__head,.current-contract-card{
+    margin-top:18px;
+  }
+  .daily-card,.create-card,.panel,.story-mode-panel{
+    padding:18px;
+    border-radius:18px;
+  }
+  .section-head h2,.panel-head h2{
+    font-size:27px;
+    line-height:.95;
+  }
+  .section-head,.panel-head{gap:14px}
+  .daily-goals{gap:9px;margin-top:17px}
+  .daily-goals>div{
+    min-height:50px;
+    padding:10px 12px;
+  }
+  .form-grid{
+    gap:12px;
+    margin-top:20px;
+  }
+  .field{gap:8px}
+  .field select,.name-field input{
+    height:52px;
+    border-radius:12px;
+  }
+  .club-preview{
+    min-height:88px;
+    margin-top:14px;
+    padding:12px;
+  }
+  .name-field{margin-top:17px;gap:8px}
+  .positions{
+    gap:10px;
+    margin-top:17px;
+  }
+  .positions button{
+    min-height:100px;
+    padding:13px;
+    border-radius:14px;
+  }
+  .play-button{
+    min-height:58px;
+    margin-top:18px;
+    border-radius:13px;
+    font-size:18px;
+  }
+  .identity-card{
+    border-radius:20px;
+    padding:18px;
+  }
+  .quick-stats{
+    gap:10px;
+    margin-top:14px;
+  }
+  .quick-stats .stat{
+    min-height:88px;
+    border-radius:14px;
+  }
+  .attributes-card{padding:18px;border-radius:18px}
+  .attributes-grid{gap:11px}
+  .attribute{
+    min-height:82px;
+    padding:12px;
+    border-radius:13px;
+  }
+  .idol-progress{padding:17px;border-radius:17px}
+  .dashboard-grid{
+    gap:16px;
+    margin-top:18px;
+  }
+  .decision-list{gap:10px}
+  .decision-list button{
+    min-height:86px;
+    padding:13px;
+    border-radius:13px;
+  }
+  .effect-chips{
+    gap:6px;
+    margin-top:10px;
+  }
+  .effect-chips span{padding:6px 8px}
+  .minigame-grid--v2,
+  .cabala-practice-grid{gap:10px}
+  .minigame-grid--v2 button,
+  .cabala-practice-grid button{
+    min-height:86px;
+    padding:12px;
+  }
+  .skill-stage{min-height:340px}
+  .bottom-nav{
+    min-height:76px;
+    padding-bottom:max(8px,env(safe-area-inset-bottom));
+  }
+  .bottom-nav button{
+    min-height:62px;
+  }
+}
+@media(min-width:721px){
+  .demo-login__card{padding:28px}
+  .cabala-practice-grid{grid-template-columns:1fr 1fr}
+  .cabala-practice-grid button:last-child{grid-column:1/-1}
+}
