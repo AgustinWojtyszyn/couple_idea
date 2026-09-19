@@ -1151,3 +1151,102 @@ button:focus-visible,input:focus-visible,select:focus-visible{box-shadow:0 0 0 3
     height:64px;
   }
 }
+
+
+/* V2 · Argentina club strip */
+.argentina-lab-panel{
+  margin-top:16px;
+  border:1px solid rgba(85,164,255,.24);
+  border-radius:15px;
+  background:
+    radial-gradient(circle at 0 0,rgba(85,164,255,.13),transparent 42%),
+    var(--surface-2);
+  padding:12px;
+  overflow:hidden;
+}
+.argentina-lab-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:10px;
+}
+.argentina-lab-head>div{
+  display:flex;
+  flex-direction:column;
+}
+.argentina-lab-head span{
+  color:var(--blue-2);
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:.1em;
+}
+.argentina-lab-head strong{
+  margin-top:4px;
+  font:700 18px/1 var(--font-display);
+}
+.argentina-lab-head>b{
+  flex:none;
+  padding:5px 8px;
+  border:1px solid var(--line-strong);
+  border-radius:999px;
+  color:var(--muted);
+  font-size:7px;
+  letter-spacing:.07em;
+}
+.club-strip{
+  display:flex;
+  gap:8px;
+  overflow-x:auto;
+  padding:2px 1px 7px;
+  scroll-snap-type:x mandatory;
+  scrollbar-width:none;
+}
+.club-strip::-webkit-scrollbar{display:none}
+.club-strip button{
+  flex:0 0 90px;
+  min-height:102px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  scroll-snap-align:start;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:var(--surface);
+  color:var(--text);
+  padding:9px 7px;
+}
+.club-strip button span{
+  width:100%;
+  overflow:hidden;
+  font-size:7px;
+  line-height:1.25;
+  font-weight:800;
+  text-align:center;
+  text-overflow:ellipsis;
+}
+.club-strip button.active{
+  border-color:var(--blue);
+  background:linear-gradient(180deg,rgba(47,124,255,.17),var(--surface));
+  box-shadow:inset 0 0 0 1px rgba(47,124,255,.22),0 10px 24px rgba(47,124,255,.1);
+}
+.club-strip button.active span{color:var(--blue-2)}
+.club-strip .real-crest,
+.club-strip .crest{
+  width:44px;
+  height:48px;
+}
+
+@media(min-width:760px){
+  .club-strip{
+    display:grid;
+    grid-template-columns:repeat(6,1fr);
+    overflow:visible;
+  }
+  .club-strip button{
+    min-width:0;
+    width:100%;
+  }
+}
