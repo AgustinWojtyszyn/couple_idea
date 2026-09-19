@@ -887,11 +887,13 @@ function ModernSkillGame({
     </div>
 
     <div className="modern-game__stadium">
+      <div className="modern-match-ribbon"><span>🏆 PARTIDO DECISIVO</span><strong>89:42</strong><b>1 — 1</b></div>
       <div className="modern-game__crowd"><i/><i/><i/><i/><i/></div>
       <div className="modern-game__lights"><i/><i/><i/><i/></div>
 
       {mechanic==='strike'&&<div className="gesture-pitch gesture-pitch--strike" onPointerDown={strikeDown} onPointerUp={strikeUp}>
         <div className="gesture-goal"><i/><i/><i/><i/></div>
+        <div className="modern-keeper" style={{left:(24+phase*52)+'%'}}><i/><b/><span/></div>
         <div className="moving-target" style={{left:(targetX*100)+'%',top:(targetY*100)+'%'}}/>
         <span className="gesture-ball">⚽</span>
         {shot&&<><span className="shot-end" style={{left:(shot.x*100)+'%',top:(shot.y*100)+'%'}}>●</span><i className="shot-vector" style={{'--shot-x':(shot.x*100)+'%','--shot-y':(shot.y*100)+'%'} as React.CSSProperties}/></>}
@@ -1012,7 +1014,7 @@ function FinalStyleChoice({onChoose}:{onChoose:(style:FinalStyle)=>void}){
 
 function CabalaMiniGame({game,onComplete}:{game:CabalaGameId;onComplete:(won:boolean,score:number)=>void}){
   const roundsByGame:Record<CabalaGameId,number>={
-    'higher-lower':1,'dice-seven':1,'coin-run':1,'lucky-number':1,'lucky-shirt':1,
+    'higher-lower':3,'dice-seven':1,'coin-run':1,'lucky-number':1,'lucky-shirt':1,
     'three-cups':1,'wheel':1,'tower':1,'grid-reveal':1,'boots':1,
   }
   const maxRounds=roundsByGame[game]
@@ -1020,10 +1022,13 @@ function CabalaMiniGame({game,onComplete}:{game:CabalaGameId;onComplete:(won:boo
   const [hits,setHits]=useState(0)
   const [feedback,setFeedback]=useState('Elegí. No hay vuelta atrás.')
   const [card,setCard]=useState(()=>2+Math.floor(Math.random()*12))
+  const [cardTrail,setCardTrail]=useState<number[]>([])
   const [lastCoin,setLastCoin]=useState<'CARA'|'CECA'|null>(null)
   const [luckyNumber,setLuckyNumber]=useState(()=>Math.floor(Math.random()*3))
   const [shirtWinner,setShirtWinner]=useState(()=>[7,9,10,11,23][Math.floor(Math.random()*5)])
   const [revealed,setRevealed]=useState(true)
+  const [cupSlots,setCupSlots]=useState<number[]>([0,1,2])
+  const [cupsReady,setCupsReady]=useState(false)
   const [weather,setWeather]=useState(()=>Math.floor(Math.random()*3))
   const [animating,setAnimating]=useState(false)
   const [generalaDice,setGeneralaDice]=useState<number[]>([1,1,1,1,1])
@@ -1034,11 +1039,48 @@ function CabalaMiniGame({game,onComplete}:{game:CabalaGameId;onComplete:(won:boo
   const loopPhase=useLoopPhase(!finished&&!animating,2200)
 
   useEffect(()=>{
-    if(!['three-cups','grid-reveal'].includes(game))return
+    if(game==='grid-reveal'){
+      setRevealed(true)
+      const id=window.setTimeout(()=>setRevealed(false),1100)
+      return()=>window.clearTimeout(id)
+    }
+    if(game!=='three-cups')return
+
+    setCupSlots([0,1,2])
     setRevealed(true)
-    const id=window.setTimeout(()=>setRevealed(false),850)
-    return()=>window.clearTimeout(id)
-  },[game,round,luckyNumber])
+    setCupsReady(false)
+    setAnimating(false)
+
+    let shuffleTimer:number|undefined
+    let finishTimer:number|undefined
+    const revealTimer=window.setTimeout(()=>{
+      setRevealed(false)
+      setAnimating(true)
+      shuffleTimer=window.setInterval(()=>{
+        setCupSlots(current=>{
+          const next=[...current]
+          const a=Math.floor(Math.random()*3)
+          let b=Math.floor(Math.random()*3)
+          if(a===b)b=(b+1)%3
+          const temp=next[a]
+          next[a]=next[b]
+          next[b]=temp
+          return next
+        })
+      },320)
+      finishTimer=window.setTimeout(()=>{
+        if(shuffleTimer)window.clearInterval(shuffleTimer)
+        setAnimating(false)
+        setCupsReady(true)
+      },2240)
+    },1300)
+
+    return()=>{
+      window.clearTimeout(revealTimer)
+      if(shuffleTimer)window.clearInterval(shuffleTimer)
+      if(finishTimer)window.clearTimeout(finishTimer)
+    }
+  },[game,round])
 
   const commit=(success:boolean,message:string,earned=100)=>{
     if(finished)return
@@ -1049,13 +1091,17 @@ function CabalaMiniGame({game,onComplete}:{game:CabalaGameId;onComplete:(won:boo
     setFeedback(message)
     if(nextRound>=maxRounds){
       const target=Math.ceil(maxRounds*.55)
-      window.setTimeout(()=>onComplete(nextHits>=target,nextHits*earned),420)
+      const normalized=Math.round((nextHits/maxRounds)*100)
+      window.setTimeout(()=>onComplete(nextHits>=target,normalized),420)
     }
   }
 
   const higherLower=(higher:boolean)=>{
-    const next=2+Math.floor(Math.random()*12)
-    const success=higher?next>card:next<card
+    const previous=card
+    let next=2+Math.floor(Math.random()*12)
+    if(next===previous)next=next===14?13:next+1
+    const success=higher?next>previous:next<previous
+    setCardTrail(current=>[...current,previous])
     setCard(next)
     commit(success,'Salió '+next+' · '+(success?'TE ACOMPAÑA':'MALA SEÑAL'))
   }
@@ -1130,10 +1176,12 @@ function CabalaMiniGame({game,onComplete}:{game:CabalaGameId;onComplete:(won:boo
     commit(success,'La camiseta marcada era la '+shirtWinner+' · '+(success?'ERA ESA':'NO ESTA VEZ'))
   }
 
-  const cupPick=(value:number)=>{
-    const success=value===luckyNumber
-    commit(success,success?'LA PELOTA ESTABA AHÍ':'VASO VACÍO')
-    setLuckyNumber(Math.floor(Math.random()*3))
+  const cupPick=(cupId:number)=>{
+    if(!cupsReady||animating||revealed)return
+    const success=cupId===luckyNumber
+    setRevealed(true)
+    setCupsReady(false)
+    commit(success,success?'⚽ ¡LA SEGUISTE!':'🥤 VASO VACÍO')
   }
 
   const wheelStop=()=>{
@@ -1165,16 +1213,16 @@ function CabalaMiniGame({game,onComplete}:{game:CabalaGameId;onComplete:(won:boo
   }
 
   const title:Record<CabalaGameId,string>={
-    'higher-lower':'El pálpito',
-    'dice-seven':'La Generala',
-    'coin-run':'Moneda de vestuario',
-    'lucky-number':'Número marcado',
-    'lucky-shirt':'La camiseta',
-    'three-cups':'Tres vasos',
-    'wheel':'Rueda del destino',
-    'tower':'La tribuna',
-    'grid-reveal':'Grilla de la suerte',
-    'boots':'Los tapones',
+    'higher-lower':'🃏 El pálpito',
+    'dice-seven':'🎲 La Generala',
+    'coin-run':'🪙 Moneda de vestuario',
+    'lucky-number':'🔢 Número marcado',
+    'lucky-shirt':'👕 La camiseta',
+    'three-cups':'⚽ Los tres vasos',
+    'wheel':'🎡 Rueda del destino',
+    'tower':'🏟️ La tribuna',
+    'grid-reveal':'🧿 Grilla de la suerte',
+    'boots':'🥾 Los tapones',
   }
 
   const kicker:Record<CabalaGameId,string>={
@@ -1186,16 +1234,21 @@ function CabalaMiniGame({game,onComplete}:{game:CabalaGameId;onComplete:(won:boo
 
   return <section className={'cabala-minigame cabala-minigame--'+game}>
     <div className="cabala-minigame__top">
-      <span>⚄ {kicker[game]} · {finished?'TERMINADO':game==='dice-seven'?'HASTA 3 TIRADAS':'JUGADA ÚNICA'}</span>
+      <span>✨ {kicker[game]} · {finished?'TERMINADO':game==='dice-seven'?'HASTA 3 TIRADAS':game==='higher-lower'?'RONDA '+Math.min(round+1,3)+'/3':'JUGADA ÚNICA'}</span>
       <strong>{title[game]}</strong>
-      <small>{game==='dice-seven'?generalaRolls+' tiradas':'una decisión'}</small>
+      <small>{game==='dice-seven'?generalaRolls+' tiradas':game==='higher-lower'?hits+' aciertos':'una decisión'}</small>
     </div>
 
-    {game==='higher-lower'&&<div className="cabala-cards-stage">
+    {game==='higher-lower'&&<div className="cabala-cards-stage palpito-stage">
       <div className="cabala-table-art"><i/><i/><i/></div>
-      <div className="playing-card playing-card--deal" key={card}><span>♠</span><strong>{card===14?'A':card===13?'K':card===12?'Q':card===11?'J':card}</strong><i>♠</i></div>
-      <div className="cabala-question">Tres cartas. ¿La próxima sale mayor o menor?</div>
-      <div className="two-actions"><button disabled={finished} onClick={()=>higherLower(false)}>↓ MENOR</button><button disabled={finished} onClick={()=>higherLower(true)}>MAYOR ↑</button></div>
+      <div className="palpito-progress">{[0,1,2].map(index=><span key={index} className={index<round?'done':index===round&&!finished?'active':''}>{index<cardTrail.length?cardTrail[index]:'?'}</span>)}</div>
+      <div className="palpito-card" key={card}>
+        <small>{round===0?'NÚMERO INICIAL':'AHORA TENÉS'}</small>
+        <strong>{card}</strong>
+        <span>{card>=11?'ALTO':card<=5?'BAJO':'MEDIO'}</span>
+      </div>
+      <div className="cabala-question">{finished?'La serie ya quedó definida.':'¿El próximo número será mayor o menor que '+card+'?'}</div>
+      <div className="two-actions"><button disabled={finished} onClick={()=>higherLower(false)}>⬇️ MENOR</button><button disabled={finished} onClick={()=>higherLower(true)}>MAYOR ⬆️</button></div>
     </div>}
 
     {game==='dice-seven'&&<div className="cabala-dice-stage generala-stage">
@@ -1230,8 +1283,20 @@ function CabalaMiniGame({game,onComplete}:{game:CabalaGameId;onComplete:(won:boo
     </div>}
 
     {game==='three-cups'&&<div className="cabala-cups-stage">
-      <div className={'cups-row '+(!revealed?'cups-row--shuffling':'')}>{[0,1,2].map(value=><button key={value} disabled={revealed||finished} className={revealed&&value===luckyNumber?'reveal':''} onClick={()=>cupPick(value)}><i>▱</i><span>{revealed&&value===luckyNumber?'⚽':''}</span></button>)}</div>
-      <div className="cabala-question">{revealed?'Mirá dónde queda la pelota.':'Elegí el vaso.'}</div>
+      <div className="cups-phase"><b>{revealed&&!finished?'👀 MIRÁ':animating?'🔀 MEZCLANDO':cupsReady?'🎯 ELEGÍ':'✅ RESUELTO'}</b><span>{animating?'Seguí el vaso, no la pelota.':cupsReady?'¿Dónde quedó?':'Memorizá el vaso que la tapa.'}</span></div>
+      <div className={'real-cups-row '+(animating?'is-shuffling':'')}>
+        {[0,1,2].map(cupId=><button
+          key={cupId}
+          disabled={!cupsReady||finished}
+          className={(revealed&&cupId===luckyNumber?'show-ball ':'')+(finished&&cupId===luckyNumber?'winner':'')}
+          style={{left:(cupSlots[cupId]*33.333)+'%'}}
+          onClick={()=>cupPick(cupId)}
+        >
+          <span className="hidden-ball">⚽</span>
+          <i className="real-cup"><b/><em/></i>
+        </button>)}
+      </div>
+      <div className="cabala-question">{revealed&&!finished?'La pelota está acá. Enseguida los vasos empiezan a moverse.':animating?'No toques todavía: seguí el recorrido.':cupsReady?'Elegí uno de los tres vasos.':'La jugada quedó definida.'}</div>
     </div>}
 
     {game==='wheel'&&<div className="cabala-wheel-stage">
@@ -1309,8 +1374,6 @@ function MarketPanel({
   const offers=state.transferOffers??[]
   const salary=state.currentSalary??club.salary
   const yearsLeft=state.contractYearsLeft??0
-  const [offerIndex,setOfferIndex]=useState(0)
-  const activeOffer=offers.length?offers[Math.min(offerIndex,offers.length-1)]:null
   const choose=(next:CareerState)=>{onState(next);onDone()}
 
   return <section className="market-core">
@@ -1332,23 +1395,19 @@ function MarketPanel({
 
     <div className="transfer-offers-head">
       <span>OFERTAS SOBRE LA MESA</span>
-      <div className="offer-counter"><b>{offers.length?offerIndex+1:0}/{offers.length}</b>{offers.length>1&&<><button onClick={()=>setOfferIndex(index=>(index-1+offers.length)%offers.length)}>‹</button><button onClick={()=>setOfferIndex(index=>(index+1)%offers.length)}>›</button></>}</div>
+      <strong>{offers.length} · DESLIZÁ →</strong>
     </div>
     {offers.length===0?<div className="empty-state"><b>↗</b><strong>No llegaron propuestas externas.</strong><span>Podés seguir o renovar con tu club.</span></div>:
-    activeOffer&&(()=>{
-      const offer=activeOffer as TransferOffer
+    <div className="transfer-offer-list transfer-offer-list--swipe">{offers.map((offer:TransferOffer)=>{
       const destination=clubById(offer.clubId)
       const prestigeDelta=destination.prestige-club.prestige
-      return <div className="market-offer-carousel">
-        <article key={offer.clubId} className="transfer-offer-card transfer-offer-card--single">
-          <div className="transfer-offer-card__top"><ClubCrest name={destination.name} size="lg"/><div><span>{leagueById(destination.leagueId).name}</span><strong>{destination.name}</strong><small>{offer.role} · prestigio {destination.prestige}</small></div><em>{prestigeDelta>0?'▲ '+prestigeDelta:prestigeDelta<0?'▼ '+Math.abs(prestigeDelta):'='}</em></div>
-          <div className="transfer-offer-card__terms"><div><span>SUELDO</span><b>$ {formatMoney(offer.salary)}</b></div><div><span>CONTRATO</span><b>{offer.years} AÑOS</b></div><div><span>PRIMA</span><b>$ {formatMoney(offer.signingBonus)}</b></div></div>
-          <div className="transfer-offer-card__warning">Al irte, la huella construida en {club.name} queda atrás. Tu reputación viaja con vos; la idolatría no.</div>
-          <button onClick={()=>choose(acceptTransferOffer(state,offer))}>FIRMAR CON {destination.short} →</button>
-        </article>
-        <div className="offer-dots">{offers.map((_,index)=><button key={index} className={index===offerIndex?'active':''} onClick={()=>setOfferIndex(index)} aria-label={'Ver oferta '+(index+1)}/>)}</div>
-      </div>
-    })()}
+      return <article key={offer.clubId} className="transfer-offer-card">
+        <div className="transfer-offer-card__top"><ClubCrest name={destination.name} size="lg"/><div><span>{leagueById(destination.leagueId).name}</span><strong>{destination.name}</strong><small>{offer.role} · prestigio {destination.prestige}</small></div><em>{prestigeDelta>0?'▲ '+prestigeDelta:prestigeDelta<0?'▼ '+Math.abs(prestigeDelta):'='}</em></div>
+        <div className="transfer-offer-card__terms"><div><span>SUELDO</span><b>$ {formatMoney(offer.salary)}</b></div><div><span>CONTRATO</span><b>{offer.years} AÑOS</b></div><div><span>PRIMA</span><b>$ {formatMoney(offer.signingBonus)}</b></div></div>
+        <div className="transfer-offer-card__warning">Al irte, la huella construida en {club.name} queda atrás. Tu reputación viaja con vos; la idolatría no.</div>
+        <button onClick={()=>choose(acceptTransferOffer(state,offer))}>FIRMAR CON {destination.short} →</button>
+      </article>
+    })}</div>}
   </section>
 }
 
@@ -1590,7 +1649,6 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
           {seasonSummary.outcomeKind&&<div className={'season-outcome-chip '+(seasonSummary.outcomeWon?'won':'lost')}>
             <b>{seasonSummary.outcomeWon?'✓':'×'}</b><span>{seasonSummary.competition??'PARTIDO DECISIVO'}</span><strong>{seasonSummary.outcomeWon?'GANADO':'PERDIDO'}</strong>
           </div>}
-          {typeof seasonSummary.glory==='number'&&seasonSummary.glory>0&&<div className="season-glory-reveal"><span>GLORIA GANADA</span><strong>+{seasonSummary.glory.toLocaleString('es-AR')}</strong><small>Se revela recién al terminar la temporada.</small></div>}
           <em>{seasonSummary.note}</em>
           <button className="play-button" onClick={closeSeasonSummary}>CONTINUAR →</button>
         </section>
@@ -1646,7 +1704,8 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
         </div>
       </section>}
 
-      {tab==='shop'&&<ShopPanel state={state} setState={setState}/>}\n      {tab==='minigames'&&<PlayerGamesHub style={state.finalStyle} onSkillScore={playMini}/>}
+      {tab==='shop'&&<ShopPanel state={state} setState={setState}/>}
+      {tab==='minigames'&&<PlayerGamesHub style={state.finalStyle} onSkillScore={playMini}/>}
       {tab==='ranking'&&<RankingPanel scores={scores}/>}
       {tab==='history'&&<section className="panel">
         <div className="panel-head"><div><span className="eyebrow">ARCHIVO</span><h2>Tu historia</h2></div><span className="pill">{state.history.length} TEMP.</span></div>
