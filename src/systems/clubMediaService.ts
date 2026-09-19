@@ -226,6 +226,51 @@ async function wikipediaFallback(query:string):Promise<ClubMedia>{
   }catch{return {}}
 }
 
+
+function normalizeWikiTitle(value:string){
+  return value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim()
+}
+
+async function preloadExactTitlesBatch(names:string[]){
+  const cache=readCache()
+  const pending=names.filter(name=>exactWikiTitles[name]&&!cache[name]?.logo)
+  if(!pending.length)return
+
+  const groups:Array<string[]>=[]
+  for(let i=0;i<pending.length;i+=40)groups.push(pending.slice(i,i+40))
+
+  for(const group of groups){
+    try{
+      const wanted=group.map(name=>exactWikiTitles[name])
+      const byTitle=new Map(wanted.map((title,index)=>[normalizeWikiTitle(title),group[index]]))
+      const res=await fetch(
+        'https://es.wikipedia.org/w/api.php?'+new URLSearchParams({
+          action:'query',
+          titles:wanted.join('|'),
+          prop:'pageimages|pageprops',
+          piprop:'thumbnail',
+          pithumbsize:'512',
+          redirects:'1',
+          indexpageids:'1',
+          format:'json',
+          origin:'*',
+        })
+      )
+      if(!res.ok)continue
+      const data=await res.json() as {query?:{pages?:Record<string,{title?:string;thumbnail?:{source?:string};pageprops?:{wikibase_item?:string}}>;redirects?:Array<{from:string;to:string}>}}
+      const redirectMap=new Map((data.query?.redirects??[]).map(item=>[normalizeWikiTitle(item.to),normalizeWikiTitle(item.from)]))
+      for(const page of Object.values(data.query?.pages??{})){
+        const titleKey=normalizeWikiTitle(page.title??'')
+        const originalKey=redirectMap.get(titleKey)??titleKey
+        const name=byTitle.get(originalKey)??byTitle.get(titleKey)
+        if(!name||!page.thumbnail?.source)continue
+        cache[name]={...(cache[name]??{}),logo:page.thumbnail.source,wikidataId:page.pageprops?.wikibase_item}
+      }
+      writeCache(cache)
+    }catch{}
+  }
+}
+
 export async function getClubMedia(name:string,forceRefresh=false):Promise<ClubMedia>{
   const cache=readCache()
   if(cache[name]&&!forceRefresh)return cache[name]
@@ -336,6 +381,7 @@ function warmImage(url?:string){
 
 export async function preloadClubMedia(names:string[],concurrency=4,forceRefresh=false){
   const unique=[...new Set(names)]
+  if(!forceRefresh)await preloadExactTitlesBatch(unique)
   let cursor=0
   const worker=async()=>{
     while(cursor<unique.length){
