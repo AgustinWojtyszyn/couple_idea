@@ -4938,3 +4938,260 @@ button:focus-visible,input:focus-visible,select:focus-visible{box-shadow:0 0 0 3
     font-size:29px;
   }
 }
+
+
+/* =========================================================
+   V8 · mobile shell repair — right rail + responsive sections
+   ========================================================= */
+html,body,#root{max-width:100%;overflow-x:hidden}
+.game-shell,.game-main,.career-overview,.dashboard-grid,.market-core,.panel,.identity-card,.matchday-scene{
+  min-width:0;
+  max-width:100%;
+}
+
+.game-side-nav{
+  left:auto!important;
+  right:7px!important;
+  top:50%!important;
+  transform:translateY(-50%)!important;
+  width:72px!important;
+  max-height:calc(100vh - 150px);
+  display:flex!important;
+  flex-direction:column!important;
+  gap:6px!important;
+  padding:8px 6px!important;
+  overflow:hidden!important;
+  border-radius:18px!important;
+}
+.game-side-nav__mark{display:none!important}
+.game-side-nav button{
+  width:58px!important;
+  min-width:58px!important;
+  height:58px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:4px!important;
+  padding:5px 2px!important;
+  border-radius:12px!important;
+}
+.game-side-nav button>span{
+  font-size:18px!important;
+  line-height:1!important;
+}
+.game-side-nav button>small{
+  display:block!important;
+  width:100%;
+  overflow:hidden;
+  color:inherit!important;
+  font-size:7px!important;
+  font-weight:900!important;
+  line-height:1!important;
+  letter-spacing:.01em!important;
+  text-align:center!important;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.game-side-nav button.active{
+  background:linear-gradient(145deg,rgba(47,124,255,.26),rgba(47,124,255,.08))!important;
+  box-shadow:inset -3px 0 0 var(--blue),0 8px 18px rgba(19,83,176,.18)!important;
+}
+.game-side-nav button.active:after{
+  left:5px!important;
+  right:auto!important;
+}
+
+.game-shell .game-main{
+  width:100%!important;
+  max-width:860px!important;
+  padding-left:12px!important;
+  padding-right:92px!important;
+  padding-top:18px!important;
+  padding-bottom:44px!important;
+}
+.game-shell .game-header{
+  padding-left:14px!important;
+  padding-right:92px!important;
+}
+
+.dashboard-grid{
+  grid-template-columns:1fr!important;
+}
+.market-core__head,
+.current-contract-card,
+.transfer-offer-card,
+.panel,
+.identity-card,
+.attributes-card,
+.idol-progress,
+.trophy-cabinet{
+  width:100%;
+  box-sizing:border-box;
+}
+.market-core__head{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  align-items:start!important;
+}
+.current-contract-card,
+.transfer-offer-card__top{
+  grid-template-columns:58px minmax(0,1fr)!important;
+}
+.current-contract-card>aside,
+.transfer-offer-card__top>em{
+  grid-column:2!important;
+  align-items:flex-start!important;
+  text-align:left!important;
+}
+.transfer-offer-card__terms{
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+}
+.transfer-offer-card__terms b{
+  font-size:10px!important;
+  word-break:break-word;
+}
+.transfer-offer-card>button{
+  min-height:50px!important;
+  font-size:10px!important;
+}
+
+@media(max-width:560px){
+  .game-side-nav{
+    right:4px!important;
+    width:62px!important;
+    padding:6px 4px!important;
+    gap:4px!important;
+  }
+  .game-side-nav button{
+    width:52px!important;
+    min-width:52px!important;
+    height:52px!important;
+  }
+  .game-side-nav button>span{font-size:16px!important}
+  .game-side-nav button>small{font-size:6.6px!important}
+
+  .game-shell .game-main{
+    padding-left:8px!important;
+    padding-right:72px!important;
+  }
+  .game-shell .game-header{
+    padding-left:10px!important;
+    padding-right:72px!important;
+  }
+
+  .game-header .brand strong{font-size:22px!important}
+  .game-header .brand small{font-size:7px!important}
+  .game-header .theme-toggle{
+    min-width:78px!important;
+    min-height:44px!important;
+    padding:0 9px!important;
+    font-size:11px!important;
+  }
+
+  .career-overview{
+    gap:9px!important;
+  }
+  .career-overview .identity-card{
+    min-height:112px!important;
+    padding:12px!important;
+  }
+  .career-overview .identity-card__copy h1{
+    font-size:31px!important;
+  }
+  .career-overview .identity-card__copy p{
+    font-size:10px!important;
+  }
+  .career-overview .matchday-scene{
+    min-height:142px!important;
+  }
+  .career-overview .matchday-scene__content{
+    min-height:142px!important;
+  }
+  .career-overview .matchday-scene__scoreboard{
+    left:10px!important;
+    right:10px!important;
+    bottom:9px!important;
+    min-height:62px!important;
+    padding:8px 10px!important;
+  }
+  .career-overview .matchday-scene__scoreboard strong{
+    font-size:17px!important;
+  }
+  .quick-stats{
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  }
+  .quick-stats .stat{
+    min-height:66px!important;
+    padding:8px 4px!important;
+  }
+  .quick-stats .stat strong{font-size:24px!important}
+  .quick-stats .stat span{font-size:7px!important}
+
+  .attributes-card{
+    padding:12px!important;
+  }
+  .attributes-head h3{font-size:22px!important}
+  .attributes-ovr{font-size:34px!important}
+  .career-overview .attribute{
+    min-width:132px!important;
+    min-height:64px!important;
+  }
+
+  .event-panel,.condition-panel,.market-core__head,.current-contract-card,.transfer-offer-card,.panel{
+    border-radius:16px!important;
+  }
+  .panel,.market-core__head,.current-contract-card,.transfer-offer-card{
+    padding:14px!important;
+  }
+  .panel-head h2,.section-head h2,.market-core__head h2{
+    font-size:25px!important;
+  }
+  .market-core__head p,.panel p{
+    font-size:11px!important;
+  }
+
+  .market-actions{
+    grid-template-columns:1fr!important;
+  }
+  .market-actions button{
+    min-height:68px!important;
+  }
+  .transfer-offer-card__terms{
+    gap:5px!important;
+  }
+  .transfer-offer-card__terms>div{
+    padding:8px 5px!important;
+  }
+}
+
+@media(min-width:980px){
+  .game-side-nav{
+    width:150px!important;
+    right:18px!important;
+    left:auto!important;
+  }
+  .game-side-nav__mark{display:grid!important}
+  .game-side-nav button{
+    width:136px!important;
+    min-width:136px!important;
+    height:50px!important;
+    flex-direction:row!important;
+    justify-content:flex-start!important;
+    gap:10px!important;
+    padding:0 11px!important;
+  }
+  .game-side-nav button>small{
+    width:auto!important;
+    font-size:10px!important;
+    text-align:left!important;
+  }
+  .game-shell .game-main{
+    padding-left:20px!important;
+    padding-right:184px!important;
+  }
+  .game-shell .game-header{
+    padding-left:22px!important;
+    padding-right:184px!important;
+  }
+}
