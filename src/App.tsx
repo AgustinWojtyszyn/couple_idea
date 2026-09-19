@@ -1721,10 +1721,6 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
         <Stat value={state.matches} label="PJ"/><Stat value={state.goals} label="GOLES"/><Stat value={state.assists} label="ASIST."/><Stat value={state.titles} label="TÍTULOS"/><Stat value={(state.glory??0).toLocaleString('es-AR')} label="GLORIA"/>
       </div>
 
-      <PlayerAttributes state={{...state,stats:playerStats}}/>
-      <IdolProgress value={state.clubLegacy??0} years={state.history.filter(item=>item.clubId===state.clubId).length}/>
-      <TrophyCabinet state={state}/>
-
       </div>}
 
       {tab==='career'&&!state.retired&&<div className="dashboard-grid">
@@ -1744,6 +1740,15 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
           <div className="condition-mini"><span>DT <b>{Math.round(state.coachTrust)}</b></span><span>DISC <b>{Math.round(state.discipline)}</b></span><span>LID <b>{Math.round(state.leadership)}</b></span></div>
         </aside>
       </div>}
+
+      {tab==='career'&&!state.retired&&<details className="career-details">
+        <summary><span>FICHA Y PROGRESO</span><b>OVR {state.overall} · HUELLA {Math.round(state.clubLegacy??0)}/100 · {state.trophies?.length??0} TROFEOS</b></summary>
+        <div className="career-details__body">
+          <PlayerAttributes state={{...state,stats:playerStats}}/>
+          <IdolProgress value={state.clubLegacy??0} years={state.history.filter(item=>item.clubId===state.clubId).length}/>
+          <TrophyCabinet state={state}/>
+        </div>
+      </details>}
 
       {tab==='market'&&<MarketPanel state={state} onState={setState} onDone={()=>setTab('career')}/>} 
 
