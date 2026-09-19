@@ -513,11 +513,17 @@ function Home({
   </div>
 }
 
-function BottomNav({tab,setTab,coach}:{tab:Tab;setTab:(t:Tab)=>void;coach:boolean}){
+function GameSideNav({tab,setTab,coach}:{tab:Tab;setTab:(t:Tab)=>void;coach:boolean}){
   const items:Array<[Tab,string,string]> = coach
     ? [['career','⌂','Inicio'],['squad','▦','Equipo'],['minigames','◎','Desafíos'],['history','≡','Historia'],['ranking','⌁','Ranking']]
     : [['career','⌂','Carrera'],['market','↗','Mercado'],['training','◇','Entreno'],['shop','▣','Tienda'],['minigames','◎','Juegos'],['ranking','⌁','Ranking']]
-  return <nav className="bottom-nav" style={{gridTemplateColumns:`repeat(${items.length},1fr)`}}>{items.map(([id,icon,label])=><button key={id} className={tab===id?'active':''} onClick={()=>setTab(id)}><span>{icon}</span><small>{label}</small></button>)}</nav>
+  const go=(next:Tab)=>{setTab(next);window.scrollTo({top:0,behavior:'smooth'})}
+  return <nav className="game-side-nav" aria-label="Secciones del juego">
+    <div className="game-side-nav__mark"><LeyendaLogo size="sm"/></div>
+    {items.map(([id,icon,label])=><button key={id} className={tab===id?'active':''} onClick={()=>go(id)} aria-label={label} title={label}>
+      <span>{icon}</span><small>{label}</small>
+    </button>)}
+  </nav>
 }
 
 const shopItems:Array<{id:string;icon:string;name:string;description:string;cost:number;effects:EventOption['effects']}>= [
@@ -1115,6 +1121,7 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
           <button className="play-button" onClick={closeSeasonSummary}>CONTINUAR →</button>
         </section>
       </div>}
+      {tab==='career'&&<div className="career-overview">
       <section className="identity-card identity-card--media" style={(playerMedia.stadiumImage??playerMedia.image)?{backgroundImage:'linear-gradient(90deg,var(--surface) 35%,rgba(5,10,18,.58)),url("'+(playerMedia.stadiumImage??playerMedia.image)+'")'}:undefined}>
         <ClubCrest name={club.name} size="lg"/>
         <div className="identity-card__copy"><span className="eyebrow">{league.name}</span><h1>{state.playerName}</h1><p>{state.position} · {state.age} años · {club.name}</p>{state.finalStyle&&<small className={'career-style-badge career-style-badge--'+state.finalStyle}>{state.finalStyle.toUpperCase()}</small>}</div>
@@ -1129,6 +1136,8 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
       <PlayerAttributes state={{...state,stats:playerStats}}/>
       <IdolProgress value={state.clubLegacy??0} years={state.history.filter(item=>item.clubId===state.clubId).length}/>
       <TrophyCabinet state={state}/>
+
+      </div>}
 
       {tab==='career'&&<div className="dashboard-grid">
         <section className="panel event-panel">
@@ -1164,7 +1173,7 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
           <div className="timeline">{[...state.history].reverse().map(s=><article key={s.season}><ClubCrest name={clubById(s.clubId).name} size="sm"/><div><strong>{clubById(s.clubId).name}</strong><span>Temporada {s.season} · {s.age} años</span><p>{s.note}</p></div><aside><b>{s.rating}</b><span>RAT</span></aside></article>)}</div>}
       </section>}
     </main>
-    <BottomNav tab={tab} setTab={setTab} coach={false}/>
+    <GameSideNav tab={tab} setTab={setTab} coach={false}/>
   </div>
 }
 
@@ -1193,6 +1202,7 @@ function CoachGame({state,setState,theme,onTheme,onExit}:{state:CoachState;setSt
     </header>
 
     <main className="game-main">
+      {tab==='career'&&<div className="career-overview">
       <section className="identity-card coach-identity identity-card--media" style={(coachMedia.stadiumImage??coachMedia.image)?{backgroundImage:'linear-gradient(90deg,var(--surface) 35%,rgba(5,10,18,.58)),url("'+(coachMedia.stadiumImage??coachMedia.image)+'")'}:undefined}>
         <ClubCrest name={club.name} size="lg"/>
         <div className="identity-card__copy"><span className="eyebrow">MODO ENTRENADOR · {leagueById(club.leagueId).name}</span><h1>{state.coachName}</h1><p>{club.name} · Temporada {state.season}/{state.maxSeasons}</p></div>
@@ -1201,6 +1211,8 @@ function CoachGame({state,setState,theme,onTheme,onExit}:{state:CoachState;setSt
       <MatchdayScene clubName={club.name} media={coachMedia} mode="coach" season={state.season}/>
 
       <div className="quick-stats"><Stat value={state.titles} label="TÍTULOS"/><Stat value={state.boardTrust} label="DIRECTIVA"/><Stat value={state.fanTrust} label="HINCHADA"/><Stat value={'$ '+formatMoney(state.budget)} label="CAJA"/></div>
+
+      </div>}
 
       {tab==='career'&&<div className="dashboard-grid">
         <section className="panel event-panel">
@@ -1221,7 +1233,7 @@ function CoachGame({state,setState,theme,onTheme,onExit}:{state:CoachState;setSt
       {tab==='ranking'&&<RankingPanel scores={scores}/>}
       {tab==='history'&&<section className="panel"><div className="panel-head"><div><span className="eyebrow">ARCHIVO DEL DT</span><h2>Temporadas</h2></div></div><div className="timeline">{[...state.history].reverse().map(s=><article key={s.season}><ClubCrest name={clubById(s.clubId).name} size="sm"/><div><strong>{clubById(s.clubId).name}</strong><span>Temporada {s.season}</span><p>{s.note}</p></div><aside><b>#{s.position}</b><span>{s.points} PTS</span></aside></article>)}</div></section>}
     </main>
-    <BottomNav tab={tab} setTab={setTab} coach={true}/>
+    <GameSideNav tab={tab} setTab={setTab} coach={true}/>
   </div>
 }
 
