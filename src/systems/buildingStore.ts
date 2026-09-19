@@ -379,35 +379,82 @@ export function simulateSeason(s:CareerState):CareerState{
   return n
 }
 
+const trophyMeta=(competition:string)=>{
+  if(competition==='Copa Libertadores')return {name:'Copa Libertadores',icon:'◈'}
+  if(competition==='Copa Sudamericana')return {name:'Copa Sudamericana',icon:'◇'}
+  if(competition==='Liga Argentina')return {name:'Liga Argentina',icon:'♛'}
+  if(competition==='Copa Argentina')return {name:'Copa Argentina',icon:'◉'}
+  return {name:competition,icon:'◆'}
+}
+
+const seasonGloryFor=(record:SeasonRecord,kind:CareerOutcomeKind,won:boolean,score=0)=>{
+  const performance=Math.round(record.matches*150+record.goals*820+record.assists*540+record.rating*1900)
+  const stake=kind==='title'?(won?52000:18000):kind==='promotion'?(won?33000:12000):(won?21000:9000)
+  return Math.max(9000,performance+stake+Math.round(score*25))
+}
+
 const completeFinal=(s:CareerState,won:boolean,source:'skill'|'luck',score=0):CareerState=>{
   const pending=s.pendingFinal
   if(!pending)return s
   const history=[...s.history]
   const record=history[pending.seasonRecordIndex]
-  if(record){
-    history[pending.seasonRecordIndex]={
-      ...record,
-      titles:won?1:0,
-      score:record.score+(won?850:220)+Math.round(score*.35),
-      note:won
-        ?`Campeón de ${pending.competition}. La final la resolviste por ${source==='skill'?'habilidad':'cábala'}.`
-        :`Finalista de ${pending.competition}. Estuviste a un partido del título.`,
-    }
+  if(!record)return s
+  const glory=seasonGloryFor(record,pending.kind,won,score)
+  const wonTitle=won&&pending.kind==='title'
+  const wonPromotion=won&&pending.kind==='promotion'
+  const survived=won&&pending.kind==='survival'
+  const titleText=
+    pending.kind==='title'
+      ?(won?'Campeón de '+pending.competition+'.':'Perdiste la final de '+pending.competition+'.')
+      :pending.kind==='promotion'
+        ?(won?'Ganaste la final y conseguiste el ascenso.':'El ascenso tendrá que esperar.')
+        :(won?'Ganaste el partido decisivo y aseguraste la permanencia.':'Perdiste el partido decisivo y quedaste marcado por el descenso.')
+  history[pending.seasonRecordIndex]={
+    ...record,
+    titles:wonTitle?1:0,
+    score:record.score+glory,
+    glory,
+    note:titleText+' Se definió por '+(source==='skill'?'habilidad':'cábala')+'.',
   }
+
+  let trophies=[...(s.trophies??[])]
+  if(wonTitle){
+    const meta=trophyMeta(pending.competition)
+    const trophy:TrophyRecord={
+      id:pending.competition+'-'+record.season+'-'+s.clubId,
+      name:meta.name,
+      icon:meta.icon,
+      season:record.season,
+      clubId:s.clubId,
+    }
+    trophies=[...trophies,trophy]
+  }
+  if(wonPromotion){
+    trophies=[...trophies,{id:'ascenso-'+record.season+'-'+s.clubId,name:'Ascenso',icon:'↑',season:record.season,clubId:s.clubId}]
+  }
+
   let next:CareerState={
     ...s,
     history,
     pendingFinal:null,
-    titles:s.titles+(won?1:0),
-    reputation:clamp(s.reputation+(won?4:1)),
-    fans:clamp(s.fans+(won?4:1)),
-    clubLegacy:clamp((s.clubLegacy??0)+(won?5:2)),
-    morale:clamp(s.morale+(won?8:-4)),
-    money:s.money+(won?(s.currentSalary??clubById(s.clubId).salary)*2:0),
+    titles:s.titles+(wonTitle?1:0),
+    trophies,
+    glory:(s.glory??0)+glory,
+    lastSeasonGlory:glory,
+    reputation:clamp(s.reputation+(wonTitle?4:won?2:0)),
+    fans:clamp(s.fans+(wonTitle?4:won?2:0)),
+    clubLegacy:clamp((s.clubLegacy??0)+(wonTitle?5:won?2:0)),
+    morale:clamp(s.morale+(won?4:-3)),
+    money:s.money+(wonTitle?(s.currentSalary??clubById(s.clubId).salary)*2:0),
   }
-  if(won){
+  if(wonTitle){
     const achievements=new Set(next.achievements)
     achievements.add('Primer título')
+    next={...next,achievements:[...achievements]}
+  }
+  if(survived){
+    const achievements=new Set(next.achievements)
+    achievements.add('Salvó la categoría')
     next={...next,achievements:[...achievements]}
   }
   if(next.retirementPending)return finalizeRetirement(next)
@@ -423,13 +470,8 @@ export function resolveSkillFinal(s:CareerState,score:number):CareerState{
   return completeFinal(s,score>=threshold,'skill',score)
 }
 
-export function resolveCabalFinal(s:CareerState,ritual:number):CareerState{
-  const pending=s.pendingFinal
-  if(!pending)return s
-  const r=rngFrom(s.seed+pending.seasonRecordIndex*811+ritual*197+s.discipline*3+s.morale)
-  const trait=ritual===0?s.morale:ritual===1?s.discipline:s.leadership
-  const chance=Math.max(.4,Math.min(.72,.37+trait/420+s.reputation/900))
-  return completeFinal(s,r()<chance,'luck')
+export function resolveCabalFinal(s:CareerState,won:boolean,score=0):CareerState{
+  return completeFinal(s,won,'luck',score)
 }
 
 export function stayAtClub(s:CareerState):CareerState{
@@ -509,7 +551,15 @@ export function transferTo(s:CareerState,id:string):CareerState{
 
 export function careerScore(s:CareerState){
   const seasons=s.history.reduce((sum,h)=>sum+h.score,0)
-  return Math.round(seasons+s.titles*1600+(s.clubLegacy??0)*24+s.achievements.length*400+s.overall*60)
+  return Math.round(
+    seasons*1.15+
+    (s.glory??0)*.9+
+    s.titles*42000+
+    (s.trophies?.length??0)*12000+
+    (s.clubLegacy??0)*650+
+    s.achievements.length*5500+
+    s.overall*950
+  )
 }
 
 export function createCoach(name:string,clubId:string):CoachState{
