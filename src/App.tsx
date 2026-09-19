@@ -189,9 +189,12 @@ function useClubMedia(name:string){
 }
 
 function ClubCrest({name,size='md'}:{name:string;size?:'sm'|'md'|'lg'}){
-  const {media,loading}=useClubMedia(name)
+  const clubRecord=clubs.find(club=>club.name===name)
+  const openDataOnly=Boolean(clubRecord?.leagueId.startsWith('of-'))
+  const {media,loading}=useClubMedia(openDataOnly?'':name)
   const [failed,setFailed]=useState(false)
   useEffect(()=>setFailed(false),[name])
+  if(openDataOnly)return <Crest name={name} size={size}/>
   if(loading)return <span className={'crest-skeleton crest-skeleton--'+size} aria-label={'Cargando escudo de '+name}/>
   if(media.logo&&!failed){
     return <span className={'real-crest real-crest--'+size}><img src={media.logo} alt={'Escudo de '+name} loading="eager" decoding="async" onError={()=>setFailed(true)}/></span>
