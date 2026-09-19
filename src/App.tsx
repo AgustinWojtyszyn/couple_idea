@@ -27,6 +27,7 @@ import {
 } from './world/Architecture'
 import {
   applyEffects,
+  careerDecisionEffects,
   careerScore,
   acceptTransferOffer,
   chooseCoachEvent,
