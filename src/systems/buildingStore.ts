@@ -4,7 +4,6 @@ import {
   clubs,
   coachEvents,
   playerEvents,
-  positions,
   type CareerState,
   type CoachEventOption,
   type CoachState,
