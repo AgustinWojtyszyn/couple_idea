@@ -310,21 +310,18 @@ export function simulateSeason(s:CareerState):CareerState{
   const rating=Math.round((6+perf/58+r()*.95+(s.position==='2'?defensiveBonus*.015:0))*10)/10
   const nextStats=evolveStats(s,rating)
   const baseScore=Math.round(
-    matches*10+goals*42+assists*30+rating*75+
-    club.prestige*4+s.reputation*3+s.leadership*2
+    matches*110+goals*620+assists*430+rating*1450+
+    club.prestige*70+s.reputation*45+s.leadership*28
   )
-  const finalChance=Math.max(.13,Math.min(.64,.12+(perf-54)/105+club.prestige/520+s.reputation/720))
-  const qualifiedForFinal=r()<finalChance
+  const challenge=challengeFor(s,perf,r)
   const sameLeague=clubs.filter(candidate=>candidate.leagueId===club.leagueId&&candidate.id!==club.id)
-  const opponent=sameLeague[Math.floor(r()*sameLeague.length)]??clubs.find(candidate=>candidate.id!==club.id)??club
-  const competitions=['Copa Nacional','Final de Liga','Copa Federal']
-  const competition=competitions[Math.floor(r()*competitions.length)]
+  const opponent=sameLeague[Math.floor(r()*sameLeague.length)]??clubs.find(candidate=>candidate.id!==club.id&&candidate.country===club.country)??club
+  const note=
+    challenge.kind==='title'?'Llegaste a '+challenge.competition+'. El título se define jugando.':
+    challenge.kind==='promotion'?'Llegaste a '+challenge.competition+'. Ganar significa subir de categoría.':
+    'La temporada termina con '+challenge.competition+'. Ganar significa seguir en pie.'
   const record:SeasonRecord={
-    season:s.season,age:s.age,clubId:s.clubId,matches,goals,assists,titles:0,rating,score:baseScore,
-    note:qualifiedForFinal
-      ?'Llegaste a una final. La temporada todavía no terminó.'
-      :rating>=7.8?'Temporada de consolidación y mercado caliente.':
-       rating<6.8?'Año irregular. El próximo puede ser decisivo.':'Cumpliste y seguís creciendo.'
+    season:s.season,age:s.age,clubId:s.clubId,matches,goals,assists,titles:0,rating,score:baseScore,note,glory:0
   }
   const targetRetirementAge=s.retirementAge??39
   const shouldRetire=s.age+1>=targetRetirementAge
@@ -338,12 +335,12 @@ export function simulateSeason(s:CareerState):CareerState{
     overall:clamp(Math.round(roleOverall(nextStats,s.position)),45,97),
     form:clamp(56+r()*32),
     energy:clamp(78+r()*21),
-    reputation:clamp(s.reputation+Math.max(1,Math.round((rating-6.4)*1.6))),
-    fans:clamp(s.fans+Math.max(0,Math.round(goals*.18+assists*.12))),
-    clubLegacy:clamp((s.clubLegacy??0)+Math.max(1,Math.min(4,Math.round((rating-6.2)*1.25)+(s.leadership>=78?1:0))),0,100),
-    coachTrust:clamp(s.coachTrust+Math.round((rating-6.8)*4)),
+    reputation:clamp(s.reputation+Math.max(1,Math.round((rating-6.4)*1.35))),
+    fans:clamp(s.fans+Math.max(0,Math.round(goals*.12+assists*.09))),
+    clubLegacy:clamp((s.clubLegacy??0)+Math.max(1,Math.min(4,Math.round((rating-6.2)*1.05)+(s.leadership>=82?1:0))),0,100),
+    coachTrust:clamp(s.coachTrust+Math.round((rating-6.8)*3)),
     discipline:clamp(s.discipline+(r()>.55?1:-1)),
-    leadership:clamp(s.leadership+(s.age>23?2:1)),
+    leadership:clamp(s.leadership+(s.age>23?1:0)),
     morale:clamp(62+r()*30),
     injuryRisk:clamp(Math.max(5,s.injuryRisk-5)+(s.age>30?3:0)),
     money:s.money+salary*12,
@@ -356,10 +353,19 @@ export function simulateSeason(s:CareerState):CareerState{
     transferOffers:[],
     marketDecisionRequired:false,
     contractYearsLeft,
-    pendingFinal:null,
+    pendingFinal:{
+      id:'challenge-'+record.season+'-'+opponent.id,
+      kind:challenge.kind,
+      competition:challenge.competition,
+      opponentClubId:opponent.id,
+      miniGame:finalMiniGameFor(s.position,r),
+      cabalaGame:finalCabalaGameFor(r),
+      seasonRecordIndex:s.history.length,
+    },
     activeEvent:null,
     retired:false,
     retirementPending:shouldRetire,
+    lastSeasonGlory:0,
   }
 
   const achievements=new Set(n.achievements)
@@ -370,21 +376,7 @@ export function simulateSeason(s:CareerState):CareerState{
   if(n.position==='2'&&n.matches>=180)achievements.add('Patrón del fondo')
   n={...n,achievements:[...achievements]}
 
-  if(qualifiedForFinal){
-    return {
-      ...n,
-      pendingFinal:{
-        id:`final-${record.season}-${opponent.id}`,
-        competition,
-        opponentClubId:opponent.id,
-        miniGame:finalMiniGameFor(s.position,r),
-        seasonRecordIndex:n.history.length-1,
-      },
-    }
-  }
-
-  if(shouldRetire)return finalizeRetirement(n)
-  return withMarket(n)
+  return n
 }
 
 const completeFinal=(s:CareerState,won:boolean,source:'skill'|'luck',score=0):CareerState=>{
