@@ -101,6 +101,15 @@ function Stat({value,label}:{value:string|number;label:string}){
   return <div className="stat"><strong>{value}</strong><span>{label}</span></div>
 }
 
+function IdolProgress({value,reputation}:{value:number;reputation:number}){
+  const level=value<20?'RECIÉN LLEGADO':value<45?'UNO MÁS':value<70?'REFERENTE':value<90?'ÍDOLO':'LEYENDA'
+  return <section className="idol-progress">
+    <div className="idol-progress__head"><span>IDOLOTRÍA</span><strong>{level} · {Math.round(value)}/100</strong></div>
+    <div className="idol-progress__track"><i style={{width:Math.max(1,value)+'%'}}/><b className="i1">●</b><b className="i2">♥</b><b className="i3">★</b><b className="i4">♛</b></div>
+    <div className="idol-progress__foot"><span>🇦🇷 SELECCIÓN</span><strong>{reputation>=72?'EN EL RADAR':reputation>=48?'CERCA':'SIN CHANCE'}</strong></div>
+  </section>
+}
+
 const effectLabels:Record<string,string>={
   pace:'VELOCIDAD',
   finishing:'DEFINICIÓN',
@@ -162,6 +171,24 @@ function PlayerAttributes({state}:{state:CareerState}){
       <div><span>{statLabels[key]}</span><strong>{Math.round(value)}</strong></div>
       <i><b style={{width:Math.max(2,value)+'%'}}/></i>
     </div>)}</div>
+  </section>
+}
+
+function StoryModes({start}:{start:(name:string,position:Position,clubId:string)=>void}){
+  const byName=(name:string)=>clubs.find(club=>club.country==='Argentina'&&club.name===name)?.id
+  const fallback=clubs.find(club=>club.country==='Argentina')?.id??clubs[0].id
+  const stories=[
+    {tag:'SAN JUAN',title:'EL PIBE DEL INTERIOR',body:'Debutás lejos de los flashes. Tenés que ganarte cada minuto.',icon:'⛰',position:'9' as Position,clubId:byName('San Martín de San Juan')??fallback},
+    {tag:'DEFENSA',title:'EL 2 QUE NADIE QUERÍA',body:'Poco ruido, mucho duelo. Convertite en patrón del fondo.',icon:'◆',position:'2' as Position,clubId:byName('Banfield')??fallback},
+    {tag:'ARCO',title:'DEBUT DE EMERGENCIA',body:'El titular cae y tu carrera arranca sin aviso.',icon:'◇',position:'1' as Position,clubId:byName('Aldosivi')??fallback},
+  ]
+  return <section className="story-mode-panel">
+    <div className="section-head"><div><span className="eyebrow">MODO HISTORIA · ORIGINAL</span><h2>Tres carreras para arrancar distinto.</h2></div><span className="pill">ARG</span></div>
+    <div className="story-mode-grid">{stories.map(story=><button key={story.title} onClick={()=>start('',story.position,story.clubId)}>
+      <b>{story.icon}</b>
+      <span><small>{story.tag}</small><strong>{story.title}</strong><em>{story.body}</em></span>
+      <i>JUGAR →</i>
+    </button>)}</div>
   </section>
 }
 
@@ -253,6 +280,8 @@ function Home({
           </button>}
         </section>
 
+        {gameMode==='player'&&<StoryModes start={(storyName,storyPosition,storyClub)=>startPlayer(storyName,storyPosition,'classic',storyClub,'Argentina')}/>}
+
         <section className="create-card">
           <div className="section-head">
             <div>
@@ -341,8 +370,36 @@ function Home({
 function BottomNav({tab,setTab,coach}:{tab:Tab;setTab:(t:Tab)=>void;coach:boolean}){
   const items:Array<[Tab,string,string]> = coach
     ? [['career','⌂','Inicio'],['squad','▦','Equipo'],['minigames','◎','Desafíos'],['history','≡','Historia'],['ranking','⌁','Ranking']]
-    : [['career','⌂','Carrera'],['market','↗','Mercado'],['training','◇','Entreno'],['minigames','◎','Juegos'],['ranking','⌁','Ranking']]
+    : [['career','⌂','Carrera'],['market','↗','Mercado'],['training','◇','Entreno'],['shop','▣','Tienda'],['minigames','◎','Juegos'],['ranking','⌁','Ranking']]
   return <nav className="bottom-nav">{items.map(([id,icon,label])=><button key={id} className={tab===id?'active':''} onClick={()=>setTab(id)}><span>{icon}</span><small>{label}</small></button>)}</nav>
+}
+
+const shopItems:Array<{id:string;icon:string;name:string;description:string;cost:number;effects:EventOption['effects']}>= [
+  {id:'physio',icon:'✚',name:'Kinesiólogo personal',description:'Menos riesgo de lesión y mejor recuperación.',cost:180000,effects:{injuryRisk:-10,energy:6}},
+  {id:'psych',icon:'◉',name:'Psicólogo deportivo',description:'Más moral y disciplina en los momentos duros.',cost:150000,effects:{morale:10,discipline:4}},
+  {id:'physical',icon:'◆',name:'Preparador físico',description:'Mejora tu potencia y capacidad de sostener temporadas.',cost:260000,effects:{physical:4,pace:2,energy:7}},
+  {id:'video',icon:'⌁',name:'Analista de video',description:'Mejor lectura: pase, defensa y confianza del DT.',cost:240000,effects:{passing:3,defending:2,coachTrust:5}},
+  {id:'technical',icon:'◎',name:'Entrenador técnico',description:'Pulí tu gesto individual de manera permanente.',cost:320000,effects:{dribbling:4,finishing:3}},
+]
+
+function ShopPanel({state,setState}:{state:CareerState;setState:(next:CareerState)=>void}){
+  const owned=new Set(state.purchases??[])
+  return <section className="panel shop-panel">
+    <div className="panel-head"><div><span className="eyebrow">STAFF PERSONAL</span><h2>Invertí en tu carrera</h2></div><span className="wallet">$ {formatMoney(state.money)}</span></div>
+    <p className="shop-intro">No hay marcas: contratás profesionales y mejoras que cambian tus stats de verdad.</p>
+    <div className="shop-list">{shopItems.map(item=>{
+      const bought=owned.has(item.id)
+      const disabled=bought||state.money<item.cost
+      return <button key={item.id} disabled={disabled} onClick={()=>{
+        const next=applyEffects(state,item.effects)
+        setState({...next,activeEvent:state.activeEvent,money:next.money-item.cost,purchases:[...(state.purchases??[]),item.id]})
+      }}>
+        <b>{item.icon}</b>
+        <span><strong>{item.name}</strong><small>{item.description}</small><EffectChips effects={item.effects}/></span>
+        <em>{bought?'CONTRATADO':'$ '+formatMoney(item.cost)}</em>
+      </button>
+    })}</div>
+  </section>
 }
 
 function RankingPanel({scores}:{scores:RunScore[]}){
@@ -454,6 +511,7 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
       </div>
 
       <PlayerAttributes state={{...state,stats:playerStats}}/>
+      <IdolProgress value={state.fans} reputation={state.reputation}/>
 
       {tab==='career'&&<div className="dashboard-grid">
         <section className="panel event-panel">
@@ -487,7 +545,7 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
         </div>
       </section>}
 
-      {tab==='minigames'&&<MiniGamesPanel onScore={playMini}/>}
+      {tab==='shop'&&<ShopPanel state={state} setState={setState}/>}\n      {tab==='minigames'&&<MiniGamesPanel onScore={playMini}/>}
       {tab==='ranking'&&<RankingPanel scores={scores}/>}
       {tab==='history'&&<section className="panel">
         <div className="panel-head"><div><span className="eyebrow">ARCHIVO</span><h2>Tu historia</h2></div><span className="pill">{state.history.length} TEMP.</span></div>
