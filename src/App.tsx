@@ -1348,14 +1348,8 @@ function PlayerGame({state,setState,theme,onTheme,onExit}:{state:CareerState;set
   },[state.retired,state.finalScore])
 
   useEffect(()=>{
-    if(state.pendingFinal&&tab!=='career'){
-      setTab('career')
-      return
-    }
-    if(state.marketDecisionRequired&&!seasonSummary&&tab!=='market'){
-      setTab('market')
-    }
-  },[state.pendingFinal,state.marketDecisionRequired,seasonSummary,tab])
+    if(state.pendingFinal&&tab!=='career')setTab('career')
+  },[state.pendingFinal,tab])
 
 
   const playSeason=()=>{
