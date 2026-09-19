@@ -106,7 +106,7 @@ async function exactWikipediaMedia(name:string):Promise<ClubMedia>{
     const data=await res.json() as {query?:{pages?:Record<string,{thumbnail?:{source?:string};pageprops?:{wikibase_item?:string}}>} }
     const page=Object.values(data.query?.pages??{})[0]
     if(!page)return {}
-    return {logo:page.thumbnail?.source,image:page.thumbnail?.source,wikidataId:page.pageprops?.wikibase_item}
+    return {logo:page.thumbnail?.source,wikidataId:page.pageprops?.wikibase_item}
   }catch{return {}}
 }
 
@@ -147,6 +147,57 @@ function commonsUrl(file?:string){
   return file?'https://commons.wikimedia.org/wiki/Special:Redirect/file/'+encodeURIComponent(file):undefined
 }
 
+async function wikidataEntityMedia(id:string):Promise<ClubMedia>{
+  try{
+    const entityRes=await fetch(
+      'https://www.wikidata.org/w/api.php?'+new URLSearchParams({
+        action:'wbgetentities',
+        ids:id,
+        props:'claims|labels',
+        languages:'es|en',
+        format:'json',
+        origin:'*',
+      })
+    )
+    if(!entityRes.ok)return {}
+    const entityData=await entityRes.json() as {entities?:Record<string,{claims?:Record<string,Array<{mainsnak?:{datavalue?:{value?:unknown}}}>>}>}
+    const claims=entityData.entities?.[id]?.claims??{}
+    const logo=claims.P154?.[0]?.mainsnak?.datavalue?.value
+    const image=claims.P18?.[0]?.mainsnak?.datavalue?.value
+    const venueId=(claims.P115?.[0]?.mainsnak?.datavalue?.value as {id?:string}|undefined)?.id
+    let stadiumImage:string|undefined
+    let stadiumName:string|undefined
+    if(venueId){
+      try{
+        const venueRes=await fetch(
+          'https://www.wikidata.org/w/api.php?'+new URLSearchParams({
+            action:'wbgetentities',
+            ids:venueId,
+            props:'claims|labels',
+            languages:'es|en',
+            format:'json',
+            origin:'*',
+          })
+        )
+        if(venueRes.ok){
+          const venueData=await venueRes.json() as {entities?:Record<string,{claims?:Record<string,Array<{mainsnak?:{datavalue?:{value?:unknown}}}>>;labels?:Record<string,{value:string}>}>}
+          const venue=venueData.entities?.[venueId]
+          const venueImage=venue?.claims?.P18?.[0]?.mainsnak?.datavalue?.value
+          stadiumImage=commonsUrl(typeof venueImage==='string'?venueImage:undefined)
+          stadiumName=venue?.labels?.es?.value??venue?.labels?.en?.value
+        }
+      }catch{}
+    }
+    return {
+      logo:commonsUrl(typeof logo==='string'?logo:undefined),
+      image:commonsUrl(typeof image==='string'?image:undefined),
+      stadiumImage,
+      stadiumName,
+      wikidataId:id,
+    }
+  }catch{return {}}
+}
+
 async function wikipediaFallback(query:string):Promise<ClubMedia>{
   try{
     const res=await fetch(
@@ -185,9 +236,18 @@ export async function getClubMedia(name:string,forceRefresh=false):Promise<ClubM
   try{
     const exact=await exactWikipediaMedia(name)
     if(exact.logo){
-      cache[name]=exact
+      const entity=exact.wikidataId?await wikidataEntityMedia(exact.wikidataId):{}
+      const result:ClubMedia={
+        ...entity,
+        ...exact,
+        logo:exact.logo,
+        image:entity.image,
+        stadiumImage:entity.stadiumImage,
+        stadiumName:entity.stadiumName,
+      }
+      cache[name]=result
       writeCache(cache)
-      return exact
+      return result
     }
     const query=aliases[name]||name
     const search=await fetch(
