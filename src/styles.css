@@ -5443,3 +5443,106 @@ html,body,#root{max-width:100%;overflow-x:hidden}
   animation:none!important;
   transition:transform .03s linear;
 }
+
+
+/* V8 · dense mobile cards without tiny text */
+@media(max-width:560px){
+  .minigame-grid--v2,
+  .cabala-practice-grid{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:8px!important;
+  }
+  .minigame-grid--v2 button,
+  .cabala-practice-grid button{
+    min-height:166px!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:stretch!important;
+    justify-content:flex-start!important;
+    gap:8px!important;
+    padding:8px!important;
+  }
+  .game-thumb{
+    width:100%!important;
+    height:82px!important;
+  }
+  .minigame-grid--v2 button>div,
+  .cabala-practice-grid button>span{
+    display:flex!important;
+    flex-direction:column!important;
+    gap:3px!important;
+  }
+  .minigame-grid--v2 button strong,
+  .cabala-practice-grid button strong{
+    font-size:12px!important;
+    line-height:1.05!important;
+  }
+  .minigame-grid--v2 button span,
+  .cabala-practice-grid button small{
+    font-size:8.8px!important;
+    line-height:1.28!important;
+  }
+  .minigame-grid--v2 button>em,
+  .cabala-practice-grid button>em{
+    margin-top:auto!important;
+    font-size:7.5px!important;
+    grid-column:auto!important;
+  }
+
+  .club-picker-modal{
+    width:100%!important;
+    max-width:none!important;
+    max-height:84vh!important;
+    border-radius:24px 24px 0 0!important;
+  }
+  .club-picker-modal__head{
+    position:sticky;
+    top:0;
+    z-index:4;
+    background:var(--surface);
+  }
+  .club-picker-search{
+    position:sticky;
+    top:74px;
+    z-index:4;
+    background:var(--surface);
+  }
+  .club-picker-results{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:8px!important;
+  }
+  .club-picker-results>button{
+    min-height:138px!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:flex-start!important;
+    justify-content:flex-start!important;
+    gap:7px!important;
+    padding:10px!important;
+  }
+  .club-picker-results .real-crest,
+  .club-picker-results .crest,
+  .club-picker-results .crest-skeleton{
+    width:56px!important;
+    height:56px!important;
+  }
+  .club-picker-results>button>span{
+    min-width:0!important;
+  }
+  .club-picker-results strong{
+    font-size:12px!important;
+    line-height:1.12!important;
+  }
+  .club-picker-results small{
+    margin-top:4px!important;
+    font-size:8px!important;
+    line-height:1.2!important;
+  }
+  .club-picker-results>button>b{
+    position:absolute;
+    right:8px;
+    top:8px;
+  }
+}
