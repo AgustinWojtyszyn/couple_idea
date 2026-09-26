@@ -1,5 +1,6 @@
 import { cityById, countryById } from '../../content/countries';
-import type { Entry, Game, Mode, NPC } from './types';
+import { currentMission } from '../missions';
+import type { DecisionRecord, Entry, Game, Mode, NPC } from './types';
 
 export type Action = 'work' | 'study' | 'rest' | 'eat' | 'social' | 'travel' | 'shop' | 'move' | 'repay' | 'job' | 'freelance';
 export type Choice = { id: string; label: string; action: Action; cost?: number; energy?: number; hours?: number; npcId?: string; district?: number; item?: string; performance?: number };
@@ -13,7 +14,7 @@ const log = (game: Game, text: string, kind: Entry['kind'] = 'story'): Game => (
 export function createGame(name: string, countryId: string, cityId: string, mode: Mode = 'vida', seed = Date.now()): Game {
   const country = countryById(countryId), city = cityById(country, cityId), roll = rng(seed);
   const npcs: NPC[] = country.names.slice(0, 4).map((person, i) => ({ id: `npc-${i}`, name: person, profession: careers[(i * 2 + 1) % careers.length], location: city.landmarks[(i + 2) % city.landmarks.length], traits: ([['creativo', 'aventurero'], ['tranquilo', 'familiar'], ['ambicioso', 'ahorrador'], ['creativo', 'tranquilo']] as NPC['traits'][])[i], money: Math.round(country.salaries * (0.5 + roll())), friendship: 10 + i * 3, trust: 8, attraction: 0, conflict: 0, memories: [], goal: goals[(i + 2) % goals.length], connections: i ? [`npc-${i - 1}`] : [] }));
-  return { version: 1, seed, name: name.trim().slice(0, 24) || 'Alex', countryId: country.id, cityId: city.id, mode, day: 1, hour: 8, money: Math.round(country.salaries * (mode === '30-dias' ? 0.45 : 0.8)), debt: mode === '30-dias' ? country.rent : 0, energy: 82, mood: 68, food: 76, skill: 5, career: 'Comercio', experience: 0, employed: true, district: 0, home: 0, furniture: ['Cama'], npcs, threads: [], journal: [{ day: 1, text: `Llegaste a ${city.name}. Una habitación, algunas posibilidades y una ciudad por descubrir.`, kind: 'story' }], recentEvents: [], goal: mode === '30-dias' ? 'Pagar mis deudas' : 'Independizarme', finished: false };
+  return { version: 1, seed, name: name.trim().slice(0, 24) || 'Alex', countryId: country.id, cityId: city.id, mode, day: 1, hour: 8, money: Math.round(country.salaries * (mode === '30-dias' ? 0.45 : 0.8)), debt: mode === '30-dias' ? country.rent : 0, energy: 82, mood: 68, food: 76, skill: 5, career: 'Comercio', experience: 0, employed: true, district: 0, home: 0, furniture: ['Cama'], npcs, threads: [], journal: [{ day: 1, text: `Llegaste a ${city.name}. Una habitación, algunas posibilidades y una ciudad por descubrir.`, kind: 'story' }], recentEvents: [], goal: mode === '30-dias' ? 'Pagar mis deudas' : 'Independizarme', finished: false, level: 1, reputation: 0, completedMissions: [], decisionHistory: [] };
 }
 
 export function advance(game: Game, hours: number): Game {
@@ -43,15 +44,93 @@ function resolveThreads(game: Game): Game {
 }
 
 export function formatMoney(game: Game, amount: number): string { const country = countryById(game.countryId); return new Intl.NumberFormat(country.locale, { style: 'currency', currency: country.currency, maximumFractionDigits: 0 }).format(amount); }
+
 export function options(game: Game): Choice[] {
   const c = countryById(game.countryId), npc = game.npcs[game.day % game.npcs.length];
+  const level = game.level ?? 1;
+  const pressure = Math.min(12, Math.floor(level / 2) * 2);
   return [
-    { id: 'work', label: game.employed ? 'Ir a trabajar' : 'Buscar empleo', action: game.employed ? 'work' : 'job', hours: 6, energy: 24 },
-    { id: 'study', label: 'Estudiar', action: 'study', hours: 3, energy: 16, cost: Math.round(c.food * .2) },
+    { id: 'work', label: game.employed ? 'Ir a trabajar' : 'Buscar empleo', action: game.employed ? 'work' : 'job', hours: 6, energy: 24 + pressure },
+    { id: 'study', label: 'Estudiar', action: 'study', hours: 3, energy: 16 + Math.floor(pressure / 2), cost: Math.round(c.food * (.2 + level * .01)) },
     { id: 'social', label: `Ver a ${npc.name}`, action: 'social', hours: 2, energy: 8, npcId: npc.id },
     { id: 'eat', label: 'Comer', action: 'eat', hours: 1, cost: Math.round(c.food * (game.furniture.includes('Cocina') ? .42 : 1)) },
     { id: 'rest', label: 'Descansar', action: 'rest', hours: 2 },
   ];
+}
+
+function missionSatisfied(id: string, choice: Choice): boolean {
+  if (id === 'first-shift') return choice.action === 'work';
+  if (id === 'level-up') return choice.action === 'study';
+  if (id === 'make-connection') return choice.action === 'social';
+  if (id === 'take-care') return choice.action === 'eat';
+  if (id === 'change-air') return choice.action === 'travel';
+  if (id === 'build-future') return choice.action === 'freelance';
+  return false;
+}
+
+function applyMission(game: Game, choice: Choice): Game {
+  const mission = currentMission(game);
+  if (!mission || !missionSatisfied(mission.id, choice)) return game;
+  const done = game.completedMissions ?? [];
+  if (done.includes(mission.id)) return game;
+  const country = countryById(game.countryId);
+  const reward = Math.round(country.salaries * (.035 + done.length * .008));
+  const completed = [...done, mission.id];
+  return log({
+    ...game,
+    money: game.money + reward,
+    reputation: clamp((game.reputation ?? 0) + 8 + done.length * 2),
+    level: 1 + completed.length,
+    completedMissions: completed,
+  }, `MISIÓN COMPLETADA · ${mission.title}. Ganaste ${formatMoney(game, reward)} y tu reputación subió.`);
+}
+
+const hashText = (value: string) => {
+  let hash = 2166136261;
+  for (let i = 0; i < value.length; i++) hash = Math.imul(hash ^ value.charCodeAt(i), 16777619);
+  return hash >>> 0;
+};
+
+export function resolveDecision(game: Game, id: string, label: string, index: number): Game {
+  if (game.finished) return game;
+  const country = countryById(game.countryId);
+  const level = game.level ?? 1;
+  const difficulty = Math.min(5, 1 + Math.floor((level - 1) / 2) + Math.floor((game.day - 1) / 12));
+  const roll = rng((game.seed ^ hashText(id) ^ (game.day * 2654435761)) >>> 0)();
+  let next = { ...game };
+  let outcome = '';
+  let impact: DecisionRecord['impact'] = 'mixto';
+
+  if (index === 0) {
+    const success = roll > .32 + difficulty * .085;
+    const amount = Math.round(country.salaries * (.025 + difficulty * .012));
+    if (success) {
+      next = { ...next, money: next.money + amount, mood: clamp(next.mood + 5), reputation: clamp((next.reputation ?? 0) + 3 + difficulty) };
+      outcome = `Te la jugaste y salió bien: ganaste ${formatMoney(next, amount)} y reputación.`;
+      impact = 'positivo';
+    } else {
+      next = { ...next, money: Math.max(0, next.money - amount), energy: clamp(next.energy - 5 - difficulty * 2), mood: clamp(next.mood - 4 - difficulty) };
+      outcome = `La decisión tuvo costo: perdiste ${formatMoney(next, amount)} y energía.`;
+      impact = 'negativo';
+    }
+  } else if (index === 1) {
+    const cost = Math.round(country.food * (.25 + difficulty * .08));
+    next = { ...next, money: Math.max(0, next.money - cost), mood: clamp(next.mood + 2), reputation: clamp((next.reputation ?? 0) + 1) };
+    outcome = `Elegiste el camino seguro: gastaste ${formatMoney(next, cost)}, evitaste el riesgo y ganaste algo de reputación.`;
+  } else {
+    const npc = next.npcs[(game.day + index) % next.npcs.length];
+    next = { ...next, energy: clamp(next.energy - 4), mood: clamp(next.mood + 5), npcs: next.npcs.map(n => n.id === npc.id ? { ...n, friendship: clamp(n.friendship + 5 + difficulty), trust: clamp(n.trust + 2) } : n) };
+    outcome = `Priorizaste el vínculo con ${npc.name}. La relación cambió y eso puede volver más adelante.`;
+    impact = 'positivo';
+  }
+
+  const record: DecisionRecord = { id, label, day: game.day, difficulty, outcome, impact };
+  next = {
+    ...next,
+    recentEvents: [id, ...next.recentEvents.filter(eventId => eventId !== id)].slice(0, 25),
+    decisionHistory: [record, ...(next.decisionHistory ?? [])].slice(0, 30),
+  };
+  return advance(log(next, `Decisión: ${label}. ${outcome}`, impact === 'negativo' ? 'money' : 'story'), 1);
 }
 
 export function act(game: Game, choice: Choice): Game {
@@ -62,7 +141,8 @@ export function act(game: Game, choice: Choice): Game {
   let next: Game = { ...game, money: game.money - (choice.cost ?? 0), energy: clamp(game.energy - (choice.energy ?? 0)) };
   switch (choice.action) {
     case 'work': {
-      const wage = Math.round(country.salaries * (0.17 + Math.min(next.skill, 70) / 350) * (choice.performance === undefined ? 1 : 0.85 + choice.performance * .3));
+      const difficultyPenalty = Math.min(.08, ((game.level ?? 1) - 1) * .01);
+      const wage = Math.round(country.salaries * (0.17 + Math.min(next.skill, 70) / 350 - difficultyPenalty) * (choice.performance === undefined ? 1 : 0.85 + choice.performance * .3));
       next = log({ ...next, money: next.money + wage, experience: next.experience + 1, mood: clamp(next.mood - 5 + (choice.performance ?? 0) * 4) }, `Cumpliste tu turno en ${next.career}. Cobraste ${formatMoney(next, wage)}.`, 'money');
       if (next.experience % 12 === 0) next = log({ ...next, skill: clamp(next.skill + 5) }, 'Tu experiencia empieza a abrirte nuevas oportunidades.');
       break;
@@ -85,5 +165,6 @@ export function act(game: Game, choice: Choice): Game {
     case 'repay': next = log({ ...next, debt: Math.max(0, next.debt - (choice.cost ?? 0)) }, 'Pagaste una parte de tu deuda.', 'money'); break;
     case 'freelance': next = log({ ...next, money: next.money + Math.round(country.salaries * .1) }, 'Terminaste un encargo independiente.', 'money'); break;
   }
+  next = applyMission(next, choice);
   return advance(next, choice.hours ?? 1);
 }
