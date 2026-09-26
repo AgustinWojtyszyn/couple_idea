@@ -149,7 +149,7 @@ export function WorldScene({ game, onPlace, missionTarget, compact = false }: Pr
     };
 
     const prism = (x: number, y: number, w: number, d: number, h: number, wall: string, side: string, roof: string) => {
-      const a = project(x,y), b = project(x+w,y), c = project(x+w,y+d), d0 = project(x,y+d);
+      const b = project(x+w,y), c = project(x+w,y+d), d0 = project(x,y+d);
       const at = project(x,y,h), bt = project(x+w,y,h), ct = project(x+w,y+d,h), dt = project(x,y+d,h);
       poly([d0,c,ct,dt], side);
       poly([b,c,ct,bt], wall);
