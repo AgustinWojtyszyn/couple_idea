@@ -11,3 +11,78 @@
 :root{--vida-ink:#080e1c;--vida-panel:#192336;--vida-cyan:#75c7e6;--vida-mint:#7edbc5;--vida-amber:#f1ba85;--vida-coral:#df8f8b;--vida-line:#788aa461}
 .setup-art{background:linear-gradient(180deg,#0b14212e,#08101ed9),url('/art/city-san-juan.webp') center 48%/cover;height:290px}.setup-art>span{font-size:clamp(48px,9vw,74px);letter-spacing:-5px;text-shadow:0 4px 16px #000}.setup-art>small{top:118px;background:#0b1626b8;padding:5px 8px;border-radius:6px}.setup-sun,.setup-mountain,.setup-building{display:none}.setup-form{background:#111b2b}.setup-form h1{color:#fff}.setup-form .primary-button{background:linear-gradient(90deg,#2b7f71,#247691);box-shadow:0 8px 23px #123a5099}.setup-form input:focus,.setup-form select:focus{border-color:var(--vida-cyan)}
 .scene-pin{animation:pin-appear .35s both}.scene-pin:nth-of-type(2){animation-delay:.08s}.scene-pin:nth-of-type(3){animation-delay:.16s}.scene-pin:nth-of-type(4){animation-delay:.24s}.scene-pin:nth-of-type(5){animation-delay:.32s}.scene-pin:nth-of-type(6){animation-delay:.4s}@keyframes pin-appear{from{opacity:0;transform:translate(-50%,-42%) scale(.86)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}@media(prefers-reduced-motion:reduce){.scene-pin{animation:none}}
+
+
+/* Playable 2.5D world */
+.world-scene{position:relative;width:100%;min-height:430px;overflow:hidden;border-radius:20px;border:1px solid #71869d70;background:#0c1423;box-shadow:0 16px 38px #030713b8,inset 0 1px #ffffff16;isolation:isolate}
+.world-scene-compact{min-height:390px}
+.world-canvas{display:block;width:100%;height:520px;max-height:650px;touch-action:none;user-select:none;cursor:crosshair;background:#0d1726}
+.world-top{position:absolute;z-index:3;left:12px;right:12px;top:12px;display:flex;align-items:center;justify-content:space-between;gap:8px;pointer-events:none}
+.world-live,.world-mode{display:flex;align-items:center;gap:6px;padding:7px 9px;border:1px solid #71859b69;border-radius:9px;background:#0b1424df;box-shadow:0 4px 14px #0008;color:#f1f5f9;font-size:9px;font-weight:850;letter-spacing:.8px}
+.world-live i{width:7px;height:7px;border-radius:50%;background:#6fe8ac;box-shadow:0 0 10px #6fe8ac}
+.world-mode{color:#8bdcf6}
+.mission-waypoint{position:absolute;z-index:3;top:52px;left:50%;transform:translateX(-50%);max-width:calc(100% - 28px);padding:7px 10px;border:1px solid #e8bd6d9c;border-radius:9px;background:#3a2b17e8;color:#ffd987;box-shadow:0 5px 18px #0007;font-size:9px;font-weight:900;letter-spacing:.8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
+.world-help{position:absolute;z-index:3;left:50%;bottom:78px;transform:translateX(-50%);max-width:min(460px,calc(100% - 150px));padding:7px 10px;border:1px solid #71849b55;border-radius:9px;background:#091321d8;color:#d6e2ec;font-size:10px;text-align:center;pointer-events:none}
+.world-controls{position:absolute;z-index:4;left:12px;bottom:12px;width:112px;display:grid;justify-items:center;gap:3px}
+.world-controls>button,.world-controls div button{width:36px;height:36px;border-radius:11px;border:1px solid #88a2b576;background:#14263ada;color:#dff3ff;font-size:15px;font-weight:900;box-shadow:inset 0 1px #ffffff1a,0 4px 10px #0007;touch-action:none}
+.world-controls div{display:flex;gap:3px}
+.world-controls button:active{transform:translateY(1px);background:#25475d}
+.world-interact{position:absolute;z-index:4;right:12px;bottom:15px;min-height:48px;max-width:48%;padding:0 14px;border-radius:13px;border:1px solid #6678897a;background:#101a2ada;color:#8293a6;font-size:10px;font-weight:900;letter-spacing:.4px;box-shadow:0 6px 15px #0008}
+.world-interact.ready{border-color:#65dcb09b;background:linear-gradient(100deg,#134333,#153947);color:#c8ffe9;box-shadow:0 0 0 1px #63d6ab1f,0 8px 18px #0009}
+.world-interact:disabled{opacity:.76}
+.world-exit{position:absolute;z-index:4;right:12px;top:51px;padding:8px 10px;border-radius:9px;border:1px solid #8295a96c;background:#101b2be8;color:#d9e8f2;font-size:10px;font-weight:800}
+.mission-card{padding:15px;border:1px solid #d7af6570;border-radius:17px;background:linear-gradient(145deg,#29271f,#181d29);box-shadow:inset 0 1px #ffffff16,0 12px 24px #050a16a8}
+.mission-card-top{display:flex;justify-content:space-between;gap:12px;align-items:start}
+.mission-card-top strong{display:block;margin-top:5px;color:#fff;font-size:16px;line-height:1.15}
+.mission-card-top>b{display:grid;place-items:center;min-width:43px;height:43px;border-radius:12px;background:#4b3820;color:#ffd482;font-size:11px}
+.mission-card p{margin:12px 0;color:#c4ced8;font-size:12px;line-height:1.45}
+.mission-route{display:flex;align-items:center;gap:9px;padding:10px;border-radius:11px;background:#111d2b;border:1px solid #5f72815f}
+.mission-route>span{display:grid;place-items:center;width:33px;height:33px;border-radius:50%;background:#3b3020;color:#ffd173;font-size:18px}
+.mission-route small{display:block;color:#91a6b8;font-size:8px;letter-spacing:1px}
+.mission-route b{color:#fff;font-size:13px}
+.mission-reward{margin-top:9px;color:#e9c882;font-size:9px;font-weight:850;letter-spacing:.8px}
+.consequence-card{margin-top:12px;padding:14px 15px;border:1px solid #778b9c63;border-radius:15px;background:#172333}
+.consequence-card strong{display:block;margin:7px 0 4px;color:#fff;font-size:14px}
+.consequence-card p{margin:0;color:#b9c7d2;font-size:12px;line-height:1.45}
+.consequence-positivo{border-color:#64be8a73;background:linear-gradient(135deg,#17352d,#152431)}
+.consequence-negativo{border-color:#d37e7773;background:linear-gradient(135deg,#3a2328,#1d2430)}
+.inline-notice{margin:10px 2px 0;padding:9px 11px;border:1px solid #6c889268;border-radius:10px;background:#152735;color:#b9e5dc;font-size:11px}
+.district-readonly{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.district-readonly article{display:flex;align-items:center;gap:8px;min-width:0;min-height:70px;padding:9px;border:1px solid #657b8d62;border-radius:12px;background:#172537;color:#fff}
+.district-readonly article.selected{border-color:#67d4a1;background:#193a35}
+.district-index{display:grid;place-items:center;min-width:28px;height:28px;border-radius:8px;background:#233c4c;color:#90dce6;font-size:9px;font-weight:900}
+.district-readonly b{display:block;font-size:11px}
+.district-readonly small{display:block;margin-top:3px;color:#9db6c5;font-size:8px}
+.city-travel-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:8px}
+.city-travel-grid button{display:flex;align-items:center;gap:9px;min-height:66px;padding:10px;border:1px solid #657e9363;border-radius:13px;background:linear-gradient(135deg,#172638,#111c2c);color:#edf3f7;text-align:left}
+.city-travel-grid button>span{display:grid;place-items:center;width:35px;height:35px;border-radius:10px;background:#253d4d;color:#80d5e6}
+.city-travel-grid button div{min-width:0;flex:1}
+.city-travel-grid strong{display:block;font-size:12px}
+.city-travel-grid small{display:block;margin-top:4px;color:#96afbf;font-size:8px}
+.city-travel-grid button>b{color:#85d9cb}
+.city-travel-grid button.selected{border-color:#64d7a3;background:#17342f}
+.city-travel-grid button:disabled{opacity:.72}
+.sheet .action-card:disabled{opacity:.5}
+
+@media(max-width:700px){
+  .world-scene{min-height:420px;border-radius:15px}
+  .world-canvas{height:460px}
+  .world-help{bottom:72px;max-width:calc(100% - 144px);font-size:9px}
+  .world-interact{max-width:52%;font-size:9px}
+  .district-readonly{grid-template-columns:repeat(2,1fr)}
+  .city-travel-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:440px){
+  .world-canvas{height:430px}
+  .world-top{left:8px;right:8px;top:8px}
+  .world-live,.world-mode{font-size:8px;padding:6px 7px}
+  .world-mode{display:none}
+  .mission-waypoint{top:43px;font-size:8px}
+  .world-exit{top:43px;right:8px}
+  .world-controls{left:8px;bottom:9px;width:104px}
+  .world-controls>button,.world-controls div button{width:34px;height:34px}
+  .world-interact{right:8px;bottom:11px;min-height:44px;max-width:55%;padding:0 10px}
+  .world-help{bottom:65px;right:8px;left:auto;transform:none;max-width:58%;text-align:right}
+  .district-readonly{grid-template-columns:1fr 1fr}
+  .city-travel-grid{grid-template-columns:1fr}
+}
