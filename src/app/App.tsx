@@ -63,7 +63,7 @@ export default function App() {
       cityId: destination.id,
       district: 0,
       money: game.money - cost,
-      journal: [{ day: game.day, text: `Viajaste de ${city.name} a ${destination.name}. El cambio de ciudad abre nuevas rutas y personas.`, kind: 'story' }, ...game.journal].slice(0, 80),
+      journal: [{ day: game.day, text: `Viajaste de ${city.name} a ${destination.name}. El cambio de ciudad abre nuevas rutas y personas.`, kind: 'story' as const }, ...game.journal].slice(0, 80),
     }, 5);
     replace(moved);
     setMessage(`Llegaste a ${destination.name}.`);
